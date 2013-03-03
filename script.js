@@ -108,7 +108,7 @@ $(function() {
 	$("#settings")
 		.click(function(){
 		window.setTimeout(function(){
-			toggleVisibilty($("#settings_dialog"),$("#settings").prop("checked"));
+			toggleVisibility($("#settings_dialog"),$("#settings").prop("checked"));
 		}, 1);
 	});
 	$("input#width").change(function() {

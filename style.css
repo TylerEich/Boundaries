@@ -57,16 +57,16 @@ body, html {
 	height:1.25em;
 }
 #throbber svg * {
-	fill:#fff;
+	fill:url(#gradientWhite);
 	stroke:#000;
 	transition:none;
 }
 #dot1,#dot2,#dot3 {
-	animation:throb 1s ease-out infinite;
+	animation: throb .375s linear alternate infinite;
 }
 #dot1{animation-delay:0s;}
-#dot2{animation-delay:-.33s;}
-#dot3{animation-delay:-.66s;}
+#dot2{animation-delay:-.125s;}
+#dot3{animation-delay:-.25s;}
 @media all and (min-height:42.5em) {
 	.button {
 		height:3em;
@@ -137,7 +137,6 @@ body, html {
 	font-weight: normal;
 	text-align: left;
 	display:none;
-	opacity:0;
 	transition:none;
 }
 pre#code_wrapper{
