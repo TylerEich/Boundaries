@@ -169,92 +169,7 @@ $(function() {
 	$('#flexible_line')
 		.click();
 	//mapStyle = JSON.parse(localStorage.mapStyle);
-	mapStyle = JSON.parse('[
-    {
-        "stylers": [
-            {
-                "visibility": "off"
-            }
-        ]
-    }, 
-    {
-        "featureType": "water",
-		"elementType":"geometry.stroke",
-        "stylers": [
-            {
-				"visibility":"on"
-			},
-			{
-				"color":"#008080"
-			}
-        ]
-    },
-	{
-		"featureType":"water",
-		"elementType":"labels.text.fill",
-		"stylers":[
-			{
-				"visibility":"on"
-			},{
-				"color":"#008080"
-			}
-		]
-	},
-	{
-		"featureType":"water",
-		"elementType":"labels.text.stroke",
-		"stylers":[
-			{
-				"visibility":"on"
-			},
-			{
-				"color":"#ffffff"
-			}
-		]
-	},
-    {
-        "featureType": "road", 
-        "stylers": [
-            {
-                "visibility": "on"
-            }
-        ]
-    }, 
-    {
-        "elementType": "geometry.fill", 
-        "stylers": [
-            {
-                "color": "#ffffff"
-            }
-        ]
-    }, 
-    {
-        "elementType": "geometry.stroke", 
-        "featureType": "road", 
-        "stylers": [
-            {
-                "color": "#808080"
-            }
-        ]
-    }, 
-    {
-        "elementType": "labels.text.stroke", 
-        "stylers": [
-            {
-                "color": "#ffffff"
-            }
-        ]
-    }, 
-    {
-        "elementType": "labels.text.fill", 
-        "stylers": [
-            {
-                "color": "#000000"
-            }
-        ]
-    }
-]
-')
+	mapStyle = JSON.parse('[{"stylers":[{"visibility":"off"}]},{"featureType":"road","stylers":[{"visibility":"on"}]},{"stylers":[{"color":"#ffffff"}],"elementType":"geometry.fill"},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#808080"}]},{"stylers":[{"color":"#ffffff"}],"elementType":"labels.text.stroke"},{"stylers":[{"color":"#000000"}],"elementType":"labels.text.fill"},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"color":"#008080"}]},{"featureType":"water","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#ffffff"}]},{"featureType":"water","elementType":"geometry","stylers":[{"visibility":"simplified"},{"color":"#008080"}]}]')
 	if (!localStorage.lat || !localStorage.lng || !localStorage.zoom) {
 		localStorage.lat = new GMap.LatLng(41.12452911, - 84.86471285)
 			.lat();
@@ -338,7 +253,7 @@ function bezel(svg) {
 	$('#bezel')
 		.remove();
 	$(document.body)
-		.prepend('<div id='bezel'></div>');
+		.prepend('<div id="bezel"></div>');
 	svg.clone()
 		.appendTo('#bezel');
 	bezelTimeout = window.setTimeout(function() {
