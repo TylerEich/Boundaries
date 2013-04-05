@@ -169,7 +169,7 @@ $(function() {
 	$('#flexible_line')
 		.click();
 	//mapStyle = JSON.parse(localStorage.mapStyle);
-	mapStyle = JSON.parse('[{"stylers":[{"visibility":"off"}]},{"featureType":"road","stylers":[{"visibility":"on"}]},{"stylers":[{"color":"#ffffff"}],"elementType":"geometry.fill"},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#808080"}]},{"stylers":[{"color":"#ffffff"}],"elementType":"labels.text.stroke"},{"stylers":[{"color":"#000000"}],"elementType":"labels.text.fill"},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"color":"#008080"}]},{"featureType":"water","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#ffffff"}]},{"featureType":"water","elementType":"geometry","stylers":[{"visibility":"simplified"},{"color":"#008080"}]}]')
+	mapStyle = JSON.parse('[{"stylers":[{"visibility":"off"}]},{"featureType":"road","stylers":[{"visibility":"on"}]},{"stylers":[{"color":"#ffffff"}],"elementType":"geometry.fill"},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#808080"}]},{"stylers":[{"color":"#ffffff"}],"elementType":"labels.text.stroke"},{"stylers":[{"color":"#000000"}],"elementType":"labels.text.fill"},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"color":"#40bfbf"}]},{"featureType":"water","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#ffffff"}]},{"featureType":"water","elementType":"geometry","stylers":[{"visibility":"simplified"},{"color":"#40bfbf"}]}]')
 	if (!localStorage.lat || !localStorage.lng || !localStorage.zoom) {
 		localStorage.lat = new GMap.LatLng(41.12452911, - 84.86471285)
 			.lat();
