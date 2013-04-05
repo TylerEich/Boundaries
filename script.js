@@ -1,128 +1,137 @@
 var GMap;
-if(google.maps){
+if (google.maps) {
 	GMap = google.maps;
 } else {
 	alert("Google Maps didn't load!");
 }
 var service = new GMap.DirectionsService();
 var bezelTimeout, throbberTimeout;
-var isMac = Boolean(navigator.platform.match("Mac"));
+var isMac = Boolean(navigator.platform.match('Mac'));
 var modifierKey;
 if (isMac) {
-	modifierKey = "⌘";
+	modifierKey = '⌘';
 } else {
-	modifierKey = "Ctrl-";
+	modifierKey = 'Ctrl-';
 }
 var map;
 var marker;
 var polylineOptions = {
 	map: map,
-	clickable:false,
-	strokeColor:"#7fff00",
-	strokeOpacity:0.125,
-	strokeWeight:10
+	clickable: false,
+	strokeColor: '#7fff00',
+	strokeOpacity: 0.125,
+	strokeWeight: 10
 };
 var polygonOptions = {
 	map: map,
-	clickable:false,
-	fillColor:"#7fff00",
-	fillOpacity:0.125
+	clickable: false,
+	fillColor: '#7fff00',
+	fillOpacity: 0.125
 };
 var color;
 var mode;
 var mapStyle;
-if(!localStorage.mapStyle) localStorage.mapStyle = '[{"stylers":[{"visibility":"off"}]},{"featureType":"road","stylers":[{"visibility":"on"}]},{"elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#808080"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#000000"}]}]';
+if (!localStorage.mapStyle) localStorage.mapStyle = '[{"stylers":[{"visibility":"off"}]},{"featureType":"road","stylers":[{"visibility":"on"}]},{"elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#808080"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#000000"}]}]';
 if (!(localStorage.ratio)) localStorage.ratio = 1;
 var ratio = Number(localStorage.ratio);
 var nodes = [];
-//var throbber = '<div id="throbber"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 48 12.75"><path id="dot1" d="m 41.625372,12.24628 c -3.243029,0 -5.875053,-2.6311667 -5.875053,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875053,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z"><animate attributeType="CSS" attributeName="opacity" begin="0s" from="1" to="0" dur="1.5s" repeatCount="indefinite"/></path><path id="dot2" d="m 24.000213,12.24628 c -3.24303,0 -5.875054,-2.6311667 -5.875054,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875054,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z"><animate attributeType="CSS" attributeName="opacity" begin="-.5s" from="1" to="0" dur="1.5s" repeatCount="indefinite"/></path><path id="dot3" d="m 6.3750531,12.24628 c -3.2430293,0 -5.87505307,-2.6311667 -5.87505307,-5.8731395 0,-3.2419738 2.63202377,-5.87314081 5.87505307,-5.87314081 3.2430294,0 5.8750529,2.63116701 5.8750529,5.87314081 0,3.2419728 -2.6320235,5.8731395 -5.8750529,5.8731395 z"><animate attributeType="CSS" attributeName="opacity" begin="-1s" from="1" to="0" dur="1.5s" repeatCount="indefinite"/></path></svg></div>';
+//var throbber = '<div id='throbber'><svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 48 12.75'><path id='dot1' d='m 41.625372,12.24628 c -3.243029,0 -5.875053,-2.6311667 -5.875053,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875053,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z'><animate attributeType='CSS' attributeName='opacity' begin='0s' from='1' to='0' dur='1.5s' repeatCount='indefinite'/></path><path id='dot2' d='m 24.000213,12.24628 c -3.24303,0 -5.875054,-2.6311667 -5.875054,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875054,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z'><animate attributeType='CSS' attributeName='opacity' begin='-.5s' from='1' to='0' dur='1.5s' repeatCount='indefinite'/></path><path id='dot3' d='m 6.3750531,12.24628 c -3.2430293,0 -5.87505307,-2.6311667 -5.87505307,-5.8731395 0,-3.2419738 2.63202377,-5.87314081 5.87505307,-5.87314081 3.2430294,0 5.8750529,2.63116701 5.8750529,5.87314081 0,3.2419728 -2.6320235,5.8731395 -5.8750529,5.8731395 z'><animate attributeType='CSS' attributeName='opacity' begin='-1s' from='1' to='0' dur='1.5s' repeatCount='indefinite'/></path></svg></div>';
 var throbber = '<div id="throbber"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 48 12.75"><path id="dot1" d="m 41.625372,12.24628 c -3.243029,0 -5.875053,-2.6311667 -5.875053,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875053,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z"></path><path id="dot2" d="m 24.000213,12.24628 c -3.24303,0 -5.875054,-2.6311667 -5.875054,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875054,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z"></path><path id="dot3" d="m 6.3750531,12.24628 c -3.2430293,0 -5.87505307,-2.6311667 -5.87505307,-5.8731395 0,-3.2419738 2.63202377,-5.87314081 5.87505307,-5.87314081 3.2430294,0 5.8750529,2.63116701 5.8750529,5.87314081 0,3.2419728 -2.6320235,5.8731395 -5.8750529,5.8731395 z"></path></svg></div>';
 $(function() {
-	console.log("DOM loaded; initializing...");
+	console.log('DOM loaded; initializing...');
 	//$(document.body).prepend(throbber);
 	// Interface listeners
-	$("label")
+	$('label')
 		.each(function() {
 		$(this)
-			.attr("title", ($(this)
-			.attr("title")
-			.replace("[meta]", modifierKey)));
+			.attr('title', ($(this)
+			.attr('title')
+			.replace('[meta]', modifierKey)));
 	});
-	$("#search_button")
+	$('#search_button')
 		.click(function() {
 		//window.setTimeout(function() {
-			toggleVisibility($("#search_box"), $("#search_button").prop("checked"));
-			//}, 1);
+		fade($('#search_box'), $('#search_button')
+			.prop('checked'));
+		//}, 1);
 	});
-	$("#red")
+	$('#red')
 		.click(function() {
-		changeColor("#ff0000");
+		changeColor('#ff0000');
 	});
-	$("#green")
+	$('#green')
 		.click(function() {
-		changeColor("#7fff00");
+		changeColor('#7fff00');
 	});
-	$("#blue")
+	$('#blue')
 		.click(function() {
-		changeColor("#0000ff");
+		changeColor('#0000ff');
 	});
-	$("#flexible_line")
+	$('#flexible_line')
 		.click(function() {
-		changeMode("flexibleLine");
+		changeMode('flexibleLine');
 	});
-	$("#rigid_line")
+	$('#rigid_line')
 		.click(function() {
-		changeMode("rigidLine");
+		changeMode('rigidLine');
 	});
-	$("#polygon")
+	$('#polygon')
 		.click(function() {
-		changeMode("polygon");
+		changeMode('polygon');
 	});
-	$("#undo")
+	$('#undo')
 		.click(function() {
 		undo();
 	});
-	$("#clear")
+	$('#clear')
 		.click(function() {
 		clearAll();
 	});
-	$("#image")
+	$('#image')
 		.click(function() {
 		//window.setTimeout(function() {
-			toggleVisibility($("#static_map"), $("#image").prop("checked"));
-			toggleVisibility($("#image_functions"), $("#image").prop("checked"));
-			//}, 1);
+		fade($('#static_map'), $('#image')
+			.prop('checked'));
+		fade($('#image_functions'), $('#image')
+			.prop('checked'));
+		//}, 1);
 	});
-	$("img#static_map")
+	$('img#static_map')
 		.click(function() {
 		refresh();
 	});
-	$("#refresh")
+	$('#refresh')
 		.click(function() {
 		refresh();
 	});
-	$("#rotate")
+	$('#rotate')
 		.click(function() {
 		rotate();
 	});
-	$("#settings")
-		.click(function(){
-		window.setTimeout(function(){
-			toggleVisibility($("#settings_dialog"),$("#settings").prop("checked"));
+	$('#static_map').error(function() {
+		alert('The image could not be loaded.');
+		throb(false);
+	});
+	$('#settings')
+		.click(function() {
+		window.setTimeout(function() {
+			fade($('#settings_dialog'), $('#settings')
+				.prop('checked'));
 		}, 1);
 	});
-	$("input#width").change(function() {
-		settings(null);
-	});
-	$("input#height")
+	$('input#width')
 		.change(function() {
 		settings(null);
 	});
-	$("#yes")
+	$('input#height')
+		.change(function() {
+		settings(null);
+	});
+	$('#yes')
 		.click(function() {
 		settings(true);
 	});
-	$("#no")
+	$('#no')
 		.click(function() {
 		settings(false);
 	});
@@ -130,33 +139,122 @@ $(function() {
 		.keydown(function(e) {
 		var key = String.fromCharCode(e.which);
 		var label = $("label[title*='" + modifierKey + key + "']");
-		var input = $("input#" + label.attr("for"));
+		var input = $('input#' + label.attr('for'));
 		if (label.length == 0) {
-			console.log("No element");
+			console.log('No element');
 			return;
 		}
 		if (isMac && e.metaKey && !e.altKey) {
-			console.log("Metakey not pressed");
+			console.log('Metakey not pressed');
 		} else if (!isMac && e.ctrlKey && !e.altKey) {
-			console.log("Control key not pressed");
+			console.log('Control key not pressed');
 		} else return;
 		e.preventDefault();
-		console.log("Default prevented");
+		console.log('Default prevented');
 		input.click();
-		bezel(label.children("svg:first-child"));
+		bezel(label.children('svg:first-child'));
 	});
-	$("input#search_box").keydown(function(e){
-		if(e.which == 13 && $(".pac-selected .pac-hover").length == 0) {
-			window.setTimeout(function(){
-				$(".pac-item").click();
-			},1);
+	$('input#search_box')
+		.keydown(function(e) {
+		if (e.which == 13 && $('.pac-selected .pac-hover')
+			.length == 0) {
+			window.setTimeout(function() {
+				$('.pac-item')
+					.click();
+			}, 1);
 		}
 	});
-	$("#green")
+	$('#green')
 		.click();
-	$("#flexible_line")
+	$('#flexible_line')
 		.click();
-	mapStyle = JSON.parse(localStorage.mapStyle);
+	//mapStyle = JSON.parse(localStorage.mapStyle);
+	mapStyle = JSON.parse('[
+    {
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    }, 
+    {
+        "featureType": "water",
+		"elementType":"geometry.stroke",
+        "stylers": [
+            {
+				"visibility":"on"
+			},
+			{
+				"color":"#008080"
+			}
+        ]
+    },
+	{
+		"featureType":"water",
+		"elementType":"labels.text.fill",
+		"stylers":[
+			{
+				"visibility":"on"
+			},{
+				"color":"#008080"
+			}
+		]
+	},
+	{
+		"featureType":"water",
+		"elementType":"labels.text.stroke",
+		"stylers":[
+			{
+				"visibility":"on"
+			},
+			{
+				"color":"#ffffff"
+			}
+		]
+	},
+    {
+        "featureType": "road", 
+        "stylers": [
+            {
+                "visibility": "on"
+            }
+        ]
+    }, 
+    {
+        "elementType": "geometry.fill", 
+        "stylers": [
+            {
+                "color": "#ffffff"
+            }
+        ]
+    }, 
+    {
+        "elementType": "geometry.stroke", 
+        "featureType": "road", 
+        "stylers": [
+            {
+                "color": "#808080"
+            }
+        ]
+    }, 
+    {
+        "elementType": "labels.text.stroke", 
+        "stylers": [
+            {
+                "color": "#ffffff"
+            }
+        ]
+    }, 
+    {
+        "elementType": "labels.text.fill", 
+        "stylers": [
+            {
+                "color": "#000000"
+            }
+        ]
+    }
+]
+')
 	if (!localStorage.lat || !localStorage.lng || !localStorage.zoom) {
 		localStorage.lat = new GMap.LatLng(41.12452911, - 84.86471285)
 			.lat();
@@ -166,13 +264,13 @@ $(function() {
 	}
 	// Add the Territory Style to the map
 	var styles = new GMap.StyledMapType(mapStyle, {
-		name: "Territory"
+		name: 'Territory'
 	});
 	var mapOptions = {
 		zoom: Number(localStorage.zoom),
 		center: new GMap.LatLng(Number(localStorage.lat), Number(localStorage.lng)),
-		backgroundColor: "#fff",
-		draggableCursor: "crosshair",
+		backgroundColor: '#fff',
+		draggableCursor: 'crosshair',
 		disableDoubleClickZoom: true,
 		streetViewControl: false,
 		zoomControl: true,
@@ -187,7 +285,7 @@ $(function() {
 		mapTypeControl: true,
 		mapTypeControlOptions: {
 			position: GMap.ControlPosition.TOP_RIGHT,
-			mapTypeIds: ["territory_style", GMap.MapTypeId.ROADMAP, GMap.MapTypeId.HYBRID]
+			mapTypeIds: ['territory_style', GMap.MapTypeId.ROADMAP, GMap.MapTypeId.HYBRID]
 		},
 		scaleControl: true,
 		scaleControlOptions: {
@@ -195,29 +293,29 @@ $(function() {
 			position: GMap.ControlPosition.RIGHT_BOTTOM
 		}
 	};
-	map = new GMap.Map(document.querySelector("#map_canvas"), mapOptions);
-	map.mapTypes.set("territory_style", styles);
-	map.setMapTypeId("territory_style");
-	GMap.event.addListener(map, "click", function(event) {
+	map = new GMap.Map(document.querySelector('#map_canvas'), mapOptions);
+	map.mapTypes.set('territory_style', styles);
+	map.setMapTypeId('territory_style');
+	GMap.event.addListener(map, 'click', function(event) {
 		addNode(event.latLng);
 	});
-	GMap.event.addListener(map, "center_changed", function() {
+	GMap.event.addListener(map, 'center_changed', function() {
 		localStorage.lat = map.getCenter()
 			.lat();
 		localStorage.lng = map.getCenter()
 			.lng();
 	});
-	GMap.event.addListener(map, "zoom_changed", function() {
+	GMap.event.addListener(map, 'zoom_changed', function() {
 		localStorage.zoom = map.getZoom();
 	});
-	var input = document.querySelector("#search_box");
+	var input = document.querySelector('#search_box');
 	var search = new GMap.places.Autocomplete(input);
-	search.bindTo("bounds", map);
-	GMap.event.addListener(search, "place_changed", function() {
-		input.className = "";
+	search.bindTo('bounds', map);
+	GMap.event.addListener(search, 'place_changed', function() {
+		input.className = '';
 		var place = search.getPlace();
 		if (!place.geometry) {
-			input.className = "notfound";
+			input.className = 'notfound';
 			return;
 		}
 		if (place.geometry.viewport) {
@@ -226,45 +324,51 @@ $(function() {
 			map.setCenter(place.geometry.location);
 			map.setZoom(17);
 		}
-		var address = "";
+		var address = '';
 		if (place.address_components) {
 			address = [
-			(place.address_components[0] && place.address_components[0].short_name || ""), (place.address_components[1] && place.address_components[1].short_name || ""), (place.address_components[2] && place.address_components[2].short_name || "")].join(" ");
+			(place.address_components[0] && place.address_components[0].short_name || ''), (place.address_components[1] && place.address_components[1].short_name || ''), (place.address_components[2] && place.address_components[2].short_name || '')].join(' ');
 		}
 	});
-	console.log("...Initialized");
+	console.log('...Initialized');
 });
 
 function bezel(svg) {
 	window.clearInterval(bezelTimeout);
-	$("#bezel")
+	$('#bezel')
 		.remove();
 	$(document.body)
-		.prepend('<div id="bezel"></div>');
+		.prepend('<div id='bezel'></div>');
 	svg.clone()
-		.appendTo("#bezel");
+		.appendTo('#bezel');
 	bezelTimeout = window.setTimeout(function() {
-		$("#bezel")
+		$('#bezel')
 			.remove();
 	}, 1000);
 }
 
-function throb(state){
+function throb(state) {
 	window.clearInterval(throbberTimeout);
-	if(state){
-		if($("#throbber").length > 0) return;
-		$(document.body).prepend(throbber);
-		//throbberTimeout = window.setTimeout(function(){$("#throbber").css("opacity",1);},1);
+	if (state) {
+		if ($('#throbber')
+			.length > 0) return;
+		$(document.body)
+			.prepend(throbber);
+		//throbberTimeout = window.setTimeout(function(){$('#throbber').css('opacity',1);},1);
 	} else {
-		$("#throbber").css("opacity",0);
-		throbberTimeout = window.setTimeout(function(){$("#throbber").remove();}, 1000);
+		$('#throbber')
+			.css('opacity', 0);
+		throbberTimeout = window.setTimeout(function() {
+			$('#throbber')
+				.remove();
+		}, 1000);
 	}
 }
 
 function addNode(point) {
 	var x = nodes.length;
 	switch (mode) {
-	case "flexibleLine":
+	case 'flexibleLine':
 		nodes.push({
 			mode: mode,
 			color: color,
@@ -276,25 +380,25 @@ function addNode(point) {
 		nodes[x].marker = addMarker(point, x);
 		nodes[x].object = addDirections(point, x);
 		break;
-	case "rigidLine":
+	case 'rigidLine':
 		nodes.push({
-			"mode": mode,
-			"color": color,
-			"connect": undefined,
-			"object": undefined,
-			"marker": undefined
+			'mode': mode,
+			'color': color,
+			'connect': undefined,
+			'object': undefined,
+			'marker': undefined
 		});
 		nodes[x].connect = setConnect(x);
 		nodes[x].marker = addMarker(point, x);
 		nodes[x].object = addLine(point, x);
 		break;
-	case "polygon":
+	case 'polygon':
 		nodes.push({
-			"mode": mode,
-			"color": color,
-			"connect": undefined,
-			"object": undefined,
-			"marker": undefined
+			'mode': mode,
+			'color': color,
+			'connect': undefined,
+			'object': undefined,
+			'marker': undefined
 		});
 		nodes[x].connect = setConnect(x);
 		nodes[x].marker = addMarker(point, x);
@@ -304,27 +408,28 @@ function addNode(point) {
 }
 
 function setConnect(x) {
-	if (!($("#connect").prop("checked"))) {
-		console.log("#connect is unchecked; connect: ", false);
+	if (!($('#connect')
+		.prop('checked'))) {
+		console.log('#connect is unchecked; connect: ', false);
 		return false;
 	}
 	if (nodes[x - 1] == undefined) {
-		console.log("The previous node is undefined; connect: ", null);
+		console.log('The previous node is undefined; connect: ', null);
 		return null;
 	}
 	if (nodes[x].color == nodes[x - 1].color) { //if the colors are the same
-		if ((nodes[x].mode == "polygon") == (nodes[x - 1].mode == "polygon")) { //if mode & previous mode are functionally the same (e.g. both polygons; flexibleLine, rigidLine), treat it as a whole
-			console.log("Colors are the same, Functions are the same; connect: ", null);
+		if ((nodes[x].mode == 'polygon') == (nodes[x - 1].mode == 'polygon')) { //if mode & previous mode are functionally the same (e.g. both polygons; flexibleLine, rigidLine), treat it as a whole
+			console.log('Colors are the same, Functions are the same; connect: ', null);
 			return null;
 		} else { //if they aren't functionally the same, disconnect them
-			console.log("Colors are the same, Functions are different; connect: ", false);
+			console.log('Colors are the same, Functions are different; connect: ', false);
 			return false;
 		}
-	} else if ((nodes[x].mode == "polygon") == (nodes[x - 1].mode == "polygon")) { //if mode & previous mode are functionally the same, connect them (because they aren't the same color)
-		console.log("Colors are different, Functions are the same; connect: ", true);
+	} else if ((nodes[x].mode == 'polygon') == (nodes[x - 1].mode == 'polygon')) { //if mode & previous mode are functionally the same, connect them (because they aren't the same color)
+		console.log('Colors are different, Functions are the same; connect: ', true);
 		return true;
 	} else { //if they aren't functionally the same or the same color, disconnect them
-		console.log("Colors are different, Functions are different; connect: ", false);
+		console.log('Colors are different, Functions are different; connect: ', false);
 		return false;
 	}
 }
@@ -348,10 +453,10 @@ function addMarker(point, x) {
 	});
 
 	function addListener(thisMarker) {
-		GMap.event.addListener(thisMarker, "click", function() {
+		GMap.event.addListener(thisMarker, 'click', function() {
 			markerClick(x);
 		});
-		GMap.event.addListener(thisMarker, "dragend", function() {
+		GMap.event.addListener(thisMarker, 'dragend', function() {
 			markerDrag(x);
 		});
 	};
@@ -366,54 +471,55 @@ function markerClick(x) {
 
 function markerDrag(x) {
 	var move0, move1, move2;
-	console.log("x == ",x);
-	for (i=0; i<2; i++){
-		var w = x+(i-1);
-		var y = x+i;
+	console.log('x == ', x);
+	for (i = 0; i < 2; i++) {
+		var w = x + (i - 1);
+		var y = x + i;
 		/*if(nodes[h]){
 			prevPoint = nodes[x + h]
 		}*/
-		try{
-			switch(nodes[y].mode){
-				case "flexibleLine":
+		try {
+			switch (nodes[y].mode) {
+			case 'flexibleLine':
 				var request = {
 					origin: nodes[w].marker.getPosition(),
 					destination: nodes[y].marker.getPosition(),
 					travelMode: GMap.TravelMode.DRIVING
 				};
-				function setDirections(theY){
-					service.route(request, function(result, status){
+
+				function setDirections(theY) {
+					service.route(request, function(result, status) {
 						if (status == GMap.DirectionsStatus.OK) {
-							console.log("Directions will be set now");
+							console.log('Directions will be set now');
 							nodes[theY].object.setDirections(result);
-							console.log("nodes after setDirections() execution: ",nodes);
+							console.log('nodes after setDirections() execution: ', nodes);
 						}
 					});
 				}
 				setDirections(y);
 				break;
-				case "rigidLine":
+			case 'rigidLine':
 
 				nodes[y].object.getPath();
 				break;
-				case "polygon":
-					var request = {
+			case 'polygon':
+				var request = {
 					origin: nodes[h],
 					destination: point1,
 					travelMode: GMap.TravelMode.DRIVING
 				};
-					service.route(request, function(result, status){
+				service.route(request, function(result, status) {
 					if (status == GMap.DirectionsStatus.OK) {
 						nodes[x + i].object.setDirections(result);
 					}
 				});
 				break;
 			}
-		}catch(err){
+		} catch (err) {
 			console.warn(err);
 		}
 	}
-	console.log("markerDrag() executed");
+	console.log('markerDrag() executed');
 }
 
 function addDirections(thisPoint, x) {
@@ -429,7 +535,7 @@ function addDirections(thisPoint, x) {
 	var renderer = new GMap.DirectionsRenderer({
 		map: map,
 		polylineOptions: {
-			map:map,
+			map: map,
 			editable: false,
 			clickable: false,
 			strokeColor: nodes[x].color,
@@ -450,11 +556,11 @@ function addDirections(thisPoint, x) {
 		if (status == GMap.DirectionsStatus.OK) {
 			renderer.setDirections(result);
 		} else {
-			alert("The line did not load");
+			alert('The line did not load');
 		}
 		throb(false);
 	});
-	console.log("Directions added");
+	console.log('Directions added');
 	return renderer;
 }
 
@@ -479,7 +585,7 @@ function addLine(thisPoint, x) {
 			strokeWeight: 10
 		});
 	} else if (nodes[x].connect == null) {
-		if (nodes[x - 1].mode != "rigidLine") {
+		if (nodes[x - 1].mode != 'rigidLine') {
 			line = new GMap.Polyline({
 				map: map,
 				editable: false,
@@ -504,7 +610,7 @@ function addLine(thisPoint, x) {
 	}
 	path.push(thisPoint);
 	line.setPath(path);
-	console.log("Line added");
+	console.log('Line added');
 	return line;
 }
 
@@ -544,7 +650,7 @@ function addPolygon(thisPoint, x) {
 	}
 	path.push(thisPoint);
 	polygon.setPath(path);
-	console.log("Polygon added");
+	console.log('Polygon added');
 	return polygon;
 }
 
@@ -566,102 +672,103 @@ function clearAll() {
 		} catch (e) {}
 	}
 	nodes = [];
-	console.log("Cleared all");
+	console.log('Cleared all');
 	return;
 }
 
 function changeMode(thisMode) {
 	mode = thisMode;
-	console.log("Mode changed to: " + mode);
+	console.log('Mode changed to: ' + mode);
 }
 
 function changeColor(thisColor) {
 	color = thisColor;
-	console.log("Color changed to: " + color);
+	console.log('Color changed to: ' + color);
 }
 
 function refresh() {
 	throb(true);
 	if (nodes.length == 0) {
-		alert("An image was generated, but it has nothing on it");
+		alert('An image was generated, but it has nothing on it');
 	}
 	var urlPaths = [];
 	var connectedPaths = [];
 	var connectedPath = [];
+
 	function connectPath(thisNode) {
 		switch (thisNode.mode) { // Attaches current object's path to the array
-		case "flexibleLine":
+		case 'flexibleLine':
 			connectedPath = connectedPath.concat(thisNode.object.getDirections()
 				.routes[0].overview_path);
 			break;
-		case "rigidLine":
+		case 'rigidLine':
 			connectedPath = connectedPath.concat(thisNode.object.getPath()
 				.getArray());
 			break;
-		case "polygon":
+		case 'polygon':
 			connectedPath = connectedPath.concat(thisNode.object.getPath()
 				.getArray());
 			break;
 		}
-		console.log("connectedPath:", connectedPath);
+		console.log('connectedPath:', connectedPath);
 	}
-	console.log("Connection logic...");
+	console.log('Connection logic...');
 	for (var i = 0; i < nodes.length; i++) {
 		var h = i - 1;
 		if (nodes[i].connect == true) {
-			console.log("connect == ", true);
-			console.log("mode:", nodes[i].mode, "| color:", nodes[i].color);
+			//console.log('connect == ', true);
+			//console.log('mode:', nodes[i].mode, '| color:', nodes[i].color);
 			connectedPaths.push({
-				"path": connectedPath,
-				"mode": nodes[h].mode,
-				"color": nodes[h].color
+				'path': connectedPath,
+				'mode': nodes[h].mode,
+				'color': nodes[h].color
 			});
-			console.log("connectedPath:", connectedPath, "connectedPaths:", connectedPaths);
+			//console.log('connectedPath:', connectedPath, 'connectedPaths:', connectedPaths);
 			connectedPath = [];
 			connectPath(nodes[i]);
 		} else if (nodes[i].connect == false) {
-			console.log("connect == ", false);
+			//console.log('connect == ', false);
 			connectedPaths.push({
-				"path": connectedPath,
-				"mode": nodes[h].mode,
-				"color": nodes[h].color
+				'path': connectedPath,
+				'mode': nodes[h].mode,
+				'color': nodes[h].color
 			});
-			console.log("connectedPath:", connectedPath, "connectedPaths:", connectedPaths);
+			//console.log('connectedPath:', connectedPath, 'connectedPaths:', connectedPaths);
 			connectedPath = [];
 		} else if (nodes[i].connect == null) {
-			console.log("connect == ", null);
+			//console.log('connect == ', null);
 			connectPath(nodes[i]);
 		}
 		/*if(i==nodes.length-1){
-			console.log("This is the last item in the array");
+			console.log('This is the last item in the array');
 			connectedPaths.push({
-				"path":connectedPath,
-				"mode":nodes[i].mode,
-				"color":nodes[i].color
+				'path':connectedPath,
+				'mode':nodes[i].mode,
+				'color':nodes[i].color
 			});
 			connectedPath = [];
-			console.log("End of iteration. i:",i,"| connectedPath:",connectedPath,"| connectedPaths:",connectedPaths);
+			console.log('End of iteration. i:',i,'| connectedPath:',connectedPath,'| connectedPaths:',connectedPaths);
 		}*/
 	}
-	console.log("...Connection logic")
+	console.log('...Connection logic')
 	if (nodes != []) {
 		connectedPaths.push({
-			"path": connectedPath,
-			"mode": nodes[nodes.length - 1].mode,
-			"color": nodes[nodes.length - 1].color
+			'path': connectedPath,
+			'mode': nodes[nodes.length - 1].mode,
+			'color': nodes[nodes.length - 1].color
 		});
 	}
-	console.log("connectedPaths:", connectedPaths);
-	console.log("URL Processing...");
+	console.log('connectedPaths:', connectedPaths);
+	console.log('URL Processing...');
 	for (var i = 0; i < connectedPaths.length; i++) {
 		var encodedPath = GMap.geometry.encoding.encodePath(connectedPaths[i].path);
 		console.log(encodedPath);
-		var hex = connectedPaths[i].color.replace("#", "0x") + "40";
-		if (connectedPaths[i].mode == "polygon") {
-			var urlPath = "&path=weight:0%7Cfillcolor:" + hex + "%7Cenc:" + encodedPath;
+		var hex = connectedPaths[i].color.replace('#', '0x') + '40';
+		if (connectedPaths[i].mode == 'polygon') {
+			var urlPath = '&path=weight:0%7Cfillcolor:' + hex + '%7Cenc:' + encodedPath;
 			urlPaths.push(urlPath);
 		} else {
-			var urlPath = "&path=weight:10|color:" + hex + "|enc:" + encodedPath;
+			var urlPath = '&path=weight:10|color:' + hex + '|enc:' + encodedPath;
 			urlPaths.push(urlPath);
 		}
 	}
@@ -674,47 +781,44 @@ function refresh() {
 		mapX = 640;
 		mapY = 1 / ratio * 640
 	}
-	var urlBase = getBaseUrl(mapX,mapY);
-	var urlFinal = urlBase + urlPaths.join("&");
+	var urlBase = getBaseUrl(mapX, mapY);
+	var urlFinal = urlBase + urlPaths.join('&');
 	console.log(urlFinal);
-	var staticMap = $("#static_map");
-	if (staticMap.prop("src") != urlFinal) {
-		staticMap.prop("src", urlFinal);
-		staticMap.css("cursor", "move");
+	var staticMap = $('#static_map');
+	if (staticMap.prop('src') != urlFinal) {
+		staticMap.prop('src', urlFinal);
+		staticMap.css('cursor', 'move');
 		staticMap.load(function() {
-			staticMap.css("opacity", 1);
+			staticMap.css('opacity', 1);
 			throb(false);
 		});
 	}
-	staticMap.error(function() {
-		alert("The image could not be loaded.");
-		throb(false);
-	});
-	console.log("Refreshed");
+	
+	//console.log('Refreshed');
 }
 
 function rotate() {
 	ratio = 1 / ratio;
 	localStorage.ratio = ratio;
 	refresh();
-	console.log("Rotated");
+	//console.log('Rotated');
 }
 
-function toggleVisibility(element, state) {
-	if(state == true){
+function fade(element, state) {
+	if (state == true) {
 		element.fadeIn(250);
-	}else if(state == true){
+	} else if (state == true) {
 		element.fadeOut(250);
-	}else{
+	} else {
 		element.fadeToggle(250);
 	}
-	console.log("Visibility toggled");
+	console.log('Visibility toggled');
 }
 
 function settings(accept) {
-	var x = $("input#width")
+	var x = $('input#width')
 		.val();
-	var y = $("input#height")
+	var y = $('input#height')
 		.val();
 	var ratio = x / y;
 	var actualX, actualY;
@@ -726,19 +830,20 @@ function settings(accept) {
 			actualX = 1280;
 			actualY = Math.floor(1 / ratio * 1280);
 		}
-		$("#actual_size")
-			.text(actualX + " × " + actualY);
+		$('#actual_size')
+			.text(actualX + ' × ' + actualY);
 	} else {
-		$("#actual_size")
-			.text("Invalid expression");
+		$('#actual_size')
+			.text('Invalid expression');
 	}
 	if (accept == true) {
-		$("#settings")
+		$('#settings')
 			.click();
 		localStorage.ratio = ratio;
+		refresh();
 		return;
 	} else if (accept == false) {
-		$("#settings")
+		$('#settings')
 			.click();
 		return;
 	}
@@ -748,7 +853,7 @@ function getBaseUrl(mapX, mapY) {
 	var url = 'http://maps.googleapis.com/maps/api/staticmap?';
 	var params = [];
 	params.push('sensor=false');
-	params.push('size=' + mapX + "x" + mapY);
+	params.push('size=' + mapX + 'x' + mapY);
 	params.push('scale=2');
 	for (var i = 0; i < mapStyle.length; i++) {
 		var mapStyleRule = [];
@@ -775,11 +880,10 @@ function getBaseUrl(mapX, mapY) {
 	return (url + params.join('&'));
 }
 
-//toHex() is for converting alpha floats from spectrum
-function toHex(a){
-	var rgbv = ["0","1","2","3","4","5","6","7","8","9","A","B","C","D","E","F"];
-	a = Math.round(a * 256 - 1);
-	var hex = rgbv[Math.floor(a/16)];
-	hex += rgbv[Math.floor(a%16)];
+function toHex(a) {
+	var rgbv = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
+	a = Math.round(a * 255);
+	var hex = rgbv[Math.floor(a / 16)];
+	hex += rgbv[Math.floor(a % 16)];
 	return hex;
 }
