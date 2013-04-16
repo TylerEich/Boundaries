@@ -1,11 +1,15 @@
 function SettingsCtrl($scope) {
-	var $scope.drawings = [{
+	var $scope.Drawings = [{
 		color: '#ff0000',
 		opacity: 0.125,
 		name: 'Red',
 		weight: 10
 	}];
-	var $scope.mapStyles = [{
+	var $scope.Size = {
+		width: $scope.load
+		height: 
+	}
+	var $scope.Styles = [{
 		
 	}];
 }

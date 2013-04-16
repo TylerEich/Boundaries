@@ -28,21 +28,21 @@
 			<tabs>
 				<pane title="Image">
 					<div id="size">
-						<input id="width" type="number" min="0" value="{{settings.size.width}}" title="Width">
-						<input id="height" type="number" min="0" value="{{settings.size.height}}" title="Height">
-						<p id="actual_size">{{settings.size.actual_width()}} × {{settings.size.actual_height()}}</p>
+						<input id="width" type="number" min="0" value="{{size.width}}" title="Width">
+						<input id="height" type="number" min="0" value="{{size.height}}" title="Height">
+						<p id="actual_size">{{size.actual_width()}} × {{size.actual_height()}}</p>
 					</div>
 					<div id="format">
-						<input id="jpg" type="radio" name="format" ng-model="settings.format.jpg"><label for="jpg">JPEG</label>
+						<input id="jpg" type="radio" name="format" ng-model="format.jpg"><label for="jpg">JPEG</label>
 						<br>
-						<input id="png" type="radio" name="format" ng-model="settings.format.png"><label for="png">PNG</label>
+						<input id="png" type="radio" name="format" ng-model="format.png"><label for="png">PNG</label>
 					</div>
 				</pane>
 				<pane title="Map">
 					<div id="map_styles">
-						<div class="style_rule" ng-repeat="rule in rules">
+						<div class="style_rule" ng-repeat="rule in style">
 							<button>-</button>
-							<p>{{rules.to_text(rule.feature)}}</p>
+							<p>{{style.to_text(rule.feature)}}</p>
 						</div>
 						<button>+</button>
 					</div>
