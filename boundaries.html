@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html ng-app>
 	<head>
 		<meta charset="UTF-8">
 		<title>Boundaries</title>
@@ -7,72 +7,51 @@
 		<link rel="apple-touch-icon-precomposed" href="icon_ios.png"/>
 		<link rel="stylesheet" href="style.css">
 		<!--PrefixFree-->
-		<script src="prefixfree.min.js">
-		</script>
+		<script src="prefixfree.min.js"></script>
 		<!--Google Maps-->
-		<script src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;key=AIzaSyBlQ137FWIBtM7TaHpUP-8UV0H87qm-OXs&amp;sensor=true">
-		</script>
+		<script src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;key=AIzaSyBlQ137FWIBtM7TaHpUP-8UV0H87qm-OXs&amp;sensor=true"></script>
 		<!--jQuery-->
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js">
-		</script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1/angular.min.js"></script>
 		<!--Boundaries-->
-		<script src="script.js">
-		</script>
+		<script src="script.js"></script>
 	</head>
 	<body>
-		<svg>
-			<defs>
-				<lineargradient id="gradientWhite" x1="50%" y1="0%" x2="50%" y2="100%">
-					<stop stop-color="#fff" offset="0" />
-					<stop stop-color="#bfbfbf" offset="1" />
-				</lineargradient>
-				<lineargradient y2="100%" x2="50%" y1="0%" x1="50%" id="gradientRed">
-					<stop stop-color="#bf0000" offset="0" />
-					<stop stop-color="#f00" offset="1" />
-				</lineargradient>
-				<lineargradient y2="100%" x2="50%" y1="0%" x1="50%" id="gradientGreen">
-					<stop stop-color="#3fbf00" offset="0"/>
-					<stop stop-color="#7fff00" offset="1"/>
-				</lineargradient>
-				<lineargradient y2="100%" x2="50%" y1="0%" x1="50%" id="gradientBlue">
-					<stop stop-color="#0000bf" offset="0"/>
-					<stop stop-color="#00f" offset="1"/>
+		<svg ng-controller="GradientsCtrl">
+			<defs ng-repeat="gradient in gradients">
+				<lineargradient id="{{gradient.id}}" x1="50%" y1="0%" x2="50%" y2="100%">
+					<stop stop-color="{{gradient.start}}" offset="0" />
+					<stop stop-color="{{gradient.end}}" offset="1" />
 				</lineargradient>
 			</defs>
 		</svg>
-		<div id="settings_dialog">
-							<input id="width" type="number" min="1" value="3.5" title="Width">
-							<input id="height" type="number" min="1" value="5" title="Height">
-							<div id="actual_size" style="
-		    padding: 0;
-		    text-align: center;
-		    margin: 0;
-		    width: 9em;
-		">896 × 1280</div>
-						<a href="http://adamwhitcroft.com/batch/" target="_blank" style="
-		    font-size: .75rem;
-		
-">
-						<div id="attributions" style="
-		    color: #fff;
-		    width: 100%;
-		    text-align: center;
-		    font-size: .75rem;
-"><span>Icons by </span><span style="font-weight:bold">Adam Whitcroft</span></div></a>
-<pre id="code_wrapper"><textarea id="style_source"></textarea></pre>
-
-<div id="yes" class="button" style="
-		    position: absolute;
-		    bottom: 0;
-		    right: 0;
-		    margin: .5em;
-		    padding: 0;
-		    width: 3em;
-		    height: 3em;
-		"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 16 16" style="
-		    width: 100%;
-		    height: 100%;
-		">
+		<div id="settings" ng-controller="SettingsCtrl">
+			<tabs>
+				<pane title="Image">
+					<div id="size">
+						<input id="width" type="number" min="0" value="{{settings.size.width}}" title="Width">
+						<input id="height" type="number" min="0" value="{{settings.size.height}}" title="Height">
+						<p id="actual_size">{{settings.size.actual_width()}} × {{settings.size.actual_height()}}</p>
+					</div>
+					<div id="format">
+						<input id="jpg" type="radio" name="format" ng-model="settings.format.jpg"><label for="jpg">JPEG</label>
+						<br>
+						<input id="png" type="radio" name="format" ng-model="settings.format.png"><label for="png">PNG</label>
+					</div>
+				</pane>
+				<pane title="Map">
+					<div id="map_styles">
+						<div class="style_rule" ng-repeat="rule in rules">
+							<button>-</button>
+							<p>{{rules.to_text(rule.feature)}}</p>
+						</div>
+						<button>+</button>
+					</div>
+				</pane>
+				<pane title="Drawing">
+				</pane>
+			</tabs>
+			<div id="yes" class="button">
+				<svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 16 16" width="100%" height="100%">
 						
 		<path d="M 45.906988,16.008701 26.043875,35.997825 18.093012,28.002176 c -2.191404,-2.210962 -5.748223,-2.210962 -7.945245,0 -2.1970236,2.21096 -2.1970236,5.790343 0,7.995649 l 11.923486,11.993473 c 2.191405,2.210962 5.748221,2.210962 7.945245,0 L 53.852233,24.004351 c 2.197023,-2.21096 2.197023,-5.784688 0,-7.99565 -2.197024,-2.21096 -5.748222,-2.21096 -7.945245,0 z" fill="url(#gradientGreen)"></path>
 

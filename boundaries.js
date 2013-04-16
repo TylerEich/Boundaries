@@ -1,42 +1,19 @@
-var GMap;
-if (google.maps) {
-	GMap = google.maps;
-} else {
-	alert("Google Maps didn't load!");
+function SettingsCtrl($scope) {
+	var $scope.drawings = [{
+		color: '#ff0000',
+		opacity: 0.125,
+		name: 'Red',
+		weight: 10
+	}];
+	var $scope.mapStyles = [{
+		
+	}];
 }
-var service = new GMap.DirectionsService();
-var bezelTimeout, throbberTimeout;
-var isMac = Boolean(navigator.platform.match('Mac'));
-var modifierKey;
-if (isMac) {
-	modifierKey = '⌘';
-} else {
-	modifierKey = 'Ctrl-';
+
+function GradientCtrl($scope) {
+	var $scope.gradients = 
 }
-var map;
-var marker;
-var polylineOptions = {
-	map: map,
-	clickable: false,
-	strokeColor: '#7fff00',
-	strokeOpacity: 0.125,
-	strokeWeight: 10
-};
-var polygonOptions = {
-	map: map,
-	clickable: false,
-	fillColor: '#7fff00',
-	fillOpacity: 0.125
-};
-var color;
-var mode;
-var mapStyle;
-if (!localStorage.mapStyle) localStorage.mapStyle = '[{"stylers":[{"visibility":"off"}]},{"featureType":"road","stylers":[{"visibility":"on"}]},{"elementType":"geometry.fill","stylers":[{"color":"#ffffff"}]},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#808080"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#ffffff"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#000000"}]}]';
-if (!(localStorage.ratio)) localStorage.ratio = 1;
-var ratio = Number(localStorage.ratio);
-var nodes = [];
-//var throbber = '<div id='throbber'><svg xmlns='http://www.w3.org/2000/svg' version='1.1' viewBox='0 0 48 12.75'><path id='dot1' d='m 41.625372,12.24628 c -3.243029,0 -5.875053,-2.6311667 -5.875053,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875053,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z'><animate attributeType='CSS' attributeName='opacity' begin='0s' from='1' to='0' dur='1.5s' repeatCount='indefinite'/></path><path id='dot2' d='m 24.000213,12.24628 c -3.24303,0 -5.875054,-2.6311667 -5.875054,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875054,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z'><animate attributeType='CSS' attributeName='opacity' begin='-.5s' from='1' to='0' dur='1.5s' repeatCount='indefinite'/></path><path id='dot3' d='m 6.3750531,12.24628 c -3.2430293,0 -5.87505307,-2.6311667 -5.87505307,-5.8731395 0,-3.2419738 2.63202377,-5.87314081 5.87505307,-5.87314081 3.2430294,0 5.8750529,2.63116701 5.8750529,5.87314081 0,3.2419728 -2.6320235,5.8731395 -5.8750529,5.8731395 z'><animate attributeType='CSS' attributeName='opacity' begin='-1s' from='1' to='0' dur='1.5s' repeatCount='indefinite'/></path></svg></div>';
-var throbber = '<div id="throbber"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 48 12.75"><path id="dot1" d="m 41.625372,12.24628 c -3.243029,0 -5.875053,-2.6311667 -5.875053,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875053,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z"></path><path id="dot2" d="m 24.000213,12.24628 c -3.24303,0 -5.875054,-2.6311667 -5.875054,-5.8731395 0,-3.2419738 2.632024,-5.87314081 5.875054,-5.87314081 3.243029,0 5.875053,2.63116701 5.875053,5.87314081 0,3.2419728 -2.632024,5.8731395 -5.875053,5.8731395 z"></path><path id="dot3" d="m 6.3750531,12.24628 c -3.2430293,0 -5.87505307,-2.6311667 -5.87505307,-5.8731395 0,-3.2419738 2.63202377,-5.87314081 5.87505307,-5.87314081 3.2430294,0 5.8750529,2.63116701 5.8750529,5.87314081 0,3.2419728 -2.6320235,5.8731395 -5.8750529,5.8731395 z"></path></svg></div>';
+
 $(function() {
 	console.log('DOM loaded; initializing...');
 	//$(document.body).prepend(throbber);
@@ -728,40 +705,6 @@ function fade(element, state) {
 		element.fadeToggle(250);
 	}
 	console.log('Visibility toggled');
-}
-
-function settings(accept) {
-	var x = $('input#width')
-		.val();
-	var y = $('input#height')
-		.val();
-	var ratio = x / y;
-	var actualX, actualY;
-	if (!isNaN(x) && !isNaN(y)) {
-		if (ratio <= 1) {
-			actualX = Math.floor(ratio * 1280);
-			actualY = 1280;
-		} else {
-			actualX = 1280;
-			actualY = Math.floor(1 / ratio * 1280);
-		}
-		$('#actual_size')
-			.text(actualX + ' × ' + actualY);
-	} else {
-		$('#actual_size')
-			.text('Invalid expression');
-	}
-	if (accept == true) {
-		$('#settings')
-			.click();
-		localStorage.ratio = ratio;
-		refresh();
-		return;
-	} else if (accept == false) {
-		$('#settings')
-			.click();
-		return;
-	}
 }
 
 function getBaseUrl(mapX, mapY) {
