@@ -1,233 +1,48 @@
-function SettingsCtrl($scope) {
-	var $scope.Drawings = [{
-		color: '#ff0000',
-		opacity: 0.125,
-		name: 'Red',
-		weight: 10
+angular.module('boundaries',['ui.bootstrap']);
+
+function MapCtrl($scope) {
+	$scope.styles = [{
+		feature: 'administrative.poi',
+		element: 'road'
 	}];
-	var $scope.Size = {
-		width: $scope.load
-		height: 
-	}
-	var $scope.Styles = [{
+}
+
+function ColorCtrl($scope) {
+	$scope.colors = localStorage.colors ? JSON.parse(localStorage.colors) : [{
+		r: 255,
+		g: 0,
+		b: 0,
+		a: 0.
+	}, {
 		
 	}];
+	// store colors in {r, g, b} format
+	
+	// 32-bit hex function
 }
 
-function GradientCtrl($scope) {
-	var $scope.gradients = 
+function ModeCtrl($scope) {
+	
 }
 
-$(function() {
-	console.log('DOM loaded; initializing...');
-	//$(document.body).prepend(throbber);
-	// Interface listeners
-	$('label')
-		.each(function() {
-		$(this)
-			.attr('title', ($(this)
-			.attr('title')
-			.replace('[meta]', modifierKey)));
-	});
-	$('#search_button')
-		.click(function() {
-		//window.setTimeout(function() {
-		fade($('#search_box'), $('#search_button')
-			.prop('checked'));
-		//}, 1);
-	});
-	$('#red')
-		.click(function() {
-		changeColor('#ff0000');
-	});
-	$('#green')
-		.click(function() {
-		changeColor('#7fff00');
-	});
-	$('#blue')
-		.click(function() {
-		changeColor('#0000ff');
-	});
-	$('#flexible_line')
-		.click(function() {
-		changeMode('flexibleLine');
-	});
-	$('#rigid_line')
-		.click(function() {
-		changeMode('rigidLine');
-	});
-	$('#polygon')
-		.click(function() {
-		changeMode('polygon');
-	});
-	$('#undo')
-		.click(function() {
-		undo();
-	});
-	$('#clear')
-		.click(function() {
-		clearAll();
-	});
-	$('#image')
-		.click(function() {
-		//window.setTimeout(function() {
-		fade($('#static_map'), $('#image')
-			.prop('checked'));
-		fade($('#image_functions'), $('#image')
-			.prop('checked'));
-		//}, 1);
-	});
-	$('img#static_map')
-		.click(function() {
-		refresh();
-	});
-	$('#refresh')
-		.click(function() {
-		refresh();
-	});
-	$('#rotate')
-		.click(function() {
-		rotate();
-	});
-	$('#static_map').error(function() {
-		alert('The image could not be loaded.');
-		throb(false);
-	});
-	$('#settings')
-		.click(function() {
-		window.setTimeout(function() {
-			fade($('#settings_dialog'), $('#settings')
-				.prop('checked'));
-		}, 1);
-	});
-	$('input#width')
-		.change(function() {
-		settings(null);
-	});
-	$('input#height')
-		.change(function() {
-		settings(null);
-	});
-	$('#yes')
-		.click(function() {
-		settings(true);
-	});
-	$('#no')
-		.click(function() {
-		settings(false);
-	});
-	$(window)
-		.keydown(function(e) {
-		var key = String.fromCharCode(e.which);
-		var label = $("label[title*='" + modifierKey + key + "']");
-		var input = $('input#' + label.attr('for'));
-		if (label.length == 0) {
-			console.log('No element');
-			return;
-		}
-		if (isMac && e.metaKey && !e.altKey) {
-			console.log('Metakey not pressed');
-		} else if (!isMac && e.ctrlKey && !e.altKey) {
-			console.log('Control key not pressed');
-		} else return;
-		e.preventDefault();
-		console.log('Default prevented');
-		input.click();
-		bezel(label.children('svg:first-child'));
-	});
-	$('input#search_box')
-		.keydown(function(e) {
-		if (e.which == 13 && $('.pac-selected .pac-hover')
-			.length == 0) {
-			window.setTimeout(function() {
-				$('.pac-item')
-					.click();
-			}, 1);
-		}
-	});
-	$('#green')
-		.click();
-	$('#flexible_line')
-		.click();
-	//mapStyle = JSON.parse(localStorage.mapStyle);
-	mapStyle = JSON.parse('[{"stylers":[{"visibility":"off"}]},{"featureType":"road","stylers":[{"visibility":"on"}]},{"stylers":[{"color":"#ffffff"}],"elementType":"geometry.fill"},{"featureType":"road","elementType":"geometry.stroke","stylers":[{"color":"#808080"}]},{"stylers":[{"color":"#ffffff"}],"elementType":"labels.text.stroke"},{"stylers":[{"color":"#000000"}],"elementType":"labels.text.fill"},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"visibility":"on"},{"color":"#40bfbf"}]},{"featureType":"water","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#ffffff"}]},{"featureType":"water","elementType":"geometry","stylers":[{"visibility":"simplified"},{"color":"#40bfbf"}]}]')
-	if (!localStorage.lat || !localStorage.lng || !localStorage.zoom) {
-		localStorage.lat = new GMap.LatLng(41.12452911, - 84.86471285)
-			.lat();
-		localStorage.lng = new GMap.LatLng(41.12452911, - 84.86471285)
-			.lng();
-		localStorage.zoom = 17;
-	}
-	// Add the Territory Style to the map
-	var styles = new GMap.StyledMapType(mapStyle, {
-		name: 'Territory'
-	});
-	var mapOptions = {
-		zoom: Number(localStorage.zoom),
-		center: new GMap.LatLng(Number(localStorage.lat), Number(localStorage.lng)),
-		backgroundColor: '#fff',
-		draggableCursor: 'crosshair',
-		disableDoubleClickZoom: true,
-		streetViewControl: false,
-		zoomControl: true,
-		zoomControlOptions: {
-			style: GMap.ZoomControlStyle.DEFAULT,
-			position: GMap.ControlPosition.RIGHT_CENTER
-		},
-		panControl: true,
-		panControlOptions: {
-			position: GMap.ControlPosition.RIGHT_TOP
-		},
-		mapTypeControl: true,
-		mapTypeControlOptions: {
-			position: GMap.ControlPosition.TOP_RIGHT,
-			mapTypeIds: ['territory_style', GMap.MapTypeId.ROADMAP, GMap.MapTypeId.HYBRID]
-		},
-		scaleControl: true,
-		scaleControlOptions: {
-			style: GMap.ScaleControlStyle.DEFAULT,
-			position: GMap.ControlPosition.RIGHT_BOTTOM
-		}
-	};
-	map = new GMap.Map(document.querySelector('#map_canvas'), mapOptions);
-	map.mapTypes.set('territory_style', styles);
-	map.setMapTypeId('territory_style');
-	GMap.event.addListener(map, 'click', function(event) {
-		addNode(event.latLng);
-	});
-	GMap.event.addListener(map, 'center_changed', function() {
-		localStorage.lat = map.getCenter()
-			.lat();
-		localStorage.lng = map.getCenter()
-			.lng();
-	});
-	GMap.event.addListener(map, 'zoom_changed', function() {
-		localStorage.zoom = map.getZoom();
-	});
-	var input = document.querySelector('#search_box');
-	var search = new GMap.places.Autocomplete(input);
-	search.bindTo('bounds', map);
-	GMap.event.addListener(search, 'place_changed', function() {
-		input.className = '';
-		var place = search.getPlace();
-		if (!place.geometry) {
-			input.className = 'notfound';
-			return;
-		}
-		if (place.geometry.viewport) {
-			map.fitBounds(place.geometry.viewport);
-		} else {
-			map.setCenter(place.geometry.location);
-			map.setZoom(17);
-		}
-		var address = '';
-		if (place.address_components) {
-			address = [
-			(place.address_components[0] && place.address_components[0].short_name || ''), (place.address_components[1] && place.address_components[1].short_name || ''), (place.address_components[2] && place.address_components[2].short_name || '')].join(' ');
-		}
-	});
-	console.log('...Initialized');
-});
+function ImageCtrl($scope) {
+	// Load variables from localStorage, or load defaults
+	$scope.width = localStorage.width ? Number(localStorage.width) : 5;
+	$scope.height = localStorage.height ? Number(localStorage.height) : 3.5;
+	$scope.format = localStorage.format ? localStorage.format : 'png';
+	$scope.rotate = localStorage.rotate ? Number(localStorage.rotate) : 0;
+	
+	// Compute image dimensions in pixels
+	$scope.ratio = $scope.width / $scope.height;
+	$scope.pxWidth = ($scope.ratio >= 1) ? 640 : Math.round($scope.ratio * 640);
+	$scope.pxHeight = ($scope.ratio < 1) ? 640 : Math.round(1 / $scope.ratio * 640);
+	
+	// Watch variables and save their values to localStorage on change
+	$scope.$watch('width', function($scope){localStorage['width']=$scope.width;});
+	$scope.$watch('height', function($scope){localStorage['height']=$scope.height;});
+	$scope.$watch('format', function($scope){localStorage['format']=$scope.format;});
+	$scope.$watch('rotate', function($scope){localStorage['rotate']=$scope.rotate;});
+}
 
 function bezel(svg) {
 	window.clearInterval(bezelTimeout);
@@ -740,12 +555,4 @@ function getBaseUrl(mapX, mapY) {
 		}
 	}
 	return (url + params.join('&'));
-}
-
-function toHex(a) {
-	var rgbv = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'];
-	a = Math.round(a * 255);
-	var hex = rgbv[Math.floor(a / 16)];
-	hex += rgbv[Math.floor(a % 16)];
-	return hex;
 }

@@ -1,48 +1,44 @@
 <!DOCTYPE html>
-<html ng-app>
+<html ng-app="boundaries">
 	<head>
 		<meta charset="UTF-8">
 		<title>Boundaries</title>
 		<link rel="icon" type="image/png" href="icon.png"/>
 		<link rel="apple-touch-icon-precomposed" href="icon_ios.png"/>
-		<link rel="stylesheet" href="style.css">
+		<link rel="stylesheet" href="boundaries.css">
 		<!--PrefixFree-->
 		<script src="prefixfree.min.js"></script>
 		<!--Google Maps-->
-		<script src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;key=AIzaSyBlQ137FWIBtM7TaHpUP-8UV0H87qm-OXs&amp;sensor=true"></script>
+		<script src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;sensor=true"></script>
 		<!--jQuery-->
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1/angular.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.6/angular.min.js"></script>
+		<script src="ui-bootstrap.min.js"></script>
+		<script src="ui-bootstrap-tpls.min.js"></script>
 		<!--Boundaries-->
-		<script src="script.js"></script>
+		<script src="boundaries.js"></script>
 	</head>
 	<body>
-		<svg ng-controller="GradientsCtrl">
-			<defs ng-repeat="gradient in gradients">
-				<lineargradient id="{{gradient.id}}" x1="50%" y1="0%" x2="50%" y2="100%">
-					<stop stop-color="{{gradient.start}}" offset="0" />
-					<stop stop-color="{{gradient.end}}" offset="1" />
-				</lineargradient>
-			</defs>
-		</svg>
-		<div id="settings" ng-controller="SettingsCtrl">
+		<div id="settings">
 			<tabs>
-				<pane title="Image">
+				<pane title="Image" ng-controller="ImageCtrl">
 					<div id="size">
-						<input id="width" type="number" min="0" value="{{size.width}}" title="Width">
-						<input id="height" type="number" min="0" value="{{size.height}}" title="Height">
-						<p id="actual_size">{{size.actual_width()}} × {{size.actual_height()}}</p>
+						<input type="number" min="0" ng-model="width">
+						<input type="number" min="0" ng-model="height">
+						<p id="actual_size">{{ pxWidth * 2 }}&nbsp;&#x00D7;&nbsp;{{ pxHeight * 2 }}</p>
 					</div>
 					<div id="format">
-						<input id="jpg" type="radio" name="format" ng-model="format.jpg"><label for="jpg">JPEG</label>
-						<br>
-						<input id="png" type="radio" name="format" ng-model="format.png"><label for="png">PNG</label>
+						<select ng-model="format">
+							<option value="jpg">JPG</option>
+							<option value="png">PNG</option>
+						</select>
 					</div>
 				</pane>
-				<pane title="Map">
+				<pane title="Map" ng-controller="MapCtrl">
 					<div id="map_styles">
 						<div class="style_rule" ng-repeat="rule in style">
 							<button>-</button>
-							<p>{{style.to_text(rule.feature)}}</p>
+							<p>{{ rule.feature }}</p>
+							<p>{{ rule.element }}</p>
 						</div>
 						<button>+</button>
 					</div>
@@ -197,7 +193,7 @@
 	</div>
 	</div>
 		<input id="search_box" type="text" placeholder="Search">
-		<img id="static_map" src="https://maps.googleapis.com/maps/api/staticmap?size=640x640&scale=2&style=visibility:off&style=feature:road%7Cvisibility:on&style=element:geometry.fill%7Clightness:100&style=element:labels.text.stroke%7Clightness:100&style=element:geometry.stroke%7Clightness:-50%7Csaturation:-100&sensor=false" alt="Static Map" title="Static Map"/>
+		<img ng-controller="ImageCtrl" id="static_map" src="{{  }}" alt="Static Map" title="Static Map"/>
 		<div id="map_canvas"></div>
 	</body>
 </html>
