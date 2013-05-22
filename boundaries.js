@@ -1,4 +1,4 @@
-angular.module('boundaries',['ui.bootstrap']);
+angular.module('boundaries', ['ui.bootstrap']);
 
 function MapCtrl($scope) {
 	$scope.styles = [{
@@ -8,40 +8,156 @@ function MapCtrl($scope) {
 }
 
 function ColorCtrl($scope) {
-	$scope.colors = localStorage.colors ? JSON.parse(localStorage.colors) : [{
-		r: 255,
-		g: 0,
-		b: 0,
-		a: 0.
-	}, {
+	// Funcitons for converting color formats
+	$scope.Hex = function (rgba, alpha) {
+		function ChanHex (chanVal) {
+			chanVal *= 255;
+			var hex = chanVal.toString(16);
+			hex = (hex.length > 1) ? hex : '0' + hex;
+			return hex;
+		}
 		
-	}];
-	// store colors in {r, g, b} format
+		var hex = '';
+		for (chan in rgba) {
+			switch (chan) {
+			case 'r':
+			case 'g':
+			case 'b':
+				hex += ChanHex(rgba[chan]);
+				break;
+				
+			case 'a':
+				hex += (alpha) ? ChanHex(rgba[chan]) : '';
+				break;
+			}
+		}
+		return hex;
+	}
+	$scope.HSL = function (rgba) {
+		var r, g, b, a;
+		var h, s, l;
+		var min, max;
+		
+		r = rgba.r;
+		g = rgba.g;
+		b = rgba.b;
+		a = rgba.a;
+		max = Math.max(r,g,b);
+		min = Math.min(r,g,b);
+		h = s = l = (max + min) / 2;
+		if (max == min) {
+			h = s = 0;
+		} else {
+			d = max - min;
+			s = (l > 0.5) ? d / (2 - max - min) : d / (max + min);
+			switch (max) {
+				case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+				case g: h = (b - r) / d + 2; break;
+				case b: h = (r - g) / d + 4; break;
+			}
+			h /= 6;
+		}
+		return {
+			h: h,
+			s: s,
+			l: l,
+			a: a
+		}
+	}
 	
-	// 32-bit hex function
+	// Load saved colors or defaults
+	var activeColor = localStorage.activeColor ? localStorage.activeColor : '1';
+	$scope.activeColor = {
+		index: activeColor
+	};
+	$scope.colors = JSON.parse(localStorage.colors) ? JSON.parse(localStorage.colors) : [{
+		/*active: true,*/
+		name: 'Red',
+		rgba: {
+			r: 1,
+			g: 0,
+			b: 0,
+			a: 0.125
+		}
+	}, {
+		/*active: false,*/
+		name: 'Green',
+		rgba: {
+			r: 0,
+			g: 1,
+			b: 0,
+			a: 0.125
+		}
+	}, {
+		/*active: false,*/
+		name: 'Blue',
+		rgba: {
+			r: 0,
+			g: 0,
+			b: 1,
+			a: 0.125
+		}
+	}];
+	
+	// Watch variables; save on change
+	$scope.$watch('activeColor.index', function() {
+		localStorage.activeColor = $scope.activeColor.index;
+	});
+	$scope.$watch('colors', function() {
+		localStorage.colors = JSON.stringify($scope.colors);
+	});
 }
 
 function ModeCtrl($scope) {
+	$scope.activeMode = localStorage.activeMode ? localStorage.activeMode : '0';
 	
+	$scope.$watch('activeMode', function() {
+		localStorage.activeMode = $scope.activeMode;
+	});
+}
+
+function FunctionCtrl($scope) {
+	$scope.connect = localStorage.connect ? JSON.parse(localStorage.connect) : true;
+	
+	// Save values on change
+	$scope.$watch('connect', function() {
+		localStorage.connect = JSON.stringify($scope.connect);
+	});
 }
 
 function ImageCtrl($scope) {
+	$scope.PxSize = function() {
+		var ratio = $scope.width / $scope.height;
+		return {
+			ratio: ratio,
+			width: (ratio >= 1) ? 640 : Math.round(ratio * 640),
+			height: (ratio < 1) ? 640 : Math.round(1 / ratio * 640)
+		}
+	};
+	
 	// Load variables from localStorage, or load defaults
-	$scope.width = localStorage.width ? Number(localStorage.width) : 5;
-	$scope.height = localStorage.height ? Number(localStorage.height) : 3.5;
+	$scope.width = Number(localStorage.width) ? Number(localStorage.width) : 5;
+	$scope.height = Number(localStorage.height) ? Number(localStorage.height) : 3.5;
 	$scope.format = localStorage.format ? localStorage.format : 'png';
-	$scope.rotate = localStorage.rotate ? Number(localStorage.rotate) : 0;
+	$scope.rotate = localStorage.rotate ? localStorage.rotate : 'auto';
 	
-	// Compute image dimensions in pixels
-	$scope.ratio = $scope.width / $scope.height;
-	$scope.pxWidth = ($scope.ratio >= 1) ? 640 : Math.round($scope.ratio * 640);
-	$scope.pxHeight = ($scope.ratio < 1) ? 640 : Math.round(1 / $scope.ratio * 640);
+	// Watch variables; save to localStorage on change
+	$scope.$watch('width', function() {
+		localStorage['width'] = $scope.width;
+	});
+	$scope.$watch('height', function() {
+		localStorage['height'] = $scope.height;
+	});
+	$scope.$watch('format', function() {
+		localStorage['format'] = $scope.format;
+	});
+	$scope.$watch('rotate', function() {
+		localStorage['rotate'] = $scope.rotate;
+	});
+}
+
+function DrawingCtrl($scope) {
 	
-	// Watch variables and save their values to localStorage on change
-	$scope.$watch('width', function($scope){localStorage['width']=$scope.width;});
-	$scope.$watch('height', function($scope){localStorage['height']=$scope.height;});
-	$scope.$watch('format', function($scope){localStorage['format']=$scope.format;});
-	$scope.$watch('rotate', function($scope){localStorage['rotate']=$scope.rotate;});
 }
 
 function bezel(svg) {

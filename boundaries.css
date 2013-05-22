@@ -85,6 +85,29 @@ body, html {
 	font: 1em "Helvetica Neue", Helvetica, Arial, sans-serif;
 	display: box;
 }
+.nav-tabs {
+	list-style: none;
+}
+.nav-tabs > li {
+	cursor: pointer;
+	border-radius: 0;
+	padding: 0.25em 0.5em;
+	float: left;
+	background: #606060;
+	border-right: 1px solid #000;
+	color: rgba(255, 255, 255, 0.75);
+}
+.nav-tabs > li:first-of-type {
+	border-radius: 0.25em 0 0 0.25em;
+}
+.nav-tabs > li:last-of-type {
+	border-radius: 0 0.25em 0.25em 0;
+	border-right: none;
+}
+.tab-pane.active {
+	box-shadow: none;
+	margin-top: .75em;
+}
 * {
 	transition: 0.125s ease;
 }
@@ -149,10 +172,10 @@ body, html {
 	top: 50%;
 	left: 50%;
 	z-index: 100002;
-	background: linear-gradient(#606060,#404040) #444;
+	background: #000;
 	margin: -10em;
 	border: 1px solid #000;
-	border-radius: .5em;
+	border-radius: .25em;
 	color: #fff;
 	padding: .5em;
 	box-sizing: border-box;
@@ -182,34 +205,29 @@ textarea {
 	font-size: 1rem;
 	box-sizing: border-box;
 }
-a {
-	color: #fff;
-	text-decoration: none;
-}
 input {
 	display: none;
-	background: linear-gradient(90deg,#fff,#cfcfcf);
-	box-shadow: inset 0 .1em .5em rgba(0,0,0,.5), 0 1px rgba(255,255,255,.2);
+	background: #fff;
+	box-shadow: inset 0 .1em .5em #000;
 }
 .button {
+	cursor: pointer;
 	display: block;
 	box-sizing: border-box;
-	box-shadow: inset 0 1px rgba(255, 255, 255, .25), 0 1px rgba(255, 255, 255, .25);
 	border: 1px solid #000;
 	border-top: 1px solid #000;
-	background: linear-gradient(0deg, #404040, #707070);
-	background-size: 100% 150%;
-	background-position: 50% 100%;
-	border-radius: .25em;
+	background: #606060;
+	border-radius: 0.25em;
 }
-.button:hover {
-	box-shadow: inset 0 1px rgba(255, 255, 255, .25), 0 1px rgba(255, 255, 255, .5);
-	background-position: 50% 0%;
-	border: 1px solid #000;
+.button:hover:not(.active) {
+	background: #808080;
 }
-.active, .button:active, input:checked + .button {
-	box-shadow: inset 0 .25em 1em #000, 0 1px rgba(255, 255, 255, .25);
-	background-position: 50% 100%;
+.active, .nav-tabs > li.active, .button:active, input:checked + .button {
+	background: #404040;
+	color: rgba(255, 255, 255, 1);
+}
+.active.trigger, .nav-tabs > li.active.trigger, .button.trigger:active, input:checked + .button.trigger {
+	/*transition: 0.1s ease;*/
 	transition: none;
 }
 .button:focus {
@@ -229,19 +247,23 @@ input {
 	border-radius: 0 0 .25em .25em;
 	border-bottom: 1px solid #000;
 }
+svg *:not(circle) {
+	fill: #fff;
+}
 svg * {
+	fill-opacity: 0.75;
+	stroke-opacity: 0.75;
+}
+.active svg *, .button:active svg *, input:checked + .button svg * {
 	fill-opacity: 1;
-	stroke: #000;
 	stroke-opacity: 1;
-	stroke-width: 1;
 }
 #sidebar {
 	height: 100%;
 	overflow-x: hidden;
 	position: relative;
 	z-index: 1;
-	background: #444;
-	border-right: 1px solid #000;
+	background: #000;
 	padding: 0;
 	box-sizing: content-box;
 	box-flex: 0;
