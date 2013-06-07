@@ -1,10 +1,74 @@
-angular.module('boundaries', ['ui.bootstrap']);
+var boundaries = angular.module('boundaries', []);
+
+boundaries.service('Store', function () {
+	
+});
 
 function MapCtrl($scope) {
+	var status = google.maps.places.PlacesServiceStatus;
+	var autocomplete = google.maps.places.AutocompleteService();
+	
+	// Search suggestion functions
+	function UpdateSuggestions(suggestions, requestStatus) {
+		switch (requestStatus) {
+		case status.INVALID_REQUEST:
+			suggestions = {
+				description: 'Invalid Request',
+				error: true
+			};
+			break;
+		case status.OVER_QUERY_LIMIT:
+			suggestions = {
+				description: 'Over Query Limit',
+				error: true
+			};
+			break;
+		case status.REQUEST_DENIED:
+			suggestions = {
+				description: 'Request Denied',
+				error: true
+			};
+			break;
+		case status.UNKNOWN_ERROR:
+			suggestions = {
+				description: 'An Unknown Error Occurred',
+				error: true
+			};
+			break;
+		case status.ZERO_RESULTS:
+			suggestions = {
+				description: 'No Results',
+				error: true
+			};
+			break;
+		}
+		$scope.suggestions = suggestions;
+	}
+	$scope.Suggest = function (search) {
+		$scope.autocomplete.getPlacePredictions({
+			bounds: $scope.map.getBounds(),
+			input: search
+		}, UpdateSuggestions);
+	};
+	// Geolocation fallback when no location is saved
+	function Locate() {
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition( function (position) {
+				$scope.center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+			}, function() {
+				$scope
+			});
+				$scope.center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+			});
+		} else
+	}
+	
+	// Map variables
 	$scope.styles = [{
 		feature: 'administrative.poi',
 		element: 'road'
 	}];
+	$scope.center = localStorage.center ? JSON.parse(localStorage.center) : Locate();
 }
 
 function ColorCtrl($scope) {
@@ -160,6 +224,11 @@ function DrawingCtrl($scope) {
 	
 }
 
+
+
+/* 
+*** MIGRATE TO ANGULAR ***
+*/
 function bezel(svg) {
 	window.clearInterval(bezelTimeout);
 	$('#bezel')
