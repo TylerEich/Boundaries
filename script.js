@@ -688,13 +688,20 @@ function refresh() {
 		}
 	}
 	var mapX, mapY;
-	ratio = Number(localStorage.ratio);
-	if (ratio <= 1) {
-		mapX = ratio * 640;
+	var bounds = new GMap.LatLngBounds();
+	for (thisPath in connectedPaths) {
+		for (point in thisPath.path) {
+			bounds.extend(point);
+		}
+	}
+	bounds = bounds.toSpan();
+	bounds = bounds.lat() / bounds.lng();
+	if (bounds <= 1) {
+		mapX = Math.round(bounds * 640);
 		mapY = 640;
 	} else {
 		mapX = 640;
-		mapY = 1 / ratio * 640
+		mapY = Math.round(1 / bounds * 640);
 	}
 	var urlBase = getBaseUrl(mapX, mapY);
 	var urlFinal = urlBase + urlPaths.join('&');
@@ -765,7 +772,7 @@ function settings(accept) {
 }
 
 function getBaseUrl(mapX, mapY) {
-	var url = 'http://maps.googleapis.com/maps/api/staticmap?';
+	var url = 'https://maps.googleapis.com/maps/api/staticmap?';
 	var params = [];
 	params.push('sensor=false');
 	params.push('size=' + mapX + 'x' + mapY);
