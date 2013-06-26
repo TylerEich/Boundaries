@@ -108,8 +108,9 @@ $(function() {
 		.click(function() {
 		rotate();
 	});
-	$('#static_map').error(function() {
+	$('#static_map').error(function(err) {
 		alert('The image could not be loaded.');
+		console.log(err);
 		throb(false);
 	});
 	$('#settings')
@@ -689,20 +690,32 @@ function refresh() {
 	}
 	var mapX, mapY;
 	var bounds = new GMap.LatLngBounds();
-	for (thisPath in connectedPaths) {
-		for (point in thisPath.path) {
-			bounds.extend(point);
+	console.log('Size Logic...');
+	console.log(connectedPaths);
+	for (var i = 0; i < connectedPaths.length; i++) {
+		for (var j = 0; j < connectedPaths[i].path.length; j++) {
+			console.log(connectedPaths[i].path[j].lat(), connectedPaths[i].path[j].lng());
+			bounds.extend(connectedPaths[i].path[j]);
 		}
 	}
+	var ratio = Number(localStorage.ratio);
+	console.log('Ratio:', ratio);
+	console.log('...End of Size Logic');
 	bounds = bounds.toSpan();
-	bounds = bounds.lat() / bounds.lng();
-	if (bounds <= 1) {
-		mapX = Math.round(bounds * 640);
-		mapY = 640;
-	} else {
+	console.log(bounds.lng(), bounds.lat());
+	var landscape = bounds.lng() >= bounds.lat();
+	console.log(landscape);
+	var mapX, mapY;
+	if (landscape) {
+		ratio = (ratio <= 1) ? ratio : 1/ratio;
 		mapX = 640;
-		mapY = Math.round(1 / bounds * 640);
+		mapY = Math.round(ratio * 640);
+	} else {
+		ratio = (ratio >= 1) ? ratio : 1/ratio;
+		mapX = Math.round(ratio * 640);
+		mapY = 640;
 	}
+	console.log(mapX, mapY);
 	var urlBase = getBaseUrl(mapX, mapY);
 	var urlFinal = urlBase + urlPaths.join('&');
 	console.log(urlFinal);
@@ -772,7 +785,7 @@ function settings(accept) {
 }
 
 function getBaseUrl(mapX, mapY) {
-	var url = 'https://maps.googleapis.com/maps/api/staticmap?';
+	var url = 'http://maps.googleapis.com/maps/api/staticmap?';
 	var params = [];
 	params.push('sensor=false');
 	params.push('size=' + mapX + 'x' + mapY);
