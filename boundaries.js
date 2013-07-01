@@ -1,78 +1,66 @@
+// TODO: Add ui and map as dependencies
 var boundaries = angular.module('boundaries', []);
 
-boundaries.service('Store', function () {
-	
-});
+// Register all services
+boundaries.service('MapService', MapService);
+boundaries.service('SettingService', SettingService);
+boundaries.service('HistoryService', HistoryService);
+// Register all controllers
+boundaries.controller('ColorController', ColorController);
+boundaries.controller('ModeController', ModeController);
+boundaries.controller('FunctionController', FunctionController);
+boundaries.controller('ImageController', ImageController);
+boundaries.controller('DrawingController', DrawingController);
+boundaries.controller('ThrobController', ThrobController);
 
-function MapCtrl($scope) {
-	var status = google.maps.places.PlacesServiceStatus;
-	var autocomplete = google.maps.places.AutocompleteService();
+// Services
+function HistoryService() {
 	
-	// Search suggestion functions
-	function UpdateSuggestions(suggestions, requestStatus) {
-		switch (requestStatus) {
-		case status.INVALID_REQUEST:
-			suggestions = {
-				description: 'Invalid Request',
-				error: true
-			};
-			break;
-		case status.OVER_QUERY_LIMIT:
-			suggestions = {
-				description: 'Over Query Limit',
-				error: true
-			};
-			break;
-		case status.REQUEST_DENIED:
-			suggestions = {
-				description: 'Request Denied',
-				error: true
-			};
-			break;
-		case status.UNKNOWN_ERROR:
-			suggestions = {
-				description: 'An Unknown Error Occurred',
-				error: true
-			};
-			break;
-		case status.ZERO_RESULTS:
-			suggestions = {
-				description: 'No Results',
-				error: true
-			};
-			break;
-		}
-		$scope.suggestions = suggestions;
-	}
-	$scope.Suggest = function (search) {
-		$scope.autocomplete.getPlacePredictions({
-			bounds: $scope.map.getBounds(),
-			input: search
-		}, UpdateSuggestions);
-	};
-	// Geolocation fallback when no location is saved
-	function Locate() {
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition( function (position) {
-				$scope.center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-			}, function() {
-				$scope
-			});
-				$scope.center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-			});
-		} else
-	}
-	
-	// Map variables
-	$scope.styles = [{
-		feature: 'administrative.poi',
-		element: 'road'
-	}];
-	$scope.center = localStorage.center ? JSON.parse(localStorage.center) : Locate();
 }
 
-function ColorCtrl($scope) {
-	// Funcitons for converting color formats
+function MapService() {
+	this.Marker = function() {
+		
+	}
+	this.Flex = function() {
+		
+	}
+}
+
+function SettingService() {
+	this.get = function(key) {
+		// If the key does not exist
+		if (this.settings[key] == null) {
+			// Load the key's value from defaults
+			var defaultValue = this.defaults[key];
+			this.set(key, defaultValue);
+			return defaultValue;
+		}
+		// If the key exists
+		return this.settings[key];
+	}
+	this.set = function(key, value) {
+		this.settings[key] = value;
+		localStorage[key] = value;
+	}
+	
+	this.defaults = {
+		lat: 37.4218, 
+		lng: -122.0840,
+		zoom: 17,
+		width: 5,
+		height: 3.5,
+		image: true
+	}
+	this.settings = {
+		
+	}
+	
+}
+
+// Controllers
+function ColorController($scope) {
+	// Functions for converting color formats
 	$scope.Hex = function (rgba, alpha) {
 		function ChanHex (chanVal) {
 			chanVal *= 255;
@@ -172,7 +160,7 @@ function ColorCtrl($scope) {
 	});
 }
 
-function ModeCtrl($scope) {
+function ModeController($scope) {
 	$scope.activeMode = localStorage.activeMode ? localStorage.activeMode : '0';
 	
 	$scope.$watch('activeMode', function() {
@@ -180,7 +168,7 @@ function ModeCtrl($scope) {
 	});
 }
 
-function FunctionCtrl($scope) {
+function FunctionController($scope) {
 	$scope.connect = localStorage.connect ? JSON.parse(localStorage.connect) : true;
 	
 	// Save values on change
@@ -189,7 +177,7 @@ function FunctionCtrl($scope) {
 	});
 }
 
-function ImageCtrl($scope) {
+function ImageController($scope) {
 	$scope.PxSize = function() {
 		var ratio = $scope.width / $scope.height;
 		return {
@@ -220,15 +208,26 @@ function ImageCtrl($scope) {
 	});
 }
 
-function DrawingCtrl($scope) {
+function DrawingController($scope) {
 	
+}
+
+function ThrobController($scope) {
+	$scope.throb = false;
+	$scope.count = 0;
+	$scope.$on('throb', function () {
+		$scope.throb = true;
+		$scope.count++;
+	});
+	$scope.$on('unthrob', function () {
+		$scope.count--;
+		if ($scope.count == 0) $scope.throb = false;
+	});
 }
 
 
 
-/* 
-*** MIGRATE TO ANGULAR ***
-*/
+// TODO: Migrate logic from the following functions into AngularJS controllers and/or services
 function bezel(svg) {
 	window.clearInterval(bezelTimeout);
 	$('#bezel')
