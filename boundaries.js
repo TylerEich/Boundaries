@@ -6,12 +6,12 @@ boundaries.service('MapService', MapService);
 boundaries.service('SettingService', SettingService);
 boundaries.service('HistoryService', HistoryService);
 // Register all controllers
-boundaries.controller('ColorController', ColorController);
-boundaries.controller('ModeController', ModeController);
-boundaries.controller('FunctionController', FunctionController);
-boundaries.controller('ImageController', ImageController);
-boundaries.controller('DrawingController', DrawingController);
-boundaries.controller('ThrobController', ThrobController);
+boundaries.controller('ColorController', ['$scope', 'SettingService', ColorController]);
+boundaries.controller('ModeController', ['$scope', 'SettingService', ModeController]);
+boundaries.controller('FunctionController', ['$scope', 'SettingService', FunctionController]);
+boundaries.controller('ImageController', ['$scope', 'SettingService', ImageController]);
+boundaries.controller('DrawingController', ['$scope', 'SettingService', 'MapService', DrawingController]);
+boundaries.controller('ThrobController', ['$scope', 'SettingService', ThrobController]);
 
 // Services
 function HistoryService() {
@@ -59,7 +59,7 @@ function SettingService() {
 }
 
 // Controllers
-function ColorController($scope) {
+function ColorController($scope, SettingService) {
 	// Functions for converting color formats
 	$scope.Hex = function (rgba, alpha) {
 		function ChanHex (chanVal) {
@@ -160,7 +160,7 @@ function ColorController($scope) {
 	});
 }
 
-function ModeController($scope) {
+function ModeController($scope, SettingService) {
 	$scope.activeMode = localStorage.activeMode ? localStorage.activeMode : '0';
 	
 	$scope.$watch('activeMode', function() {
@@ -168,7 +168,7 @@ function ModeController($scope) {
 	});
 }
 
-function FunctionController($scope) {
+function FunctionController($scope, SettingService) {
 	$scope.connect = localStorage.connect ? JSON.parse(localStorage.connect) : true;
 	
 	// Save values on change
@@ -177,7 +177,7 @@ function FunctionController($scope) {
 	});
 }
 
-function ImageController($scope) {
+function ImageController($scope, SettingService) {
 	$scope.PxSize = function() {
 		var ratio = $scope.width / $scope.height;
 		return {
@@ -208,11 +208,11 @@ function ImageController($scope) {
 	});
 }
 
-function DrawingController($scope) {
+function DrawingController($scope, SettingService, MapService) {
 	
 }
 
-function ThrobController($scope) {
+function ThrobController($scope, SettingService) {
 	$scope.throb = false;
 	$scope.count = 0;
 	$scope.$on('throb', function () {

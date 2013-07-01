@@ -173,6 +173,8 @@
 	</div>
 		<input id="search_box" type="text" placeholder="Search">
 		<img ng-controller="ImageCtrl" id="static_map" src="" alt="Static Map" title="Static Map"/>
-		<div id="map_canvas"></div>
+		<div id="map_canvas">
+			<div ng-repeat="marker in markers" ui-map-marker="markers[$index]" ui-event="{ click: 'ShowInfo' }">
+		</div>
 	</body>
 </html>
