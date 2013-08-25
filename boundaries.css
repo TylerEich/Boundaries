@@ -72,9 +72,75 @@
 		opacity: 1;
 	}
 	100% {
-		opacity: .25;
+		opacity: 0.25;
 	}
+}
+#search_wrapper {
+	width: 16em;
+	position: absolute;
+	right: 0;
+	border-radius: 0.25em;
+	overflow: hidden;
+}
+.suggestion {
+	cursor: pointer;
+	height: 2em;
+	padding: 0.5em;
+	background: #606060;
+	color: rgba(255, 255, 255, 0.75);
+	width: 100%;
+	box-sizing: border-box;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.suggestion:hover {
+	background: #404040;
+	color: rgba(255, 255, 255, 1);
+}
 
+.slide-show, .slide-hide {
+	transition: 0.25s ease all;
+}
+.slide-show.slide-show-active, .slide-hide {
+	opacity: 1;
+	transform: translateX(0%);
+}
+.slide-hide.slide-hide-active, .slide-show {
+	opacity: 0;
+	transform: translateX(-100%);
+}
+/*#search_results.slide-show, #search_results.slide-hide {
+	transform-origin: center top;
+}*/
+#search_results {
+	transform-origin: 50% 0;
+}
+#search_results.slide-show.slide-show-active, #search_results.slide-hide {
+	transform: scaleY(1);
+}
+#search_results.slide-hide.slide-hide-active, #search_results.slide-show {
+	transform: scaleY(0);
+}
+
+.appear-enter, .appear-leave
+{
+	transition: 1s ease all;
+	position: relative;
+	display: block;
+} 
+
+.appear-enter.appear-enter-active, .appear-leave {
+	opacity: 1;
+	transition: 1s ease-out all;
+	transform: translateX(0);
+	height: 1em;
+}
+.appear-leave.appear-leave-active, .appear-enter {
+	opacity: 0;
+	transition: 1s ease-out all;
+	transform: translateX(100%);
+	height: 0;
 }
 
 body, html {
@@ -85,29 +151,7 @@ body, html {
 	font: 1em "Helvetica Neue", Helvetica, Arial, sans-serif;
 	display: box;
 }
-.nav-tabs {
-	list-style: none;
-}
-.nav-tabs > li {
-	cursor: pointer;
-	border-radius: 0;
-	padding: 0.25em 0.5em;
-	float: left;
-	background: #606060;
-	border-right: 1px solid #000;
-	color: rgba(255, 255, 255, 0.75);
-}
-.nav-tabs > li:first-of-type {
-	border-radius: 0.25em 0 0 0.25em;
-}
-.nav-tabs > li:last-of-type {
-	border-radius: 0 0.25em 0.25em 0;
-	border-right: none;
-}
-.tab-pane.active {
-	box-shadow: none;
-	margin-top: .75em;
-}
+
 * {
 	transition: 0.125s ease;
 }
@@ -129,14 +173,13 @@ body, html {
 	animation: bezel 1s ease-out;
 }
 #throbber {
-	z-index: 9999;
+	z-index: 1;
 	position: fixed;
 	top: 0;
 	left: 50%;
 	margin-left: -2.5em;
 	width: 5em;
-	background: rgba(0,0,0,.75);
-	opacity: 1;
+	background: rgba(0, 0, 0, 0.75);
 	border-radius: 0 0 .5em .5em;
 	padding: .5em;
 	box-shadow: 0 .1em .5em rgba(0,0,0,.5);
@@ -146,11 +189,9 @@ body, html {
 	pointer-events: none;
 }
 #throbber svg {
-	height: 1.25em;
+	height: 1em;
 }
 #throbber svg * {
-	fill: url(#gradientWhite);
-	stroke: #000;
 	transition: none;
 }
 #dot1,#dot2,#dot3 {
@@ -200,7 +241,6 @@ textarea {
 	margin: 0 .125em;
 	width: 4em;
 	border-radius: .25em;
-	border: 1px solid #000;
 	font-weight: normal;
 	font-size: 1rem;
 	box-sizing: border-box;
@@ -208,25 +248,22 @@ textarea {
 input {
 	display: none;
 	background: #fff;
-	box-shadow: inset 0 .1em .5em #000;
 }
 .button {
 	cursor: pointer;
 	display: block;
 	box-sizing: border-box;
-	border: 1px solid #000;
-	border-top: 1px solid #000;
 	background: #606060;
 	border-radius: 0.25em;
 }
 .button:hover:not(.active) {
 	background: #808080;
 }
-.active, .nav-tabs > li.active, .button:active, input:checked + .button {
+.active, .button:active, input:checked + .button {
 	background: #404040;
 	color: rgba(255, 255, 255, 1);
 }
-.active.trigger, .nav-tabs > li.active.trigger, .button.trigger:active, input:checked + .button.trigger {
+.active.trigger, .button.trigger:active, input:checked + .button.trigger {
 	/*transition: 0.1s ease;*/
 	transition: none;
 }
@@ -247,7 +284,7 @@ input {
 	border-radius: 0 0 .25em .25em;
 	border-bottom: 1px solid #000;
 }
-svg *:not(circle) {
+svg * {
 	fill: #fff;
 }
 svg * {
@@ -269,12 +306,8 @@ svg * {
 	box-flex: 0;
 }
 #search_box {
-	position: fixed;
-	top: 0;
-	left: 4em;
-	margin: .5em;
-	width: 20em;
-	display: none;;
+	width: 100%;
+	display: block;
 	font: inherit;
 	padding: .5em;
 	/*background: #fff;
@@ -292,7 +325,7 @@ svg * {
 	bottom: 0;
 }
 #image_controls, #image_controls * {
-	transition: none;
+	/*transition: none;*/
 }
 #settings_wrapper {
 	position: absolute;
@@ -309,7 +342,6 @@ img#static_map {
 	max-width: 20em;
 	max-height: 20em;
 	box-shadow: 0 1px rgba(255, 255, 255, .25);
-	border: 1px solid #000;
 	box-shadow: 0 .25em 1em #000;
 	border-radius: .25em;
 	background-color: #fff;
