@@ -1,77 +1,88 @@
 "use strict";
+/*Array.prototype.diff = function(a) {
+    return this.filter(function(i) {
+		return !(a.indexOf(i) > -1);
+	});
+};*/
+// The MVCArrayBinder contstructor allows MVC binding between and array and an object
+function MVCArrayBinder(mvcArray) {
+	this.array_ = mvcArray;
+}
+MVCArrayBinder.prototype = new google.maps.MVCObject();
+MVCArrayBinder.prototype.get = function(key) {
+	if (!isNaN(parseInt(key))) {
+		return this.array_.getAt(parseInt(key));
+	} else {
+		this.array_.get(key);
+	}
+};
+
+MVCArrayBinder.prototype.set = function(key, val) {
+	if (!isNaN(parseInt(key))) {
+		this.array_.setAt(parseInt(key), val);
+	} else {
+		this.array_.set(key, val);
+	}
+};
+
 // TODO: Add ui and map as dependencies
 // TODO: Privacy Policy and Terms of Service (https://developers.google.com/places/policies)
-var boundaries = angular.module('boundaries', []);
-
+var boundaries = angular.module('boundaries', ['ui.map', 'ui.event']);
+angular.bootstrap(document.querySelector('#map_canvas'), ['boundaries']);
 // Register all factories
 // boundaries.factory('MapFactory', ['$rootScope', MapFactory]);
 
 // Register all services
-boundaries.service('MapService', ['$rootScope', MapService]);
+// boundaries.service('MapService', ['$rootScope', MapService]);
 boundaries.service('SettingService', SettingService);
+boundaries.service('UtilityService', ['$rootScope', '$q', '$http', UtilityService]);
+boundaries.service('VariableService', VariableService);
 boundaries.service('HistoryService', HistoryService);
 
 // Register all controllers
-boundaries.controller('ColorController', ['$scope', 'SettingService', ColorController]);
+boundaries.controller('ColorController', ['$scope', 'SettingService', 'UtilityService', ColorController]);
 boundaries.controller('ModeController', ['$scope', 'SettingService', ModeController]);
 boundaries.controller('ActionController', ['$scope', 'SettingService', ActionController]);
-boundaries.controller('MapController', ['$scope', 'SettingService', MapController]);
+boundaries.controller('MapController', ['$scope', 'SettingService', 'UtilityService', 'VariableService', MapController]);
 boundaries.controller('ImageController', ['$scope', 'SettingService', ImageController]);
-boundaries.controller('DrawingController', ['$scope', 'SettingService', 'MapService', DrawingController]);
-boundaries.controller('SearchController', ['$scope', 'SettingService', 'MapService', SearchController]);
-boundaries.controller('ThrobController', ['$scope', 'SettingService', ThrobController]);
+boundaries.controller('DrawingController', ['$scope', 'SettingService', DrawingController]);
+boundaries.controller('SearchController', ['$scope', '$sce', 'SettingService', 'UtilityService', 'VariableService', SearchController]);
+boundaries.controller('ThrobController', ['$scope', 'VariableService', ThrobController]);
 
 // Services
 function HistoryService() {
 	
 }
 
-function MapService($rootScope) {
-	// Uses DOM manipulation to initialize the map
-	var map = new google.maps.Map(document.getElementById('map_canvas'));
-	var autocomplete = new google.maps.places.AutocompleteService();
-	var placeService = new google.maps.places.PlacesService(map);
-	this.GetSuggestions = function(search) {
-		$rootScope.$broadcast('throb.on');
-		autocomplete.getPlacePredictions({
-			bounds: map.getBounds(),
-			input: search
-		}, this.ReturnSuggestions);
-	};
-	this.ReturnSuggestions = function(suggestions, status) {
-		$rootScope.$broadcast('throb.off');
-		if (status == google.maps.places.PlacesServiceStatus.OK) {
-			$rootScope.$broadcast('suggestions.ok', suggestions);
-		} else if (status == google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
-			$rootScope.$broadcast('suggestions.no_result');
-		} else {
-			$rootScope.$broadcast('suggestions.error');
-		}
-	};
-	this.GetDetails = function(reference) {
-		if (reference) placeService.getDetails({reference: reference}, this.LoadPlace);
-	}
-	this.LoadPlace = function(place, status) {
-		if (status == google.maps.places.PlacesServiceStatus.OK) {
-			console.log(place.geometry);
-			if (place.geometry.viewport) {
-				map.fitBounds(place.geometry.viewport);
-			} else if (place.geometry.location) {
-				map.panTo(place.geometry.location);
-			}
-		}
-	}
+// Used to share temporary variables between controllers
+function VariableService() {
+	this.map = {};
 }
-
+// Used to store settings and share between controllers
 function SettingService() {
-	// Functions
-	// Load defaults or load saved values
-	
+	// Defaults also serve as an object specification
 	this.defaults = {
 		map: {
-			lat: 0,
-			lng: 0,
-			zoom: 5
+			lat: undefined,
+			lng: undefined,
+			zoom: 5,
+			nodes: [],
+			style: [{
+				stylers: [{
+					color: "#ffffff"
+				}]
+			}, {
+				elementType: "geometry.stroke",
+				featureType: "road",
+				stylers: [{
+					color: "#808080"
+				}]
+			}, {
+				elementType: "labels.text.fill",
+				stylers: [{
+					color: "#000000"
+				}]
+			}]
 		},
 		image: {
 			width: 5,
@@ -80,34 +91,40 @@ function SettingService() {
 			show: true,
 			rotate: false
 		},
-		colors: [{
-			name: 'Red',
-			rgba: {
-				r: 255,
-				g: 0,
-				b: 0,
-				a: 32
-			}
-		}, {
-			name: 'Green',
-			rgba: {
-				r: 0,
-				g: 255,
-				b: 0,
-				a: 32
-			}
-		}, {
-			name: 'Blue',
-			rgba: {
-				r: 0,
-				g: 0,
-				b: 255,
-				a: 32
-			}
-		}],
+		color: {
+			active: 1,
+			choices: [{
+				name: 'Red',
+				rgba: {
+					r: 1,
+					g: 0,
+					b: 0,
+					a: 0.25
+				},
+				weight: 10
+			}, {
+				name: 'Green',
+				rgba: {
+					r: 0,
+					g: 1,
+					b: 0,
+					a: 0.25
+				},
+				weight: 10
+			}, {
+				name: 'Blue',
+				rgba: {
+					r: 0,
+					g: 0,
+					b: 1,
+					a: 0.25
+				},
+				weight: 10
+			}]
+		},
 		search: {
 			query: '',
-			show: true
+			show: false
 		},
 		mode: 'flex',
 		action: {
@@ -116,11 +133,14 @@ function SettingService() {
 		// More defaults...
 	};
 	try {
-		this.settings = JSON.parse(LocalStorage.settings);
+		this.settings = JSON.parse(localStorage.settings);
+		this.settings = this.defaults;
 	} catch (e) {
 		this.settings = this.defaults;
+		// this.Save();
 		console.log('Default settings loaded');
 	}
+	// Keep saved object keys aligned with default object keys (while preserving values). If a key is missing, it will be added. If an extra key is found, it will be removed.
 	function SyncProperties(master, check, secondStep) {
 		//console.log('Master:', master, 'Check:', check, 'Second Step:', secondStep);
 		if (typeof master != 'object' || typeof check != 'object') return;
@@ -143,19 +163,103 @@ function SettingService() {
 			}
 		}
 	}
+	
 	SyncProperties(this.defaults, this.settings);
 	this.Save = function() {
 		localStorage.settings = JSON.stringify(this.settings);
+		//console.timeEnd('Save');
+	};
+}
+// Useful functions used by multiple controllers
+function UtilityService($rootScope, $q, $http) {
+	var autocomplete = new google.maps.places.AutocompleteService();
+	var placeService = new google.maps.places.PlacesService(document.querySelector('#places_attributions'));
+	this.color = {
+		toHex: function(rgba, alpha) {
+			var rgba = angular.copy(rgba);
+			var keys = Object.keys(rgba);
+			for (var i = 0; i < keys.length; i++) {
+				var key = keys[i];
+				rgba[key] = Math.round(rgba[key] * 255);
+			}
+			var hex = ((1 << 24) | (rgba.r << 16) | (rgba.g << 8) | rgba.b).toString(16).substring(1);
+			
+			if (alpha === true || (alpha === undefined && rgba.a !== 255)) {
+				var a = ((1 << 8) | rgba.a).toString(16).substring(1);
+				return hex + a;
+			} else {
+				return hex;
+			}
+		}
+	};
+	this.map = {
+		suggestions: function(input, map) {
+			function load(suggestions, status) {
+				if (status == google.maps.places.PlacesServiceStatus.OK) {
+					deferred.resolve(suggestions);
+				} else if (status == google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
+					deferred.reject('No Results');
+				} else {
+					deferred.reject('An Error Occurred');
+				}
+				$rootScope.$apply();
+			}
+			
+			var deferred = $q.defer();
+			if (input.length <= 0) {
+				deferred.resolve([]);
+			} else {
+				var request = {input: input};
+				if (map && map.getBounds) request.bounds = map.getBounds();
+				autocomplete.getPlacePredictions(request, load);
+			}
+			return deferred.promise;
+		},
+		loadPlace: function(map, reference) {
+			if (map === undefined || reference === undefined) return;
+			function revealOnMap(place, status) {
+				if (place === undefined || status === undefined) return;
+				if (status == google.maps.places.PlacesServiceStatus.OK) {
+					if (place.geometry.viewport) {
+						map.fitBounds(place.geometry.viewport); // fitBounds because panToBounds does not zoom out to show the entire bounding box
+					} else if (place.geometry.location) {
+						map.panTo(place.geometry.location);
+					}
+				}
+			}
+			
+			if (reference) placeService.getDetails({reference: reference}, revealOnMap);
+		}
+	};
+	// Interface for the HTML5 Geolocation API
+	this.location = function() {
+		var deferred = $q.defer();
+		if ('geolocation' in navigator) {
+			navigator.geolocation.getCurrentPosition(deferred.resolve, deferred.reject);
+			return deferred.promise;
+		} else {
+			return $http.get('https://freegeoip.net/json/', {cache: true});
+		}
+	};
+	this.throb = {
+		on: function() {
+			console.log('Throb on');
+			$rootScope.$broadcast('throb', true);
+		},
+		off: function() {
+			console.log('Throb off');
+			if (VariableService.throb <= 0) return;
+			$rootScope.$broadcast('throb', false);
+		}
 	};
 }
 
 // Controllers
-function ColorController($scope, SettingService) {
+function ColorController($scope, SettingService, UtilityService) {
 	// Functions for converting color formats
-	$scope.Hex = function (rgba, alpha) {
-		if (alpha) return ((255 << 32) | (128 << 16) | (128)).toString(16);
-		return ((rgba.r << 16) | (rgba.g << 8) | rgba.b).toString(16);
-	}
+	$scope.Hex = function(rgba) {
+		return UtilityService.color.toHex(rgba, false);
+	};
 	$scope.HSL = function (rgba) {
 		var r, g, b, a;
 		var h, s, l;
@@ -186,33 +290,279 @@ function ColorController($scope, SettingService) {
 			l: l,
 			a: a
 		}
-	}
-	
+	};
+	$scope.active = SettingService.settings.color.active;
+	$scope.choices = SettingService.settings.color.choices;
 	// Load saved colors or defaults
-	/*var activeColor = SettingService.settings.colors.activeColor;
-	$scope.activeColor = {
-		index: activeColor
-	};*/
+	$scope.$watch('[active, choices]', function() {
+		SettingService.settings.color.active = $scope.active;
+		SettingService.settings.color.choices = $scope.choices;
+		SettingService.Save();
+	}, true);
 }
 
 function ModeController($scope, SettingService) {
 	$scope.mode = SettingService.settings.mode;
 	
-	$scope.$watch('mode', function(){SettingService.Save();});
+	$scope.$watch('mode', function() {
+		SettingService.settings.mode = $scope.mode;
+		SettingService.Save();
+	});
 }
 
-function MapController($scope, SettingService) {
+function MapController($scope, SettingService, UtilityService, VariableService) {
+	// Functions
+	function makeHexColor(node, alpha) {
+		var color = SettingService.settings.color.choices[node.color_i];
+		return UtilityService.color.toHex(color.rgba, alpha);
+	}
+	function makeLatLng(node) {
+		return new google.maps.LatLng(node.lat, node.lng);
+	}
+	function makeIcon(node) {
+		var color = makeHexColor(node, false);
+		return {
+			fillColor: color,
+			fillOpacity: 0.5,
+			path: google.maps.SymbolPath.CIRCLE,
+			scale: 10,
+			strokeColor: color,
+			strokeOpacity: 1,
+			strokeWeight: 2.5
+		};
+	}
+	function makeMarkerOptions(node) {
+		return {
+			clickable: true,
+			crossOnDrag: true,
+			cursor: 'pointer',
+			draggable: true,
+			flat: true,
+			icon: makeIcon(node),
+			map: $scope.map,
+			position: makeLatLng(node)
+		};
+	}
+	function makePolylineOptions(node) {
+		var color = SettingService.settings.color.choices[node.color_i];
+		return {
+			clickable: true,
+			draggable: false,
+			editable: false,
+			strokeColor: makeHexColor(node, alpha),
+			strokeOpacity: color.rgba.a,
+			strokeWeight: color.weight,
+			map: $scope.map
+		};
+	}
+	function makePolygonOptions(node) {
+		var color = SettingService.settings.color.choices[node.color_i];
+		return {
+			clickable: true,
+			draggable: false,
+			editable: false,
+			fillColor: makeHexColor(node, alpha),
+			fillOpacity: color.rgba.a,
+			map: $scope.map
+		};
+	}
+	function makeMarker(node) {
+		return new google.maps.Marker(makeMarkerOptions(node));
+	}
+	function makePolyline(node) {
+		return new google.maps.Polyline(makePolylineOptions(node));
+	}
+	function makePolygon(node) {
+		return new google.maps.Polygon(makePolygonOptions(node));
+	}
 	
+	function addNode(node) {
+		var marker = makeMarker(node);
+		$scope.markers.push(marker);
+		if ($scope.nodes.length == 0 || SettingService.settings.connect == false || $scope.nodes[$scope.nodes.length - 1].color_i != SettingService.settings.color.active) {
+			console.log('Creating New Line');
+			var polyline = makePolyline(node);
+			// The MVCArrayBinder contstructor allows MVC binding between and array and an object
+			polyline.pathBinder = new MVCArrayBinder(polyline.getPath());
+			$scope.drawings.push(polyline);
+		}
+		var drawing = $scope.drawings[$scope.drawings.length - 1];
+		drawing.getPath().push(makeLatLng(node));
+		marker.bindTo('position', drawing.pathBinder, (drawing.getPath().getLength() - 1).toString());
+		$scope.nodes.push(node);
+	}
+	function changeNode(i, node, refresh)  {
+		for (var key in node) {
+			if (node.hasOwnProperty(key)) {
+				$scope.nodes[i][key] = node[key];
+			}
+		}
+		$scope.nodes[i] = node;
+		
+		if (refresh) {
+			var isLat = (node.lat != undefined);
+			var isLng = (node.lng != undefined);
+			var isColorI = (node.color_i != undefined);
+			var isMode = (node.mode != undefined);
+			var markerLatLng = $scope.markers[i].getPosition();
+			if (isLat || isLng) {
+				var lat = markerLatLng.lat();
+				var lng = markerLatLng.lng();
+				$scope.markers[i].setPosition(new google.maps.LatLng(isLat ? node.lat : lat, isLng ? node.lng : lng));
+			}
+			if (isColorI) {
+				var icon = makeIcon(node);
+			}
+		}
+	}
+	// TODO: deleteNode()
+	function updateStyle() {
+		$scope.map.mapTypes.set('custom', new google.maps.StyledMapType($scope.style, {
+			name: 'Customized'
+		}));
+	}
+	function panToCurrentLocation() {
+		UtilityService.throb.on();
+		UtilityService.location().then(function(position) {
+			console.log(position);
+			if (!position) return;
+			var location, zoom;
+			if (position.coords) {
+				location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+				zoom = 10;
+			} else if (position.data) {
+				location = new google.maps.LatLng(position.data.latitude, position.coords.longitude);
+				zoom = 7;
+			}
+			$scope.map.panTo(location);
+			$scope.map.setZoom(zoom);
+		}, function(failure) {
+			SettingService.settings.search.show = true;
+		}).finally(function() {
+			UtilityService.throb.off();
+		});
+	}
+	// Event binders
+	$scope.map_click = function(e) {
+		addNode($scope.map, {
+			lat: e.latLng.lat(),
+			lng: e.latLng.lng(),
+			color_i: SettingService.settings.color.active,
+			mode: SettingService.settings.mode
+		});
+	};
+	$scope.map_center_changed = function() {
+		var center = $scope.map.getCenter();
+		$scope.lat = center.lat();
+		$scope.lng = center.lng();
+	};
+	$scope.map_zoom_changed = function() {
+		$scope.zoom = $scope.map.getZoom();
+	};
+	$scope.marker_drag = function(e, i) {
+		changeNode(i, {
+			lat: e.latLng.lat(),
+			lng: e.latLng.lng()
+		}, false);
+		$scope.nodes[i].lat = e.latLng.lat();
+		$scope.nodes[i].lng = e.latLng.lng();
+	};
+	$scope.marker_click = function(i) {
+		var markerPosition = $scope.markers[i].getPosition();
+		addNode($scope.map, {
+			lat: markerPosition.lat(),
+			lng: markerPosition.lng(),
+			color_i: SettingService.settings.color.active,
+			mode: SettingService.settings.mode
+		});
+	};
+	$scope.marker_rightclick = function(i) {
+		console.log('Marker rightclicked: ', i);
+		deleteNode(i);
+		console.log($scope.nodes);
+	};
+	$scope.zoom_out = function() {
+		var zoom = $scope.map.getZoom() - 1;
+		$scope.map.setZoom(zoom);
+	};
+	// Variables
+	var lat = SettingService.settings.map.lat;
+	var lng = SettingService.settings.map.lng;
+	var center = new google.maps.LatLng($scope.lat, $scope.lng);
+	var zoom = SettingService.settings.map.zoom;
+	// TODO: Styled map code. Use callback to load styles onto map
+	$scope.style = SettingService.settings.map.style;
+	$scope.options = {
+		center: new google.maps.LatLng($scope.lat ? $scope.lat : 0, $scope.lng ? $scope.lng : 0),
+		disableDefaultUI: true,
+		disableDoubleClickZoom: true,
+		draggableCursor: 'crosshair',
+		draggingCursor: 'move',
+		mapTypeControl: true,
+		mapTypeControlOptions: {
+			mapTypeIds: ['custom', google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID],
+			position: google.maps.ControlPosition.TOP_RIGHT,
+			style: google.maps.MapTypeControlStyle.DEFAULT
+		},
+		/*panControl: true,
+		panControlOptions: {
+			position: google.maps.ControlPosition.RIGHT_CENTER
+		},*/
+		scaleControl: true,
+		zoom: zoom,
+		zoomControl: true,
+		zoomControlOptions: {
+			position: google.maps.ControlPosition.RIGHT_CENTER,
+			style: google.maps.ZoomControlStyle.SMALL
+		}
+	};
+	$scope.nodes = SettingService.settings.map.nodes;
+	$scope.markers = [];
+	$scope.drawings = [];
+	
+	// Watchers
+	$scope.$watch('map', function() {
+		VariableService.map = $scope.map;
+	});
+	// Listen once; when the map is defined, load its watchers
+	var unbindWatcher = $scope.$watch('map', function() {
+		if ($scope.map == undefined) return;
+		updateStyle();
+		if ($scope.lat == undefined || $scope.lng == undefined) {
+			panToCurrentLocation();
+			console.log('Location Retrieved');
+		}
+		$scope.$watch('map.getZoom()', function() {
+			SettingService.settings.map.zoom = $scope.map.getZoom();
+		});
+		$scope.$watch('map.getCenter()', function() {
+			var center = $scope.map.getCenter();
+			SettingService.settings.map.lat = center.lat();
+			SettingService.settings.map.lng = center.lng();
+			SettingService.Save();
+		});
+		for (var i = 0; i < $scope.nodes.length; i++) {
+			var node = $scope.nodes[i];
+			// TODO: this function pushes to markerData. Decide how best to prevent duplication
+			addNode($scope.map, node.lat, node.lng, node.color_i, node.mode);
+		}
+		unbindWatcher();
+	});
 }
 
 function ActionController($scope, SettingService) {
+	$scope.clearAll = function() {
+		
+	};
 	$scope.connect = SettingService.settings.action.connect;
-	
 	// Save values on change
-	$scope.$watch('connect', function(){SettingService.Save();});
+	$scope.$watch('connect', function() {
+		SettingService.settings.action.connect = $scope.connect;
+		SettingService.Save();
+	});
 }
 
-function ImageController($scope, SettingService) {
+function ImageController($scope, SettingService, VariableService) {
 	$scope.PxSize = function() {
 		var ratio = $scope.width / $scope.height;
 		return {
@@ -221,54 +571,84 @@ function ImageController($scope, SettingService) {
 			height: (ratio < 1) ? 640 : Math.round(1 / ratio * 640)
 		}
 	};
-	
-	// Load variables from localStorage, or load defaults
+	// Image orientation logic
+	/*var drawingBounds = new google.maps.LatLngBounds();
+	for (var i = 0; i < VariableService.drawing.length; i++) {
+		var marker = VariableService.markers[i];
+		
+	}
+	var northEast = VariableService.markers.get
+	var heading = Math.abs(google.maps.geometry.spherical.computeHeading(latLng1, latLng2));
+	if (45 <= heading || heading < 135) {
+		console.log('Landscape');
+	} else {
+		console.log('Portrait');
+	}
+	*/
+	// Load variables from SettingService
 	$scope.width = SettingService.settings.image.width;
 	$scope.height = SettingService.settings.image.height;
 	$scope.show = SettingService.settings.image.show;
 	$scope.format = SettingService.settings.image.format;
 	$scope.rotate = SettingService.settings.image.rotate;
 	
-	$scope.$watch('[width, height, show, format, rotate]', function(){SettingService.Save();}, true);
+	$scope.$watch('[width, height, show, format, rotate]', function() {
+		SettingService.settings.image.width = $scope.width;
+		SettingService.settings.image.height = $scope.height;
+		SettingService.settings.image.show = $scope.show;
+		SettingService.settings.image.format = $scope.format;
+		SettingService.settings.image.rotate = $scope.rotate;
+		SettingService.Save();
+	}, true);
 }
 
-function DrawingController($scope, SettingService, MapService) {
+function DrawingController($scope, SettingService) {
 	
 }
 
-function ThrobController($scope, SettingService) {
+function ThrobController($scope, VariableService) {
 	$scope.count = 0;
-	
-	// Events
-	$scope.$on('throb.on', function () {
-		$scope.count++;
+	$scope.$on('throb', function(event, count) {
+		console.log('ThrobController ', count);
+		if (count == true) $scope.count++;
+		if (count == false) $scope.count--;
 	});
-	$scope.$on('throb.off', function () {
-		$scope.count--;
-		if(!$scope.$$phase) {
-			$scope.$apply();
-		}
-	});
-	$scope.$watch();
 }
 
-function SearchController($scope, SettingService, MapService) {
-	function checkApply() {
-		if (!$scope.$$phase) {
-			$scope.$apply();
+function SearchController($scope, $sce, SettingService, UtilityService, VariableService) {
+	$scope.loadPlace = function(reference) {
+		UtilityService.throb.on();
+		UtilityService.map.loadPlace(VariableService.map, reference);
+		UtilityService.throb.off();
+	};
+	$scope.keydown = function(e) {
+		var enter, up, down;
+		enter = (e.which == 13);
+		up = (e.which == 38);
+		down = (e.which == 40);
+		if (enter || up || down) {
+			e.preventDefault();
+		}
+		if (enter) {
+			if ($scope.active == -1) {
+				$scope.loadPlace($scope.suggestions[0].reference);
+			} else {
+				$scope.loadPlace($scope.suggestions[$scope.active].reference);
+			}
+		} else if (up && $scope.active > -1) {
+			$scope.active--;
+		} else if (down && $scope.active < $scope.suggestions.length - 1) {
+			$scope.active++;
 		}
 	}
-	$scope.LoadPlace = function(reference) {
-		MapService.GetDetails(reference);
-	};
 	$scope.show = SettingService.settings.search.show;
 	$scope.query = SettingService.settings.search.query;
 	$scope.suggestions = [];
+	$scope.active = -1;
 	
-	function boldMatches(suggestions) {
+	function formatSuggestions(suggestions) {
 		for (var i = 0; i < suggestions.length; i++) {
 			var desc = suggestions[i].description;
-			//console.group('Original Description: \'%s\'', desc);
 			suggestions[i].description = '';
 			var index = 0;
 			for (var j = 0; j < suggestions[i].matched_substrings.length; j++) {
@@ -276,34 +656,44 @@ function SearchController($scope, SettingService, MapService) {
 				var length = suggestions[i].matched_substrings[j].length;
 				suggestions[i].description += desc.slice(index, offset) + '<b>' + desc.substr(offset, length) + '</b>';
 				index += offset + length;
-				//console.log('Offset: %i; Length: %i; Index: %i', offset, length, index);
-				//console.log('Description: %s', suggestions[i].description);
 			}
 			suggestions[i].description += desc.slice(index);
-			//console.log('Final Description: \'%s\'', suggestions[i].description);
-			//console.groupEnd();
+			suggestions[i].description = $sce.trustAsHtml(suggestions[i].description);
 		}
 		return suggestions;
 	}
-	$scope.$on('suggestions.ok', function(e, suggestions) {
-		$scope.suggestions = boldMatches(suggestions);
-		checkApply();
-	});
-	$scope.$on('suggestions.no_result', function(e, suggestions) {
-		
-		$scope.suggestions = [{description: 'No Results'}];
-		checkApply();
-	});
+	function errorMessage(message) {
+		if (typeof message == 'string') return [{description: $sce.trustAsHtml('<i>' + message + '</i>'), error: true}]
+	}
 	
-	$scope.$watch('[query, show]',  function(){SettingService.Save();}, true);
 	$scope.$watch('query', function() {
-		if ($scope.query.length > 0) {
-			MapService.GetSuggestions($scope.query);
-		}
+		UtilityService.map.suggestions($scope.query, VariableService.map).then(function(suggestions) {
+			// console.time('Suggestions');
+			$scope.suggestions = formatSuggestions(suggestions);
+			// console.timeEnd('Suggestions');
+		}, function(message) {
+			$scope.suggestions = errorMessage(message);
+		});
 	});
+	$scope.$watch('[query, show]',  function() {
+		SettingService.settings.search.query = $scope.query;
+		SettingService.settings.search.show = $scope.show;
+		SettingService.Save();
+	}, true);
 }
 
 
+
+
+
+
+
+
+
+
+/* 
+-------------------------DEPRECATED CODE-------------------------
+*/
 // TODO: Migrate logic from the following functions into AngularJS controllers and/or services
 function bezel(svg) {
 	window.clearInterval(bezelTimeout);

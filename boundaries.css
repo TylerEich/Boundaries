@@ -94,10 +94,17 @@
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
+.suggestion.none {
+	text-align: center;
+}
 .suggestion:hover {
 	background: #404040;
 	color: rgba(255, 255, 255, 1);
 }
+.suggestion.none {
+	pointer-events: none;
+}
+
 
 .slide-show, .slide-hide {
 	transition: 0.25s ease all;
@@ -253,11 +260,15 @@ input {
 	cursor: pointer;
 	display: block;
 	box-sizing: border-box;
-	background: #606060;
+	background: #808080;
 	border-radius: 0.25em;
 }
-.button:hover:not(.active) {
-	background: #808080;
+.button:hover:not(.active):not(:active):not(:checked) {
+	background: #606060;
+}
+.button:hover:not(.active):not(:active):not(:checked) svg * {
+	fill-opacity: 0.75;
+	stroke-opacity: 0.75;
 }
 .active, .button:active, input:checked + .button {
 	background: #404040;
@@ -284,12 +295,14 @@ input {
 	border-radius: 0 0 .25em .25em;
 	border-bottom: 1px solid #000;
 }
-svg * {
+
+svg :not(circle) {
 	fill: #fff;
 }
+
 svg * {
-	fill-opacity: 0.75;
-	stroke-opacity: 0.75;
+	fill-opacity: 0.625;
+	stroke-opacity: 0.625;
 }
 .active svg *, .button:active svg *, input:checked + .button svg * {
 	fill-opacity: 1;
@@ -350,34 +363,21 @@ img#static_map {
 	background-position: 0 0, 1em 1em;
 	transition: none;
 }
-.pac-container {
-	/*margin: -2px 0 0 0;*/
-	background:#fff;
-	padding: .25em 0;
-	border: 1px solid #000;
-	box-shadow: 0 .25em 1em #000;
-	border-radius: .25em;
-}
-.pac-container > div.pac-item {
-	cursor: pointer;
-	padding: .25em .5em;
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-.pac-container > div:hover, .pac-selected {
-	background: #f7f7f7;
-}
-.pac-container:after {
-	display: none;
+
+#map_wrapper {
+	z-index: 0;
+	height: 100%;
+	/*width: calc(100% - 16em);*/
+	box-flex: 1;
+	cursor: crosshair;
 }
 #map_canvas {
 	height: 100%;
-	z-index: 0;
+	width: 100%;
 	background-image: linear-gradient(45deg, #f7f7f7 25%, transparent 25%, transparent 75%, #f7f7f7 75%, #f7f7f7), linear-gradient(45deg, #f7f7f7 25%, transparent 25%, transparent 75%, #f7f7f7 75%, #f7f7f7);
 	background-size: 2em 2em;
 	background-position: 0 0, 1em 1em;
-	box-flex: 1;
+/*	box-flex: 1;*/
 }
 #map_canvas, #map_canvas * {
 	transition: none;
