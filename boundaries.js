@@ -53,7 +53,6 @@ boundaries.controller('ThrobController', ['$scope', 'VariableService', ThrobCont
 function HistoryService() {
 	
 }
-
 // Used to share temporary variables between controllers
 function VariableService() {
 	this.map = {};
@@ -232,15 +231,34 @@ function UtilityService($rootScope, $q, $http) {
 		}
 	};
 	// Interface for the HTML5 Geolocation API
-	this.location = function() {
-		var deferred = $q.defer();
-		if ('geolocation' in navigator) {
-			navigator.geolocation.getCurrentPosition(deferred.resolve, deferred.reject);
+	this.location = {
+		exact: function() {
+			console.log('Exact location requested...');
+			var deferred = $q.defer();
+			if ('geolocation' in navigator) {
+				navigator.geolocation.getCurrentPosition(function(position) {
+					$rootScope.$apply(function() {
+						deferred.resolve(position);
+					});
+				}, function(error) {
+					$rootScope.$apply(function() {
+						deferred.reject(error);
+					});
+				});
+			} else {
+				$rootScope.$apply(function() {
+					deferred.reject(false);
+				});
+			}
+			console.log(deferred);
 			return deferred.promise;
-		} else {
-			return $http.get('https://freegeoip.net/json/', {cache: true});
+		},
+		approximate: function() {
+			var promise = $http.get('https://freegeoip.net/json/', {cache: true});
+			console.log(promise);
+			return promise;
 		}
-	};
+	},
 	this.throb = {
 		on: function() {
 			console.log('Throb on');
@@ -311,6 +329,7 @@ function ModeController($scope, SettingService) {
 }
 
 function MapController($scope, SettingService, UtilityService, VariableService) {
+	UtilityService.throb.on();
 	// Functions
 	function makeHexColor(node, alpha) {
 		var color = SettingService.settings.color.choices[node.color_i];
@@ -320,6 +339,7 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 		return new google.maps.LatLng(node.lat, node.lng);
 	}
 	function makeIcon(node) {
+		console.log('makeIcon node:', node);
 		var color = makeHexColor(node, false);
 		return {
 			fillColor: color,
@@ -349,7 +369,7 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 			clickable: true,
 			draggable: false,
 			editable: false,
-			strokeColor: makeHexColor(node, alpha),
+			strokeColor: makeHexColor(node, false),
 			strokeOpacity: color.rgba.a,
 			strokeWeight: color.weight,
 			map: $scope.map
@@ -408,7 +428,7 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 			if (isLat || isLng) {
 				var lat = markerLatLng.lat();
 				var lng = markerLatLng.lng();
-				$scope.markers[i].setPosition(new google.maps.LatLng(isLat ? node.lat : lat, isLng ? node.lng : lng));
+				$scope.markers[i].setPosition(makeLatLng(isLat ? node.lat : lat, isLng ? node.lng : lng));
 			}
 			if (isColorI) {
 				var icon = makeIcon(node);
@@ -423,28 +443,67 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 	}
 	function panToCurrentLocation() {
 		UtilityService.throb.on();
-		UtilityService.location().then(function(position) {
+		var location;
+		console.log('useExact:', useExact);
+		if (useExact === undefined || useExact === false) {
+			UtilityService.location.approximate().then(function(position) {
+				if (!position) return;
+				if (position.data) {
+					console.log('Position.data exists');
+					location = new google.maps.LatLng(position.data.latitude, position.data.longitude);
+				}
+				console.log(position.data.latitude, position.data.longitude);
+				// Check if exact location is already in use
+				if (useExact === undefined || useExact === false) {
+					$scope.map.setCenter(location);
+					$scope.map.setZoom(8);
+				}
+			});
+		}
+		if (useExact === undefined || useExact === true) {
+			UtilityService.location.exact().then(function(position) {
+				useExact = true;
+				if (!position) return;
+				if (position.coords) {
+					location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+				}
+				console.log(position.coords.latitude, position.coords.longitude);
+				$scope.map.setCenter(location);
+				$scope.map.setZoom(15);
+			}, function(error) {
+				switch (error.code) {
+				case error.PERMISSION_DENIED:
+				case error.POSITION_UNAVAILABLE:
+					useExact = false;
+					break;
+				}
+				console.log('Exact Location Failed.');
+				SettingService.settings.search.show = true;
+			}).finally(function() {
+				UtilityService.throb.off();
+			});
+		}
+		/*UtilityService.location.exact().then(function(position) {
+			console.log('Exact Location Succeeded.');
 			console.log(position);
 			if (!position) return;
-			var location, zoom;
 			if (position.coords) {
 				location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-				zoom = 10;
-			} else if (position.data) {
-				location = new google.maps.LatLng(position.data.latitude, position.coords.longitude);
-				zoom = 7;
 			}
-			$scope.map.panTo(location);
-			$scope.map.setZoom(zoom);
+			console.log('Setting Center');
+			$scope.map.setCenter(location);
+			$scope.map.setZoom(15);
 		}, function(failure) {
+			console.log('Exact Location Failed.');
 			SettingService.settings.search.show = true;
 		}).finally(function() {
 			UtilityService.throb.off();
-		});
+		});*/
 	}
+	
 	// Event binders
 	$scope.map_click = function(e) {
-		addNode($scope.map, {
+		addNode({
 			lat: e.latLng.lat(),
 			lng: e.latLng.lng(),
 			color_i: SettingService.settings.color.active,
@@ -452,11 +511,13 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 		});
 	};
 	$scope.map_center_changed = function() {
+		console.log('Center changed');
 		var center = $scope.map.getCenter();
 		$scope.lat = center.lat();
 		$scope.lng = center.lng();
 	};
 	$scope.map_zoom_changed = function() {
+		console.log('Zoom changed');
 		$scope.zoom = $scope.map.getZoom();
 	};
 	$scope.marker_drag = function(e, i) {
@@ -469,7 +530,7 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 	};
 	$scope.marker_click = function(i) {
 		var markerPosition = $scope.markers[i].getPosition();
-		addNode($scope.map, {
+		addNode({
 			lat: markerPosition.lat(),
 			lng: markerPosition.lng(),
 			color_i: SettingService.settings.color.active,
@@ -485,7 +546,9 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 		var zoom = $scope.map.getZoom() - 1;
 		$scope.map.setZoom(zoom);
 	};
+	
 	// Variables
+	var useExact;
 	var lat = SettingService.settings.map.lat;
 	var lng = SettingService.settings.map.lng;
 	var center = new google.maps.LatLng($scope.lat, $scope.lng);
@@ -493,7 +556,7 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 	// TODO: Styled map code. Use callback to load styles onto map
 	$scope.style = SettingService.settings.map.style;
 	$scope.options = {
-		center: new google.maps.LatLng($scope.lat ? $scope.lat : 0, $scope.lng ? $scope.lng : 0),
+		center: makeLatLng($scope.lat ? $scope.lat : 0, $scope.lng ? $scope.lng : 0),
 		disableDefaultUI: true,
 		disableDoubleClickZoom: true,
 		draggableCursor: 'crosshair',
@@ -530,20 +593,22 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 		updateStyle();
 		if ($scope.lat == undefined || $scope.lng == undefined) {
 			panToCurrentLocation();
-			console.log('Location Retrieved');
 		}
-		$scope.$watch('map.getZoom()', function() {
+		$scope.$watch('[lat, lng, zoom]', function() {
+			var center = $scope.map.getCenter();
+			SettingService.settings.map.lat = center.lat();
+			SettingService.settings.map.lng = center.lng();
 			SettingService.settings.map.zoom = $scope.map.getZoom();
-		});
-		$scope.$watch('map.getCenter()', function() {
+			SettingService.Save();
+		}, true);
+		/*$scope.$watch('map.getCenter()', function() {
 			var center = $scope.map.getCenter();
 			SettingService.settings.map.lat = center.lat();
 			SettingService.settings.map.lng = center.lng();
 			SettingService.Save();
-		});
+		});*/
 		for (var i = 0; i < $scope.nodes.length; i++) {
 			var node = $scope.nodes[i];
-			// TODO: this function pushes to markerData. Decide how best to prevent duplication
 			addNode($scope.map, node.lat, node.lng, node.color_i, node.mode);
 		}
 		unbindWatcher();

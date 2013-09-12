@@ -69,10 +69,10 @@
 }
 @keyframes throb {
 	0% {
-		opacity: 1;
+		fill-opacity: 1;
 	}
 	100% {
-		opacity: 0.25;
+		fill-opacity: 0.25;
 	}
 }
 #search_wrapper {
@@ -180,37 +180,32 @@ body, html {
 	animation: bezel 1s ease-out;
 }
 #throbber {
+	height: 2em;
+	width: 5em;
+	box-sizing: border-box;
 	z-index: 1;
 	position: fixed;
 	top: 0;
 	left: 50%;
 	margin-left: -2.5em;
-	width: 5em;
 	background: rgba(0, 0, 0, 0.75);
-	border-radius: 0 0 .5em .5em;
-	padding: .5em;
-	box-shadow: 0 .1em .5em rgba(0,0,0,.5);
-	transition: .25s ease;
-}
-#throbber,#throbber * {
+	border-radius: 0 0 0.25em 0.25em;
+	transition: 0.25s ease;
 	pointer-events: none;
-}
-#throbber svg {
-	height: 1em;
-}
-#throbber svg * {
 	transition: none;
 }
-#dot1,#dot2,#dot3 {
-	animation: throb .375s linear alternate infinite;
+
+#throbber svg circle {
+	fill: #fff;
+	animation: throb .375s ease alternate infinite;
 }
-#dot1 {
+#throbber svg circle:nth-of-type(1) {
 	animation-delay: 0s;
 }
-#dot2 {
+#throbber svg circle:nth-of-type(2) {
 	animation-delay: -.125s;
 }
-#dot3 {
+#throbber svg circle:nth-of-type(3) {
 	animation-delay: -.25s;
 }
 #settings {
