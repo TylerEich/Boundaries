@@ -5,25 +5,18 @@
 		<title>Boundaries</title>
 		<link rel="icon" type="image/png" href="icon.png"/>
 		<link rel="apple-touch-icon-precomposed" href="icon_ios.png"/>
+		<script src="https://use.edgefonts.net/source-sans-pro:n3,n4,n7.js"></script>
 		<link rel="stylesheet" href="boundaries.css">
 		<script src="prefixfree.min.js"></script>
-		<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
-		<!--script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script-->
-		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular.js"></script>
-		<script src="event.js"></script>
-		<script src="ui-map.js"></script>
-		<!--link rel="stylesheet" href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css"-->
-		<!--Boundaries-->
-		<script src="boundaries.js"></script>
 	</head>
 	<body>
-		<div id="throbber" ng-controller="ThrobController" ng-hide="count == 0">
+		<!-- <div id="throbber" ng-controller="ThrobController" ng-hide="count == 0">
 			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
 				<circle cy="32" cx="32" r="16"/>
 				<circle cy="32" cx="80" r="16"/>
 				<circle cy="32" cx="128" r="16"/>
 			</svg>
-		</div>
+		</div> -->
 		<div id="settings" ng-hide="true">
 			<tabs>
 				<pane heading="Image">
@@ -134,7 +127,7 @@
 					</svg>
 				</label>
 			</div>
-			<div ng-controller="ActionController" id="functions" class="button_group">
+			<div ng-controller="MapController" id="functions" class="button_group">
 				<label class="button" title="Connect ([meta]K)" for="connect" ng-class="{active: connect}">
 					<input id="connect" type="checkbox" ng-model="connect">
 					<svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
@@ -148,7 +141,7 @@
 					</svg>
 				</label>
 				<label class="button trigger" title="Clear ([meta]L)" for="clear">
-					<input id="clear" type="button" ng-click="Clear()">
+					<input id="clear" type="button" ng-click="clear()">
 					<svg xmlns="https://www.w3.org/2000/svg" viewBox="0,0 64,64">
 						<path d="m32,56c-13.254,0 -24,-10.746 -24,-24s10.746,-24 24,-24s24,10.746 24,24s-10.746,24 -24,24zm0,-42c-9.939,0 -18,8.061 -18,18s8.061,18 18,18s18,-8.061 18,-18s-8.061,-18 -18,-18zm8.484,26.484c-1.173,1.173 -3.069,1.173 -4.242,0l-4.242,-4.242l-4.242,4.242c-1.173,1.173 -3.072,1.173 -4.245,0s-1.173,-3.069 0,-4.242l4.245,-4.242l-4.245,-4.242c-1.173,-1.173 -1.173,-3.072 0,-4.245s3.072,-1.173 4.245,0l4.242,4.245l4.242,-4.245c1.173,-1.173 3.069,-1.173 4.242,0s1.173,3.072 0,4.245l-4.242,4.242l4.242,4.242c1.173,1.173 1.173,3.072 0,4.242z" />
 					</svg>
@@ -189,9 +182,27 @@
 	</div>
 	</div>
 	<div ng-controller="MapController" id="map_wrapper">
+		
+		<div id="throbber" ng-controller="ThrobController" ng-hide="count == 0">
+			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
+				<circle cy="32" cx="32" r="16"/>
+				<circle cy="32" cx="80" r="16"/>
+				<circle cy="32" cx="128" r="16"/>
+			</svg>
+		</div>
+		
 		<div id="map_canvas" ui-map="map" ui-options="options" ui-event="{'map-click': 'map_click($event)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'idle()'}"></div>
-		<div ng-repeat="marker in markers" ui-map-marker="markers[$index]" ui-event="{ 'map-click': 'marker_click($index)', 'map-rightclick': 'marker_rightclick($index)', 'map-drag': 'marker_drag($event, $index)' }"></div>
+		
+		<div ng-repeat="drawing in drawings">
+			<div ng-repeat="node in drawing.nodes" ui-map-marker="node._marker" ui-event="{ 'map-click': '$parent.marker_click($parent.$index, $index)', 'map-rightclick': 'marker_rightclick($parent.$index, $index)', 'map-dragstart': 'marker_dragstart($parent.$index, $index)', 'map-dragend': 'marker_dragend($parent.$index, $index)' }"></div>
+		</div>
+		
 	</div>
 	<div id="places_attributions"></div>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular.js"></script>
+	<script src="event.js"></script>
+	<script src="ui-map.js"></script>
+	<script src="boundaries.js"></script>
 	</body>
 </html>
