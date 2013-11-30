@@ -17,9 +17,8 @@
 				<circle cy="32" cx="128" r="16"/>
 			</svg>
 		</div> -->
+			<!--TODO: Usage help via ngRoute (e.g. ./help)-->
 		<div id="settings" ng-hide="true">
-			<tabs>
-				<pane heading="Image">
 					<div ng-controller="ImageController">
 						<div id="size">
 							<input type="number" min="0" ng-model="width">
@@ -42,8 +41,6 @@
 							</select>
 						</div>
 					</div>
-				</pane>
-				<pane heading="Map">
 					<div ng-controller="MapController">
 						<div id="map_styles">
 							<div class="style_rule" ng-repeat="rule in style">
@@ -54,36 +51,10 @@
 							<button>+</button>
 						</div>
 					</div>
-				</pane>
-				<pane heading="Drawing">
 					<div ng-controller="DrawingController">
 					</div>
-				</pane>
-			</tabs>
-			<div id="yes" class="button">
-				<svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 16 16" width="100%" height="100%">
-						
-		<path d="M 45.906988,16.008701 26.043875,35.997825 18.093012,28.002176 c -2.191404,-2.210962 -5.748223,-2.210962 -7.945245,0 -2.1970236,2.21096 -2.1970236,5.790343 0,7.995649 l 11.923486,11.993473 c 2.191405,2.210962 5.748221,2.210962 7.945245,0 L 53.852233,24.004351 c 2.197023,-2.21096 2.197023,-5.784688 0,-7.99565 -2.197024,-2.21096 -5.748222,-2.21096 -7.945245,0 z" fill="url(#gradientGreen)"></path>
-
-							</svg></div>
-		<div id="no" class="button" style="
-		    position: absolute;
-		    bottom: 0;
-		    left: 0;
-		    margin: .5em;
-		    padding: 0;
-		    width: 3em;
-		    height: 3em;
-		"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 16 16" style="
-		    width: 100%;
-		    height: 100%;
-		">
-						
-		<path d="m 53.2922,53.292111 c -2.943735,2.943852 -7.701894,2.943852 -10.645629,0 L 32.000942,42.646056 21.355313,53.292111 c -2.943735,2.943852 -7.709423,2.943852 -10.653158,0 -2.9362066,-2.943854 -2.9362066,-7.702203 0,-10.646055 L 21.355313,32 10.702155,21.353945 c -2.9362066,-2.943852 -2.9362066,-7.702201 0,-10.646055 2.943735,-2.9438518 7.709423,-2.9438518 10.653158,0 L 32.000942,21.353945 42.646571,10.70789 c 2.943735,-2.9438518 7.701894,-2.9438518 10.645629,0 2.943735,2.943854 2.943735,7.702203 0,10.646055 L 42.646571,32 53.2922,42.646056 c 2.943735,2.943852 2.943735,7.709731 0,10.646055 z" fill="#ff0000"></path>
-
-							</svg></div>
 						</div>
-		<div id="sidebar" style="width:20em;">
+		<div id="sidebar" style="width: 20em;">
 			<div id="search" ng-controller="SearchController">
 				<div id="search_wrapper" ng-show="show" ng-animate="'slide'" ng-keydown="keydown($event)">
 					<input id="search_box" ng-model="query" ng-change="" type="text" placeholder="Search" autocomplete="off">
@@ -131,7 +102,7 @@
 				<label class="button" title="Connect ([meta]K)" for="connect" ng-class="{active: connect}">
 					<input id="connect" type="checkbox" ng-model="connect">
 					<svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
-						<path d="m 52.924939,27.669982 -4.337717,4.331851 c -2.704107,2.704108 -6.719209,3.246689 -9.983495,1.692267 l 9.983495,-9.986428 c 1.146752,-1.146753 1.146752,-3.00326 0,-4.14708 l -4.144147,-4.152947 c -1.146754,-1.146752 -3.000328,-1.146752 -4.147081,0 l -9.986427,9.989361 c -1.554423,-3.267219 -1.011842,-7.28232 1.692266,-9.989361 l 4.328919,-4.331851 c 3.437325,-3.4343918 9.009781,-3.4343918 12.44124,0 l 4.152947,4.147081 c 3.43146,3.437325 3.43146,9.009781 0,12.447107 z M 23.707673,40.293061 c -1.146754,-1.146753 -1.146754,-3.000328 0,-4.147081 l 12.44124,-12.441241 c 1.146754,-1.146753 3.000328,-1.146753 4.147081,0 1.146753,1.146752 1.146753,3.000328 0,4.147081 L 27.854753,40.293061 c -1.14382,1.146753 -3.003261,1.146753 -4.14708,0 z m -8.297094,4.150013 4.14708,4.147081 c 1.146753,1.146752 3.000327,1.146752 4.147081,0 l 9.98936,-9.989361 c 1.554422,3.267219 1.01184,7.28232 -1.692267,9.989361 l -3.965243,4.331851 c -3.437324,3.437325 -9.006848,3.437325 -12.444173,0 l -4.516623,-4.51369 c -3.4343921,-3.437325 -3.4343921,-9.006849 0,-12.444173 L 15.407646,31.9989 c 2.709973,-2.704107 6.722142,-3.246689 9.992294,-1.692267 l -9.989361,9.986428 c -1.14382,1.146753 -1.14382,3.006193 0,4.150013 z" />
+						<path d="M 32,56 C 18.746,56 8,45.254 8,32 8,18.746 18.746,8 32,8 45.254,8 56,18.746 56,32 56,45.254 45.254,56 32,56 z m 0,-42 c -9.939,0 -18,8.061 -18,18 0,9.939 8.061,18 18,18 9.939,0 18,-8.061 18,-18 0,-9.939 -8.061,-18 -18,-18 z m 9,21 -6,0 0,6 c 0,1.659 -1.341,3 -3,3 -1.656,0 -3,-1.341 -3,-3 l 0,-6 -6,0 c -1.656,0 -3,-1.341 -3,-3 0,-1.656 1.344,-3 3,-3 l 6,0 0,-6 c 0,-1.656 1.344,-3 3,-3 1.659,0 3,1.344 3,3 l 0,6 6,0 c 1.659,0 3,1.344 3,3 0,1.659 -1.341,3 -3,3 z" />
 					</svg>
 				</label>
 				<label class="button trigger" title="Undo ([meta]Z)" for="undo">
@@ -191,16 +162,18 @@
 			</svg>
 		</div>
 		
-		<div id="map_canvas" ui-map="map" ui-options="options" ui-event="{'map-click': 'map_click($event)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'idle()'}"></div>
-		
-		<div ng-repeat="drawing in drawings">
-			<div ng-repeat="node in drawing.nodes" ui-map-marker="node._marker" ui-event="{ 'map-click': '$parent.marker_click($parent.$index, $index)', 'map-rightclick': 'marker_rightclick($parent.$index, $index)', 'map-dragstart': 'marker_dragstart($parent.$index, $index)', 'map-dragend': 'marker_dragend($parent.$index, $index)' }"></div>
+		<div id="map_canvas" ui-map="map" ui-options="options" ui-event="{'map-click': 'map_click($params)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'map_idle()'}"></div>
+		<div ng-controller="DrawingController">
+			<div ng-repeat="drawing in drawings">
+				<div ng-repeat="node in drawing.nodes" ui-map-marker="node._marker" ui-event="{ 'map-click': 'marker_click($parent.$index, $index)', 'map-rightclick': 'marker_rightclick($parent.$index, $index)', 'map-dragstart': 'marker_dragstart($parent.$index, $index)', 'map-dragend': 'marker_dragend($parent.$index, $index)' }"></div>
+			</div>
 		</div>
-		
 	</div>
 	<div id="places_attributions"></div>
+	
 	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular-route.js"></script>
 	<script src="event.js"></script>
 	<script src="ui-map.js"></script>
 	<script src="boundaries.js"></script>

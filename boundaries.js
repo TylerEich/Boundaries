@@ -1,60 +1,48 @@
 "use strict";
-/*Array.prototype.diff = function(a) {
-    return this.filter(function(i) {
-		return !(a.indexOf(i) > -1);
-	});
-};*/
-// The MVCArrayBinder contstructor allows MVC binding between and array and an object
-function MVCArrayBinder(mvcArray) {
-	this.array_ = mvcArray;
-}
-MVCArrayBinder.prototype = new google.maps.MVCObject();
-MVCArrayBinder.prototype.get = function(key) {
-	if (!isNaN(parseInt(key))) {
-		return this.array_.getAt(parseInt(key));
-	} else {
-		this.array_.get(key);
-	}
-};
 
-MVCArrayBinder.prototype.set = function(key, val) {
-	if (!isNaN(parseInt(key))) {
-		this.array_.setAt(parseInt(key), val);
-	} else {
-		this.array_.set(key, val);
-	}
-};
-
-// TODO: Add ui and map as dependencies
 // TODO: Privacy Policy and Terms of Service (https://developers.google.com/places/policies)
-var boundaries = angular.module('boundaries', ['ui.map', 'ui.event']);
+var boundaries = angular.module('boundaries', ['ngRoute', 'ui.map', 'ui.event']);
+
 angular.bootstrap(document.querySelector('#map_canvas'), ['boundaries']);
 
 // Register all services
 boundaries.service('SettingService', SettingService);
 boundaries.service('UtilityService', ['$rootScope', '$q', '$http', UtilityService]);
-boundaries.service('VariableService', VariableService);
-boundaries.service('HistoryService', HistoryService);
 
 // Register all controllers
+// Every controller that needs to communicate gets $rootScope
 boundaries.controller('ColorController', ['$scope', 'SettingService', 'UtilityService', ColorController]);
 boundaries.controller('ModeController', ['$scope', 'SettingService', ModeController]);
 boundaries.controller('ActionController', ['$scope', 'SettingService', ActionController]);
-boundaries.controller('MapController', ['$scope', 'SettingService', 'UtilityService', 'VariableService', MapController]);
+boundaries.controller('MapController', ['$scope', '$rootScope', '$location', 'SettingService', 'UtilityService', MapController]);
 boundaries.controller('ImageController', ['$scope', 'SettingService', ImageController]);
 boundaries.controller('DrawingController', ['$scope', 'SettingService', DrawingController]);
-boundaries.controller('SearchController', ['$scope', '$sce', 'SettingService', 'UtilityService', 'VariableService', SearchController]);
-boundaries.controller('ThrobController', ['$scope', 'VariableService', ThrobController]);
+boundaries.controller('SearchController', ['$scope', '$sce', '$routeParams', '$location', 'SettingService', 'UtilityService', SearchController]);
+boundaries.controller('ThrobController', ['$scope', '$rootScope', '$location', ThrobController]);
 
+// Configure deep-linking for Boundaries
+boundaries.config(function($locationProvider, $routeProvider) {
+	$locationProvider.html5Mode(true);
+	$routeProvider.when('/zoom/:zoom', {
+		controller: 'MapController'
+	})
+	.when('/lat/:lat', {
+		controller: 'MapController'
+	})
+	.when('/lng/:lng', {
+		controller: 'MapController'
+	})
+	.when('/drawing/:drawing', {
+		controller: 'DrawingController'
+	})
+	.when('/style/:style', {
+		controller: 'StyleController'
+	})
+	.when('/colors/:colors', {
+		controller: 'ColorController'
+	});
+});
 // Services
-function HistoryService() {
-	/*
-	Use $location to store state
-	Allows back button to undo changes
-	Store drawing only
-	Optionally include map style and/or drawing colors
-	*/
-}
 // Used to share temporary variables between controllers
 function VariableService() {
 	this.map = {};
@@ -135,7 +123,8 @@ function SettingService() {
 	};
 	try {
 		this.settings = JSON.parse(localStorage.settings);
-		this.settings = this.defaults; // TODO: Remove. This is for testing only
+		console.log(localStorage.settings);
+		//this.settings = this.defaults; // TODO: Remove. This is for testing only
 	} catch (e) {
 		this.settings = this.defaults;
 		// this.Save();
@@ -143,7 +132,7 @@ function SettingService() {
 	}
 	
 	// Keep saved object keys aligned with default object keys (while preserving values). If a key is missing, it will be added. If an extra key is found, it will be removed.
-	function SyncProperties(master, check, deleteFromCheck) {
+	function syncProperties(master, check, deleteFromCheck) {
 		if (typeof master != 'object' || typeof check != 'object') return;
 		if (!deleteFromCheck) {
 			var masterKeys = Object.keys(master).sort(); // Pull keys from master as array
@@ -151,7 +140,7 @@ function SettingService() {
 				if (!check.hasOwnProperty(masterKeys[i])) {
 					check[masterKeys[i]] = master[masterKeys[i]];
 				} else {
-					SyncProperties(master[masterKeys[i]], check[masterKeys[i]]);
+					syncProperties(master[masterKeys[i]], check[masterKeys[i]]);
 				}
 			}
 		}
@@ -160,18 +149,14 @@ function SettingService() {
 			if (!master.hasOwnProperty(checkKeys[i])) {
 				delete check[checkKeys[i]];
 			} else {
-				SyncProperties(master[checkKeys[i]], check[checkKeys[i]], true);
+				syncProperties(master[checkKeys[i]], check[checkKeys[i]], true);
 			}
 		}
 	}
-	
-	SyncProperties(this.defaults, this.settings);
-	var censor = function(key, value) {
+	syncProperties(this.defaults, this.settings);
+	function censor(key, value) {
 		if (typeof key == 'string') var substring = key.substring(0, 1);
-		if (substring && (substring == '_' || substring == '$')) {
-			console.log('key ignored:', key);
-			return undefined;
-		}
+		if (substring && (substring == '_' || substring == '$')) return undefined;
 		return value;
 	}
 	this.Save = function() {
@@ -182,6 +167,10 @@ function SettingService() {
 function UtilityService($rootScope, $q, $http) {
 	var autocomplete = new google.maps.places.AutocompleteService();
 	var placeService = new google.maps.places.PlacesService(document.querySelector('#places_attributions'));
+	var map;
+	$rootScope.$on('map', function(event, param) {
+		map = param;
+	});
 	this.color = {
 		toHex: function(rgba, alpha) {
 			var rgba = angular.copy(rgba);
@@ -201,7 +190,7 @@ function UtilityService($rootScope, $q, $http) {
 		}
 	};
 	this.map = {
-		suggestions: function(input, map) {
+		suggestions: function(input) {
 			function load(suggestions, status) {
 				if (status == google.maps.places.PlacesServiceStatus.OK) {
 					deferred.resolve(suggestions);
@@ -223,10 +212,10 @@ function UtilityService($rootScope, $q, $http) {
 			}
 			return deferred.promise;
 		},
-		loadPlace: function(map, reference) {
-			if (map === undefined || reference === undefined) return;
+		loadPlace: function(reference) {
+			if (reference === undefined) console.error('loadPlace() requires map and reference');
 			function revealOnMap(place, status) {
-				if (place === undefined || status === undefined) return;
+				if (place === undefined || status === undefined) console.error('revealOnMap() requires place and status');
 				if (status == google.maps.places.PlacesServiceStatus.OK) {
 					if (place.geometry.viewport) {
 						map.fitBounds(place.geometry.viewport); // fitBounds because panToBounds does not zoom out to show the entire bounding box
@@ -333,9 +322,140 @@ function ModeController($scope, SettingService) {
 	});
 }
 
-function MapController($scope, SettingService, UtilityService, VariableService) {
-	UtilityService.throb.on();
-	// Functions
+function MapController($scope, $rootScope, $location, SettingService, UtilityService) {	
+	function updateStyle() {
+		$scope.map.mapTypes.set('custom', new google.maps.StyledMapType($scope.style, {
+			name: 'Customized'
+		}));
+	}
+	function panToCurrentLocation() {
+		var location;
+		if (useExact === undefined || useExact === false) {
+			UtilityService.throb.on();
+			UtilityService.location.approximate().then(function(position) {
+				if (!position) return;
+				if (position.data) {
+					location = new google.maps.LatLng(position.data.latitude, position.data.longitude);
+				}
+				// Check if exact location is already in use
+				if (useExact === undefined || useExact === false) {
+					$scope.map.setCenter(location);
+					$scope.map.setZoom(8);
+				}
+			}).finally(function() {
+				UtilityService.throb.off();
+			});
+		}
+		if (useExact === undefined || useExact === true) {
+			UtilityService.throb.on();
+			UtilityService.location.exact().then(function(position) {
+				useExact = true;
+				if (!position) return;
+				if (position.coords) {
+					location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+				}
+				$scope.map.setCenter(location);
+				$scope.map.setZoom(15);
+			}, function(error) {
+				switch (error.code) {
+				case error.PERMISSION_DENIED:
+				case error.POSITION_UNAVAILABLE:
+					useExact = false;
+					break;
+				}
+				SettingService.settings.search.show = true;
+			}).finally(function() {
+				UtilityService.throb.off();
+			});
+		}
+	}
+	
+	// Event binders
+	$scope.map_click = function($param) {
+		$rootScope.$emit('map.click', $param);
+	};
+	$scope.map_center_changed = function() {
+		var center = $scope.map.getCenter();
+		$scope.lat = center.lat();
+		$scope.lng = center.lng();
+	};
+	$scope.map_zoom_changed = function() {
+		$scope.zoom = $scope.map.getZoom();
+	};
+	$scope.map_idle = function() {
+		$location.search('lat', $scope.lat);
+		$location.search('lng', $scope.lng);
+		$location.search('zoom', $scope.zoom);
+	};
+	// Map controls
+	$scope.zoom_in = function() {
+		var zoom = $scope.map.getZoom() + 1;
+		$scope.map.setZoom(zoom);
+	};
+	$scope.zoom_out = function() {
+		var zoom = $scope.map.getZoom() - 1;
+		$scope.map.setZoom(zoom);
+	};
+	
+	
+	// Variables
+	var useExact;
+	$scope.location = $location;
+	// $scope.lat = SettingService.settings.map.lat;
+// 	$scope.lng = SettingService.settings.map.lng;
+// 	$scope.zoom = SettingService.settings.map.zoom;
+	$scope.lat = Number($location.search().lat);
+	$scope.lng = Number($location.search().lng);
+	$scope.zoom = Number($location.search().zoom);
+	$scope.options = {
+		center: new google.maps.LatLng($scope.lat ? $scope.lat : 0, $scope.lng ? $scope.lng : 0),
+		disableDefaultUI: true,
+		disableDoubleClickZoom: true,
+		draggableCursor: 'crosshair',
+		draggingCursor: 'move',
+		mapTypeControl: true,
+		mapTypeControlOptions: {
+			mapTypeIds: ['custom', google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID],
+			position: google.maps.ControlPosition.TOP_RIGHT,
+			style: google.maps.MapTypeControlStyle.DEFAULT
+		},
+		/*panControl: true,
+		panControlOptions: {
+			position: google.maps.ControlPosition.RIGHT_CENTER
+		},*/
+		scaleControl: true,
+		zoom: $scope.zoom,
+		zoomControl: true,
+		zoomControlOptions: {
+			position: google.maps.ControlPosition.RIGHT_CENTER,
+			style: google.maps.ZoomControlStyle.SMALL
+		}
+	};
+	
+	$scope.$watch('location.search()', function() {
+		var search = $scope.location.search();
+		$scope.lat = Number(search.lat);
+		$scope.lng = Number(search.lng);
+		$scope.zoom = Number(search.zoom);
+	});
+	
+	// Listen once; when the map is defined, load its watchers
+	var unbindWatcher = $scope.$watch('map', function() {
+		if ($scope.map == undefined) return;
+		$rootScope.$emit('map', $scope.map);
+		updateStyle();
+		if ($scope.lat == undefined || $scope.lng == undefined) panToCurrentLocation();
+		$scope.$watch('[lat, lng, zoom]', function() {
+			SettingService.settings.map.lat = $scope.lat;
+			SettingService.settings.map.lng = $scope.lng;
+			SettingService.settings.map.zoom = $scope.zoom;
+			SettingService.Save();
+		}, true);
+		unbindWatcher();
+	});
+}
+
+function DrawingController($scope, $rootScope, $location) {
 	function makeHexColor(node, alpha) {
 		var color = SettingService.settings.color.choices[node.activeColor];
 		return UtilityService.color.toHex(color.rgba, alpha);
@@ -406,180 +526,42 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 		}
 	}
 	
-	function splicePolyPath(newPath, drawingIndex, nodeIndex) {
-		var drawing, nodeAhead, nodeBehind, pathAhead, pathBehind, polyPath;
-		
-		drawing = $scope.drawings[drawingIndex];
-		
-		if (drawing.nodes.length > 1) {
-			if (nodeIndex > 0) nodeBehind = drawing.nodes[nodeIndex - 1];
-			if (drawing.nodes.length > nodeIndex + 1) nodeAhead = drawing.nodes[nodeIndex + 1];
-		}
-		
-		polyPath = drawing._poly.getPath().getArray();
-		if (nodeBehind) pathBehind = polyPath.slice(0, nodeBehind.index);
-		else pathBehind = [];
-		if (nodeAhead) pathAhead = polyPath.slice(nodeAhead.index);
-		else pathAhead = [];
-		
-		polyPath = pathBehind.concat(newPath, pathAhead);
-		return polyPath;
+	function splicePolyPath(drawingIndex, nodeIndex, removeLength, newPath) {
+		$scope.drawings[drawingIndex]._poly.getPath().getArray().splice();
 	}
-	function spliceDrawing(newDrawing, drawingIndex) {
-		
+	function spliceDrawing(drawingIndex, removeLength, newDrawing) {
+		$scope.drawings.splice(drawingIndex, removeLength, newDrawing);
 	}
-	function spliceNode(newNode, drawingIndex, nodeIndex) {
-		
+	function spliceNode(drawingIndex, nodeIndex, removeLength, newNode) {
+		if ($scope.drawings.length <= drawingIndex) spliceDrawing(-1, 0, {});
+		$scope.drawings[drawingIndex].nodes[nodeIndex].index;
 	}
 	
-	// TODO: make add- functions use splice- for logic
-	function addDrawing(drawing, i) {
-		// 'push' items to end when no index is provided
-		if (i === null ) i = $scope.drawings.length - 1;
-		$scope.drawings.splice(i, 0, drawing);
-	}
-
-	function addNode(node, drawingIndex, nodeIndex) {
-		// TODO: add index property to nodes
-		if (node == null) return;
-		// place marker
-		if ($scope.drawings.length === 0 || SettingService.settings.new === true) addDrawing({
-			activeColor: SettingService.settings.color.active,
-			polygon: SettingService.settings.mode.polygon,
-			_poly: makePoly(node, SettingService.settings.mode.polygon),
-			nodes: []
+	var map;
+	$rootScope.$on('map', function($event, $param) {
+		map = $param;
+	});
+	$rootScope.$on('map.click', function($event, $param) {
+		spliceNode(-1, -1, 0, {
+			lat: $param[0].latLng.lat(),
+			lng: $param[0].latLng.lng(),
+			rigid: $scope.rigid
 		});
-		
-		// when indicies are not defined, default to end of array
-		if ($scope.drawings[drawingIndex] === undefined) drawingIndex = $scope.drawings.length - 1;
-		if (drawingIndex < 0) drawingIndex = 0;
-		if ($scope.drawings[drawingIndex].nodes[nodeIndex] === undefined) nodeIndex = $scope.drawings[drawingIndex].nodes.length - 1;
-		if (nodeIndex < 0) nodeIndex = 0;
-		
-		$scope.drawings[drawingIndex].nodes.splice(nodeIndex, 0, node);
-		
-		// add marker
-		$scope.drawings[drawingIndex].nodes[nodeIndex]['_marker'] = makeMarker(node);
-		
-		// add path to poly
-		$scope.drawings[drawingIndex]._poly.getPath().insertAt(nodeIndex + 1, makeLatLng(node));
-	}
-	function changeNode(node, drawingIndex, nodeIndex, refresh)  {
-		// when indicies are not defined, default to end of array
-		if ($scope.drawings[drawingIndex] === undefined) drawingIndex = $scope.drawings.length - 1;
-		if (drawingIndex < 0) drawingIndex = 0;
-		if ($scope.drawings[drawingIndex].nodes[nodeIndex] === undefined) nodeIndex = $scope.drawings[drawingIndex].nodes.length - 1;
-		if (nodeIndex < 0) nodeIndex = 0;
-		
-		for (var key in node) {
-			if (node.hasOwnProperty(key)) {
-				$scope.drawings[drawingIndex].nodes[nodeIndex][key] = node[key];
-			}
-		}
-		
-		if (refresh) {
-			var hasLat = node.hasOwnProperty('lat');
-			var hasLng = node.hasOwnProperty('lng');
-			var hasRigid = node.hasOwnProperty('rigid');
-			var markerLatLng = $scope.markers[i].getPosition();
-			if (hasLat || hasLng) {
-				var lat = markerLatLng.lat();
-				var lng = markerLatLng.lng();
-				$scope.markers[i].setPosition(makeLatLng(isLat ? node.lat : lat, isLng ? node.lng : lng));
-			}
-			if (hasRigid) {
-				var icon = makeIcon(node);
-			}
-		}
-	}
-	function deleteNode(drawingIndex, nodeIndex) {
-		// when indicies are not defined, default to end of array
-		if ($scope.drawings[drawingIndex] === undefined) drawingIndex = $scope.drawings.length - 1;
-		if (drawingIndex < 0) drawingIndex = 0;
-		if ($scope.drawings[drawingIndex].nodes[nodeIndex] === undefined) nodeIndex = $scope.drawings[drawingIndex].nodes.length - 1;
-		if (nodeIndex < 0) nodeIndex = 0;
-		
-		var length = $scope.drawings[drawingIndex]._poly.getLength();
-	}
-	function updateStyle() {
-		$scope.map.mapTypes.set('custom', new google.maps.StyledMapType($scope.style, {
-			name: 'Customized'
-		}));
-	}
-	function panToCurrentLocation() {
-		var location;
-		if (useExact === undefined || useExact === false) {
-			UtilityService.throb.on();
-			UtilityService.location.approximate().then(function(position) {
-				if (!position) return;
-				if (position.data) {
-					location = new google.maps.LatLng(position.data.latitude, position.data.longitude);
-				}
-				// Check if exact location is already in use
-				if (useExact === undefined || useExact === false) {
-					$scope.map.setCenter(location);
-					$scope.map.setZoom(8);
-				}
-			}).finally(function() {
-				UtilityService.throb.off();
-			});
-		}
-		if (useExact === undefined || useExact === true) {
-			UtilityService.throb.on();
-			UtilityService.location.exact().then(function(position) {
-				useExact = true;
-				if (!position) return;
-				if (position.coords) {
-					location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-				}
-				$scope.map.setCenter(location);
-				$scope.map.setZoom(15);
-			}, function(error) {
-				switch (error.code) {
-				case error.PERMISSION_DENIED:
-				case error.POSITION_UNAVAILABLE:
-					useExact = false;
-					break;
-				}
-				SettingService.settings.search.show = true;
-			}).finally(function() {
-				UtilityService.throb.off();
-			});
-		}
-	}
+	});
 	
-	// Event binders
-	$scope.map_click = function(e) {
-		addNode({
-			activeColor: SettingService.settings.color.active,
-			lat: e.latLng.lat(),
-			lng: e.latLng.lng(),
-			rigid: SettingService.settings.mode.rigid
-		});
-	};
-	$scope.map_center_changed = function() {
-		var center = $scope.map.getCenter();
-		$scope.lat = center.lat();
-		$scope.lng = center.lng();
-	};
-	$scope.map_zoom_changed = function() {
-		console.log('zoom changed');
-		$scope.zoom = $scope.map.getZoom();
-	};
+	$scope.drawings = SettingService.settings.map.drawings;
+	$scope.markers = [];
+	$scope.polys = [];
+	
 	$scope.marker_dragstart = function(drawingIndex, nodeIndex) {
 		console.log('dragstart:', drawingIndex, nodeIndex);
 		$scope.drawings[drawingIndex].nodes[nodeIndex]._unbind = $scope.$watch('drawings[' + drawingIndex + '].nodes[' + nodeIndex + ']._marker.getPosition()', function(oldVal, newVal) {
-			if (newVal === undefined) return;
-			changeNode({
-				lat: newVal.lat(),
-				lng: newVal.lng()
-			}, drawingIndex, nodeIndex);
-			/*$scope.drawings[drawingIndex].nodes[nodeIndex].lat = newVal.lat();
-			$scope.drawings[drawingIndex].nodes[nodeIndex].lng = newVal.lng();*/
+			spliceNode
 		});
 	};
 	$scope.marker_dragend = function(drawingIndex, nodeIndex) {
 		$scope.drawings[drawingIndex].nodes[nodeIndex]._unbind();
+		delete $scope.drawings[drawingIndex].nodes[nodeIndex]._unbind;
 	};
 	/*$scope.marker_drag = function(node, drawingIndex, nodeIndex) {
 		changeNode(node, drawingIndex, nodeIndex, false);
@@ -598,15 +580,6 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 		deleteNode(drawingIndex, nodeIndex);
 	};
 	
-	// Map controls
-	$scope.zoom_in = function() {
-		var zoom = $scope.map.getZoom() + 1;
-		$scope.map.setZoom(zoom);
-	};
-	$scope.zoom_out = function() {
-		var zoom = $scope.map.getZoom() - 1;
-		$scope.map.setZoom(zoom);
-	};
 	$scope.new = function() {
 		
 	};
@@ -623,72 +596,13 @@ function MapController($scope, SettingService, UtilityService, VariableService) 
 		}
 		$scope.drawings = [];
 	};
-	
-	// Variables
-	var useExact;
-	$scope.lat = SettingService.settings.map.lat;
-	$scope.lng = SettingService.settings.map.lng;
-	$scope.zoom = SettingService.settings.map.zoom;
-	$scope.style = SettingService.settings.map.style;
-	$scope.options = {
-		center: makeLatLng($scope.lat ? $scope.lat : 0, $scope.lng ? $scope.lng : 0),
-		disableDefaultUI: true,
-		disableDoubleClickZoom: true,
-		draggableCursor: 'crosshair',
-		draggingCursor: 'move',
-		mapTypeControl: true,
-		mapTypeControlOptions: {
-			mapTypeIds: ['custom', google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID],
-			position: google.maps.ControlPosition.TOP_RIGHT,
-			style: google.maps.MapTypeControlStyle.DEFAULT
-		},
-		/*panControl: true,
-		panControlOptions: {
-			position: google.maps.ControlPosition.RIGHT_CENTER
-		},*/
-		scaleControl: true,
-		zoom: $scope.zoom,
-		zoomControl: true,
-		zoomControlOptions: {
-			position: google.maps.ControlPosition.RIGHT_CENTER,
-			style: google.maps.ZoomControlStyle.SMALL
-		}
-	};
-	$scope.drawings = SettingService.settings.map.drawings;
-	$scope.markers = [];
-	$scope.polys = [];
-	
-	// Watchers
-	$scope.$watch('map', function() {
-		VariableService.map = $scope.map;
-	});
-	
-	// Listen once; when the map is defined, load its watchers
-	var unbindWatcher = $scope.$watch('map', function() {
-		if ($scope.map == undefined) return;
-		updateStyle();
-		if ($scope.lat == undefined || $scope.lng == undefined) {
-			panToCurrentLocation();
-		}
-		$scope.$watch('[lat, lng, zoom]', function() {
-			SettingService.settings.map.lat = $scope.lat;
-			SettingService.settings.map.lng = $scope.lng;
-			SettingService.settings.map.zoom = $scope.zoom;
-			SettingService.Save();
-		}, true);
-		for (var i = 0; i < $scope.drawings.length; i++) {
-			var node = $scope.drawings[i];
-			addNode(node);
-		}
-		unbindWatcher();
-	});
 }
 
 function ActionController($scope, VariableService) {
 	
 }
 
-function ImageController($scope, SettingService, VariableService) {
+function ImageController($scope, SettingService) {
 	$scope.PxSize = function() {
 		var ratio = $scope.width / $scope.height;
 		return {
@@ -732,18 +646,18 @@ function DrawingController($scope, SettingService) {
 	
 }
 
-function ThrobController($scope, VariableService) {
+function ThrobController($scope, $rootScope, $location, $routeParams) {
 	$scope.count = 0;
-	$scope.$on('throb', function(event, count) {
+	$rootScope.$on('throb', function(event, count) {
 		if (count === true) $scope.count++;
 		if (count === false) $scope.count--;
 	});
 }
 
-function SearchController($scope, $sce, SettingService, UtilityService, VariableService) {
+function SearchController($scope, $sce, $routeParams, $location, SettingService, UtilityService) {
 	$scope.loadPlace = function(reference) {
 		UtilityService.throb.on();
-		UtilityService.map.loadPlace(VariableService.map, reference);
+		UtilityService.map.loadPlace(reference);
 		UtilityService.throb.off();
 	};
 	$scope.keydown = function(e) {
@@ -765,7 +679,7 @@ function SearchController($scope, $sce, SettingService, UtilityService, Variable
 		}
 	}
 	$scope.show = SettingService.settings.search.show;
-	$scope.query = SettingService.settings.search.query;
+	$scope.query = '';
 	$scope.suggestions = [];
 	$scope.active = 0;
 	
@@ -793,7 +707,7 @@ function SearchController($scope, $sce, SettingService, UtilityService, Variable
 	}
 	
 	$scope.$watch('query', function() {
-		UtilityService.map.suggestions($scope.query, VariableService.map).then(function(suggestions) {
+		UtilityService.map.suggestions($scope.query).then(function(suggestions) {
 			$scope.suggestions = formatSuggestions(suggestions);
 			$scope.active = 0;
 		}, function(message) {
@@ -821,470 +735,6 @@ function SearchController($scope, $sce, SettingService, UtilityService, Variable
 -------------------------DEPRECATED CODE-------------------------
 */
 // TODO: Migrate logic from the following functions into AngularJS controllers and/or services
-function bezel(svg) {
-	window.clearInterval(bezelTimeout);
-	$('#bezel')
-		.remove();
-	$(document.body)
-		.prepend('<div id="bezel"></div>');
-	svg.clone()
-		.appendTo('#bezel');
-	bezelTimeout = window.setTimeout(function() {
-		$('#bezel')
-			.remove();
-	}, 1000);
-}
-
-function addNode(point) {
-	var x = nodes.length;
-	switch (mode) {
-	case 'flexibleLine':
-		nodes.push({
-			mode: mode,
-			color: color,
-			connect: undefined,
-			object: undefined,
-			marker: undefined
-		});
-		nodes[x].connect = setConnect(x);
-		nodes[x].marker = addMarker(point, x);
-		nodes[x].object = addDirections(point, x);
-		break;
-	case 'rigidLine':
-		nodes.push({
-			'mode': mode,
-			'color': color,
-			'connect': undefined,
-			'object': undefined,
-			'marker': undefined
-		});
-		nodes[x].connect = setConnect(x);
-		nodes[x].marker = addMarker(point, x);
-		nodes[x].object = addLine(point, x);
-		break;
-	case 'polygon':
-		nodes.push({
-			'mode': mode,
-			'color': color,
-			'connect': undefined,
-			'object': undefined,
-			'marker': undefined
-		});
-		nodes[x].connect = setConnect(x);
-		nodes[x].marker = addMarker(point, x);
-		nodes[x].object = addPolygon(point, x);
-		break;
-	}
-}
-
-function setConnect(x) {
-	if (!($('#connect')
-		.prop('checked'))) {
-		console.log('#connect is unchecked; connect: ', false);
-		return false;
-	}
-	if (nodes[x - 1] == undefined) {
-		console.log('The previous node is undefined; connect: ', null);
-		return null;
-	}
-	if (nodes[x].color == nodes[x - 1].color) { //if the colors are the same
-		if ((nodes[x].mode == 'polygon') == (nodes[x - 1].mode == 'polygon')) { //if mode & previous mode are functionally the same (e.g. both polygons; flexibleLine, rigidLine), treat it as a whole
-			console.log('Colors are the same, Functions are the same; connect: ', null);
-			return null;
-		} else { //if they aren't functionally the same, disconnect them
-			console.log('Colors are the same, Functions are different; connect: ', false);
-			return false;
-		}
-	} else if ((nodes[x].mode == 'polygon') == (nodes[x - 1].mode == 'polygon')) { //if mode & previous mode are functionally the same, connect them (because they aren't the same color)
-		console.log('Colors are different, Functions are the same; connect: ', true);
-		return true;
-	} else { //if they aren't functionally the same or the same color, disconnect them
-		console.log('Colors are different, Functions are different; connect: ', false);
-		return false;
-	}
-}
-
-function addMarker(point, x) {
-	marker = new GMap.Marker({
-		position: point,
-		zIndex: x,
-		icon: {
-			path: GMap.SymbolPath.CIRCLE,
-			fillColor: color,
-			fillOpacity: .25,
-			strokeColor: color,
-			strokeOpacity: .125,
-			strokeWeight: 1,
-			scale: 10
-		},
-		clickable: true,
-		draggable: true,
-		map: map
-	});
-
-	function addListener(thisMarker) {
-		GMap.event.addListener(thisMarker, 'click', function() {
-			markerClick(x);
-		});
-		GMap.event.addListener(thisMarker, 'dragend', function() {
-			markerDrag(x);
-		});
-	};
-	addListener(marker);
-	return marker;
-}
-
-function markerClick(x) {
-	var point = nodes[x].marker.getPosition();
-	addNode(point);
-}
-
-function markerDrag(x) {
-	var move0, move1, move2;
-	console.log('x == ', x);
-	for (i = 0; i < 2; i++) {
-		var w = x + (i - 1);
-		var y = x + i;
-		/*if(nodes[h]){
-			prevPoint = nodes[x + h]
-		}*/
-		try {
-			switch (nodes[y].mode) {
-			case 'flexibleLine':
-				var request = {
-					origin: nodes[w].marker.getPosition(),
-					destination: nodes[y].marker.getPosition(),
-					travelMode: GMap.TravelMode.DRIVING
-				};
-
-				/*function setDirections(theY) {
-					service.route(request, function(result, status) {
-						if (status == GMap.DirectionsStatus.OK) {
-							console.log('Directions will be set now');
-							nodes[theY].object.setDirections(result);
-							console.log('nodes after setDirections() execution: ', nodes);
-						}
-					});
-				}
-				setDirections(y);*/
-				break;
-			case 'rigidLine':
-
-				nodes[y].object.getPath();
-				break;
-			case 'polygon':
-				var request = {
-					origin: nodes[h],
-					destination: point1,
-					travelMode: GMap.TravelMode.DRIVING
-				};
-				service.route(request, function(result, status) {
-					if (status == GMap.DirectionsStatus.OK) {
-						nodes[x + i].object.setDirections(result);
-					}
-				});
-				break;
-			}
-		} catch (err) {
-			console.warn(err);
-		}
-	}
-	console.log('markerDrag() executed');
-}
-
-function addDirections(thisPoint, x) {
-	if (nodes[x].connect == false) return null;
-	var start, end;
-	if (nodes[x - 1] && nodes[x]) {
-		start = nodes[x - 1].marker.getPosition();
-		end = nodes[x].marker.getPosition();
-	} else if (nodes[x]) {
-		start = nodes[x].marker.getPosition();
-		end = nodes[x].marker.getPosition();
-	}
-	var renderer = new GMap.DirectionsRenderer({
-		map: map,
-		polylineOptions: {
-			map: map,
-			editable: false,
-			clickable: false,
-			strokeColor: nodes[x].color,
-			strokeOpacity: 0.125,
-			strokeWeight: 10
-		},
-		preserveViewport: true,
-		suppressMarkers: true,
-		suppressInfoWindows: true
-	});
-	var request = {
-		origin: start,
-		destination: end,
-		travelMode: GMap.TravelMode.DRIVING
-	};
-	throb(true);
-	service.route(request, function(result, status) {
-		if (status == GMap.DirectionsStatus.OK) {
-			renderer.setDirections(result);
-		} else {
-			alert('The line did not load');
-		}
-		throb(false);
-	});
-	console.log('Directions added');
-	return renderer;
-}
-
-function addLine(thisPoint, x) {
-	if (nodes[x].connect == false) return new GMap.Polyline({
-		map: map,
-		editable: false,
-		clickable: false,
-		strokeColor: nodes[x].color,
-		strokeOpacity: 0.125,
-		strokeWeight: 10,
-		path: [thisPoint]
-	});
-	var line, path = [];
-	if (!nodes[x - 1]) {
-		line = new GMap.Polyline({
-			map: map,
-			editable: false,
-			clickable: false,
-			strokeColor: nodes[x].color,
-			strokeOpacity: 0.125,
-			strokeWeight: 10
-		});
-	} else if (nodes[x].connect == null) {
-		if (nodes[x - 1].mode != 'rigidLine') {
-			line = new GMap.Polyline({
-				map: map,
-				editable: false,
-				clickable: false,
-				strokeColor: nodes[x].color,
-				strokeOpacity: 0.125,
-				strokeWeight: 10,
-				path: [nodes[x - 1].marker.getPosition()]
-			});
-		} else line = nodes[x - 1].object;
-		path = line.getPath();
-	} else if (nodes[x].connect == true) {
-		path.push(nodes[x - 1].marker.getPosition());
-		line = new GMap.Polyline({
-			map: map,
-			editable: false,
-			clickable: false,
-			strokeColor: nodes[x].color,
-			strokeOpacity: 0.125,
-			strokeWeight: 10
-		});
-	}
-	path.push(thisPoint);
-	line.setPath(path);
-	console.log('Line added');
-	return line;
-}
-
-function addPolygon(thisPoint, x) {
-	if (nodes[x].connect == false) return new GMap.Polygon({
-		map: map,
-		editable: false,
-		clickable: false,
-		fillColor: nodes[x].color,
-		fillOpacity: 0.25,
-		strokeWeight: 0,
-		path: [thisPoint]
-	});
-	var polygon, path = [];
-	if (!nodes[x - 1]) {
-		polygon = new GMap.Polygon({
-			map: map,
-			editable: false,
-			clickable: false,
-			fillColor: nodes[x].color,
-			fillOpacity: 0.25,
-			strokeWeight: 0
-		});
-	} else if (nodes[x].connect == null) {
-		polygon = nodes[x - 1].object;
-		path = polygon.getPath();
-	} else if (nodes[x].connect == true) {
-		path.push(nodes[x - 1].marker.getPosition());
-		polygon = new GMap.Polygon({
-			map: map,
-			editable: false,
-			clickable: false,
-			fillColor: nodes[x].color,
-			fillOpacity: 0.25,
-			strokeWeight: 0
-		});
-	}
-	path.push(thisPoint);
-	polygon.setPath(path);
-	console.log('Polygon added');
-	return polygon;
-}
-
-function undo() {
-	try {
-		nodes[nodes.length - 1].marker.setMap(null);
-		//nodes[nodes.length-1].marker.clearListeners();
-		nodes[nodes.length - 1].object.setMap(null);
-	} catch (err) {}
-	nodes.pop();
-	return;
-}
-
-function clearAll() {
-	for (var i = 0; i < nodes.length; i++) {
-		try {
-			nodes[i].marker.setMap(null);
-			nodes[i].object.setMap(null);
-		} catch (e) {}
-	}
-	nodes = [];
-	console.log('Cleared all');
-	return;
-}
-
-function changeMode(thisMode) {
-	mode = thisMode;
-	console.log('Mode changed to: ' + mode);
-}
-
-function changeColor(thisColor) {
-	color = thisColor;
-	console.log('Color changed to: ' + color);
-}
-
-function refresh() {
-	throb(true);
-	if (nodes.length == 0) {
-		alert('An image was generated, but it has nothing on it');
-	}
-	var urlPaths = [];
-	var connectedPaths = [];
-	var connectedPath = [];
-
-	function connectPath(thisNode) {
-		switch (thisNode.mode) { // Attaches current object's path to the array
-		case 'flexibleLine':
-			connectedPath = connectedPath.concat(thisNode.object.getDirections()
-				.routes[0].overview_path);
-			break;
-		case 'rigidLine':
-			connectedPath = connectedPath.concat(thisNode.object.getPath()
-				.getArray());
-			break;
-		case 'polygon':
-			connectedPath = connectedPath.concat(thisNode.object.getPath()
-				.getArray());
-			break;
-		}
-		console.log('connectedPath:', connectedPath);
-	}
-	console.log('Connection logic...');
-	for (var i = 0; i < nodes.length; i++) {
-		var h = i - 1;
-		if (nodes[i].connect == true) {
-			//console.log('connect == ', true);
-			//console.log('mode:', nodes[i].mode, '| color:', nodes[i].color);
-			connectedPaths.push({
-				'path': connectedPath,
-				'mode': nodes[h].mode,
-				'color': nodes[h].color
-			});
-			//console.log('connectedPath:', connectedPath, 'connectedPaths:', connectedPaths);
-			connectedPath = [];
-			connectPath(nodes[i]);
-		} else if (nodes[i].connect == false) {
-			//console.log('connect == ', false);
-			connectedPaths.push({
-				'path': connectedPath,
-				'mode': nodes[h].mode,
-				'color': nodes[h].color
-			});
-			//console.log('connectedPath:', connectedPath, 'connectedPaths:', connectedPaths);
-			connectedPath = [];
-		} else if (nodes[i].connect == null) {
-			//console.log('connect == ', null);
-			connectPath(nodes[i]);
-		}
-		/*if(i==nodes.length-1){
-			console.log('This is the last item in the array');
-			connectedPaths.push({
-				'path':connectedPath,
-				'mode':nodes[i].mode,
-				'color':nodes[i].color
-			});
-			connectedPath = [];
-			console.log('End of iteration. i:',i,'| connectedPath:',connectedPath,'| connectedPaths:',connectedPaths);
-		}*/
-	}
-	console.log('...Connection logic')
-	if (nodes != []) {
-		connectedPaths.push({
-			'path': connectedPath,
-			'mode': nodes[nodes.length - 1].mode,
-			'color': nodes[nodes.length - 1].color
-		});
-	}
-	console.log('connectedPaths:', connectedPaths);
-	console.log('URL Processing...');
-	for (var i = 0; i < connectedPaths.length; i++) {
-		var encodedPath = GMap.geometry.encoding.encodePath(connectedPaths[i].path);
-		console.log(encodedPath);
-		var hex = connectedPaths[i].color.replace('#', '0x') + '40';
-		if (connectedPaths[i].mode == 'polygon') {
-			var urlPath = '&path=weight:0%7Cfillcolor:' + hex + '%7Cenc:' + encodedPath;
-			urlPaths.push(urlPath);
-		} else {
-			var urlPath = '&path=weight:10|color:' + hex + '|enc:' + encodedPath;
-			urlPaths.push(urlPath);
-		}
-	}
-	var mapX, mapY;
-	ratio = Number(localStorage.ratio);
-	if (ratio <= 1) {
-		mapX = ratio * 640;
-		mapY = 640;
-	} else {
-		mapX = 640;
-		mapY = 1 / ratio * 640
-	}
-	var urlBase = getBaseUrl(mapX, mapY);
-	var urlFinal = urlBase + urlPaths.join('&');
-	console.log(urlFinal);
-	var staticMap = $('#static_map');
-	if (staticMap.prop('src') != urlFinal) {
-		staticMap.prop('src', urlFinal);
-		staticMap.css('cursor', 'move');
-		staticMap.load(function() {
-			staticMap.css('opacity', 1);
-			throb(false);
-		});
-	}
-	
-	//console.log('Refreshed');
-}
-
-function rotate() {
-	ratio = 1 / ratio;
-	localStorage.ratio = ratio;
-	refresh();
-	//console.log('Rotated');
-}
-
-function fade(element, state) {
-	if (state == true) {
-		element.fadeIn(250);
-	} else if (state == true) {
-		element.fadeOut(250);
-	} else {
-		element.fadeToggle(250);
-	}
-	console.log('Visibility toggled');
-}
-
 function getBaseUrl(mapX, mapY) {
 	var url = 'http://maps.googleapis.com/maps/api/staticmap?';
 	var params = [];
