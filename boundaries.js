@@ -6,6 +6,7 @@ var boundaries = angular.module('boundaries', ['ngRoute', 'ui.map', 'ui.event'])
 angular.bootstrap(document.querySelector('#map_canvas'), ['boundaries']);
 
 // Register all services
+// boundaries.service('LocalStorageService', LocalStorageService);
 boundaries.service('SettingService', SettingService);
 boundaries.service('UtilityService', ['$rootScope', '$q', '$http', UtilityService]);
 
@@ -43,10 +44,6 @@ boundaries.config(function($locationProvider, $routeProvider) {
 	});
 });
 // Services
-// Used to share temporary variables between controllers
-function VariableService() {
-	this.map = {};
-}
 // Used to store settings and share between controllers
 function SettingService() {
 	// Defaults also serve as an object specification
@@ -312,7 +309,6 @@ function ColorController($scope, SettingService, UtilityService) {
 		SettingService.Save();
 	}, true);
 }
-
 function ModeController($scope, SettingService) {
 	$scope.mode = SettingService.settings.mode;
 	
@@ -321,7 +317,6 @@ function ModeController($scope, SettingService) {
 		SettingService.Save();
 	});
 }
-
 function MapController($scope, $rootScope, $location, SettingService, UtilityService) {	
 	function updateStyle() {
 		$scope.map.mapTypes.set('custom', new google.maps.StyledMapType($scope.style, {
