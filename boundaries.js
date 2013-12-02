@@ -1,24 +1,24 @@
 "use strict";
 
 // TODO: Privacy Policy and Terms of Service (https://developers.google.com/places/policies)
-var boundaries = angular.module('boundaries', ['ngRoute', 'ui.map', 'ui.event']);
+var boundaries = angular.module('boundaries', ['ngStorage', 'ngRoute', 'ui.map', 'ui.event']);
 
 angular.bootstrap(document.querySelector('#map_canvas'), ['boundaries']);
 
 // Register all services
 // boundaries.service('LocalStorageService', LocalStorageService);
-boundaries.service('SettingService', SettingService);
-boundaries.service('UtilityService', ['$rootScope', '$q', '$http', UtilityService]);
+boundaries.service('settingService', settingService);
+boundaries.service('utilityService', ['$rootScope', '$q', '$http', utilityService]);
 
 // Register all controllers
 // Every controller that needs to communicate gets $rootScope
-boundaries.controller('ColorController', ['$scope', 'SettingService', 'UtilityService', ColorController]);
-boundaries.controller('ModeController', ['$scope', 'SettingService', ModeController]);
-boundaries.controller('ActionController', ['$scope', 'SettingService', ActionController]);
-boundaries.controller('MapController', ['$scope', '$rootScope', '$location', 'SettingService', 'UtilityService', MapController]);
-boundaries.controller('ImageController', ['$scope', 'SettingService', ImageController]);
-boundaries.controller('DrawingController', ['$scope', 'SettingService', DrawingController]);
-boundaries.controller('SearchController', ['$scope', '$sce', '$routeParams', '$location', 'SettingService', 'UtilityService', SearchController]);
+boundaries.controller('ColorController', ['$scope', 'settingService', 'utilityService', ColorController]);
+boundaries.controller('ModeController', ['$scope', 'settingService', ModeController]);
+boundaries.controller('ActionController', ['$scope', 'settingService', ActionController]);
+boundaries.controller('MapController', ['$scope', '$rootScope', '$location', 'settingService', 'utilityService', MapController]);
+boundaries.controller('ImageController', ['$scope', 'settingService', ImageController]);
+boundaries.controller('DrawingController', ['$scope', 'settingService', DrawingController]);
+boundaries.controller('SearchController', ['$scope', '$sce', '$location', 'settingService', 'utilityService', SearchController]);
 boundaries.controller('ThrobController', ['$scope', '$rootScope', '$location', ThrobController]);
 
 // Configure deep-linking for Boundaries
@@ -45,7 +45,7 @@ boundaries.config(function($locationProvider, $routeProvider) {
 });
 // Services
 // Used to store settings and share between controllers
-function SettingService() {
+function settingService() {
 	// Defaults also serve as an object specification
 	this.defaults = {
 		map: {
@@ -161,7 +161,7 @@ function SettingService() {
 	};
 }
 // Useful functions available to multiple controllers
-function UtilityService($rootScope, $q, $http) {
+function utilityService($rootScope, $q, $http) {
 	var autocomplete = new google.maps.places.AutocompleteService();
 	var placeService = new google.maps.places.PlacesService(document.querySelector('#places_attributions'));
 	var map;
@@ -264,10 +264,16 @@ function UtilityService($rootScope, $q, $http) {
 }
 
 // Controllers
-function ColorController($scope, SettingService, UtilityService) {
+function UrlController($scope, $location, localStorageService) {
+	$scope.location = $location;
+	$scope.$watch('location.url()', function() {
+		localStorageService.add('url', $location.url());
+	});
+}
+function ColorController($scope, settingService, utilityService) {
 	// Functions for converting color formats
 	$scope.Hex = function(rgba) {
-		return UtilityService.color.toHex(rgba, false);
+		return utilityService.color.toHex(rgba, false);
 	};
 	$scope.HSL = function (rgba) {
 		var r, g, b, a;
@@ -300,24 +306,24 @@ function ColorController($scope, SettingService, UtilityService) {
 			a: a
 		}
 	};
-	$scope.active = SettingService.settings.color.active;
-	$scope.choices = SettingService.settings.color.choices;
+	$scope.active = settingService.settings.color.active;
+	$scope.choices = settingService.settings.color.choices;
 	// Load saved colors or defaults
 	$scope.$watch('[active, choices]', function() {
-		SettingService.settings.color.active = $scope.active;
-		SettingService.settings.color.choices = $scope.choices;
-		SettingService.Save();
+		settingService.settings.color.active = $scope.active;
+		settingService.settings.color.choices = $scope.choices;
+		settingService.Save();
 	}, true);
 }
-function ModeController($scope, SettingService) {
-	$scope.mode = SettingService.settings.mode;
+function ModeController($scope, settingService) {
+	$scope.mode = settingService.settings.mode;
 	
 	$scope.$watch('mode', function() {
-		SettingService.settings.mode = $scope.mode;
-		SettingService.Save();
+		settingService.settings.mode = $scope.mode;
+		settingService.Save();
 	});
 }
-function MapController($scope, $rootScope, $location, SettingService, UtilityService) {	
+function MapController($scope, $rootScope, $location, settingService, utilityService) {	
 	function updateStyle() {
 		$scope.map.mapTypes.set('custom', new google.maps.StyledMapType($scope.style, {
 			name: 'Customized'
@@ -326,8 +332,8 @@ function MapController($scope, $rootScope, $location, SettingService, UtilitySer
 	function panToCurrentLocation() {
 		var location;
 		if (useExact === undefined || useExact === false) {
-			UtilityService.throb.on();
-			UtilityService.location.approximate().then(function(position) {
+			utilityService.throb.on();
+			utilityService.location.approximate().then(function(position) {
 				if (!position) return;
 				if (position.data) {
 					location = new google.maps.LatLng(position.data.latitude, position.data.longitude);
@@ -338,12 +344,12 @@ function MapController($scope, $rootScope, $location, SettingService, UtilitySer
 					$scope.map.setZoom(8);
 				}
 			}).finally(function() {
-				UtilityService.throb.off();
+				utilityService.throb.off();
 			});
 		}
 		if (useExact === undefined || useExact === true) {
-			UtilityService.throb.on();
-			UtilityService.location.exact().then(function(position) {
+			utilityService.throb.on();
+			utilityService.location.exact().then(function(position) {
 				useExact = true;
 				if (!position) return;
 				if (position.coords) {
@@ -358,9 +364,9 @@ function MapController($scope, $rootScope, $location, SettingService, UtilitySer
 					useExact = false;
 					break;
 				}
-				SettingService.settings.search.show = true;
+				settingService.settings.search.show = true;
 			}).finally(function() {
-				UtilityService.throb.off();
+				utilityService.throb.off();
 			});
 		}
 	}
@@ -396,9 +402,9 @@ function MapController($scope, $rootScope, $location, SettingService, UtilitySer
 	// Variables
 	var useExact;
 	$scope.location = $location;
-	// $scope.lat = SettingService.settings.map.lat;
-// 	$scope.lng = SettingService.settings.map.lng;
-// 	$scope.zoom = SettingService.settings.map.zoom;
+	// $scope.lat = settingService.settings.map.lat;
+// 	$scope.lng = settingService.settings.map.lng;
+// 	$scope.zoom = settingService.settings.map.zoom;
 	$scope.lat = Number($location.search().lat);
 	$scope.lng = Number($location.search().lng);
 	$scope.zoom = Number($location.search().zoom);
@@ -441,10 +447,10 @@ function MapController($scope, $rootScope, $location, SettingService, UtilitySer
 		updateStyle();
 		if ($scope.lat == undefined || $scope.lng == undefined) panToCurrentLocation();
 		$scope.$watch('[lat, lng, zoom]', function() {
-			SettingService.settings.map.lat = $scope.lat;
-			SettingService.settings.map.lng = $scope.lng;
-			SettingService.settings.map.zoom = $scope.zoom;
-			SettingService.Save();
+			settingService.settings.map.lat = $scope.lat;
+			settingService.settings.map.lng = $scope.lng;
+			settingService.settings.map.zoom = $scope.zoom;
+			settingService.Save();
 		}, true);
 		unbindWatcher();
 	});
@@ -452,8 +458,8 @@ function MapController($scope, $rootScope, $location, SettingService, UtilitySer
 
 function DrawingController($scope, $rootScope, $location) {
 	function makeHexColor(node, alpha) {
-		var color = SettingService.settings.color.choices[node.activeColor];
-		return UtilityService.color.toHex(color.rgba, alpha);
+		var color = settingService.settings.color.choices[node.activeColor];
+		return utilityService.color.toHex(color.rgba, alpha);
 	}
 	function makeLatLng(node) {
 		return new google.maps.LatLng(node.lat, node.lng);
@@ -481,7 +487,7 @@ function DrawingController($scope, $rootScope, $location) {
 		};
 	}
 	function makePolylineOptions(node) {
-		var color = SettingService.settings.color.choices[node.activeColor];
+		var color = settingService.settings.color.choices[node.activeColor];
 		return {
 			clickable: true,
 			draggable: false,
@@ -493,7 +499,7 @@ function DrawingController($scope, $rootScope, $location) {
 		};
 	}
 	function makePolygonOptions(node) {
-		var color = SettingService.settings.color.choices[node.activeColor];
+		var color = settingService.settings.color.choices[node.activeColor];
 		return {
 			clickable: true,
 			draggable: false,
@@ -544,7 +550,7 @@ function DrawingController($scope, $rootScope, $location) {
 		});
 	});
 	
-	$scope.drawings = SettingService.settings.map.drawings;
+	$scope.drawings = settingService.settings.map.drawings;
 	$scope.markers = [];
 	$scope.polys = [];
 	
@@ -565,10 +571,10 @@ function DrawingController($scope, $rootScope, $location) {
 		console.log('marker click');
 		var markerPosition = $scope.drawings[drawingIndex].nodes[nodeIndex]._marker.getPosition();
 		addNode({
-			activeColor: SettingService.settings.color.active,
+			activeColor: settingService.settings.color.active,
 			lat: markerPosition.lat(),
 			lng: markerPosition.lng(),
-			rigid: SettingService.settings.mode.rigid
+			rigid: settingService.settings.mode.rigid
 		});
 	};
 	$scope.marker_rightclick = function(drawingIndex, nodeIndex) {
@@ -597,7 +603,7 @@ function ActionController($scope, VariableService) {
 	
 }
 
-function ImageController($scope, SettingService) {
+function ImageController($scope, settingService) {
 	$scope.PxSize = function() {
 		var ratio = $scope.width / $scope.height;
 		return {
@@ -620,24 +626,24 @@ function ImageController($scope, SettingService) {
 		console.log('Portrait');
 	}
 	*/
-	// Load variables from SettingService
-	$scope.width = SettingService.settings.image.width;
-	$scope.height = SettingService.settings.image.height;
-	$scope.show = SettingService.settings.image.show;
-	$scope.format = SettingService.settings.image.format;
-	$scope.rotate = SettingService.settings.image.rotate;
+	// Load variables from settingService
+	$scope.width = settingService.settings.image.width;
+	$scope.height = settingService.settings.image.height;
+	$scope.show = settingService.settings.image.show;
+	$scope.format = settingService.settings.image.format;
+	$scope.rotate = settingService.settings.image.rotate;
 	
 	$scope.$watch('[width, height, show, format, rotate]', function() {
-		SettingService.settings.image.width = $scope.width;
-		SettingService.settings.image.height = $scope.height;
-		SettingService.settings.image.show = $scope.show;
-		SettingService.settings.image.format = $scope.format;
-		SettingService.settings.image.rotate = $scope.rotate;
-		SettingService.Save();
+		settingService.settings.image.width = $scope.width;
+		settingService.settings.image.height = $scope.height;
+		settingService.settings.image.show = $scope.show;
+		settingService.settings.image.format = $scope.format;
+		settingService.settings.image.rotate = $scope.rotate;
+		settingService.Save();
 	}, true);
 }
 
-function DrawingController($scope, SettingService) {
+function DrawingController($scope, settingService) {
 	
 }
 
@@ -649,11 +655,11 @@ function ThrobController($scope, $rootScope, $location, $routeParams) {
 	});
 }
 
-function SearchController($scope, $sce, $routeParams, $location, SettingService, UtilityService) {
+function SearchController($scope, $sce, $location, settingService, utilityService) {
 	$scope.loadPlace = function(reference) {
-		UtilityService.throb.on();
-		UtilityService.map.loadPlace(reference);
-		UtilityService.throb.off();
+		utilityService.throb.on();
+		utilityService.map.loadPlace(reference);
+		utilityService.throb.off();
 	};
 	$scope.keydown = function(e) {
 		var enter, up, down;
@@ -673,7 +679,7 @@ function SearchController($scope, $sce, $routeParams, $location, SettingService,
 			$scope.active++;
 		}
 	}
-	$scope.show = SettingService.settings.search.show;
+	$scope.show = false;
 	$scope.query = '';
 	$scope.suggestions = [];
 	$scope.active = 0;
@@ -702,7 +708,7 @@ function SearchController($scope, $sce, $routeParams, $location, SettingService,
 	}
 	
 	$scope.$watch('query', function() {
-		UtilityService.map.suggestions($scope.query).then(function(suggestions) {
+		utilityService.map.suggestions($scope.query).then(function(suggestions) {
 			$scope.suggestions = formatSuggestions(suggestions);
 			$scope.active = 0;
 		}, function(message) {
@@ -711,9 +717,9 @@ function SearchController($scope, $sce, $routeParams, $location, SettingService,
 		});
 	});
 	$scope.$watch('[query, show]',  function() {
-		SettingService.settings.search.query = $scope.query;
-		SettingService.settings.search.show = $scope.show;
-		SettingService.Save();
+		settingService.settings.search.query = $scope.query;
+		settingService.settings.search.show = $scope.show;
+		settingService.Save();
 	}, true);
 }
 
