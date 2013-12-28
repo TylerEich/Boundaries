@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="boundaries">
 	<head>
-		<meta charset="UTF-8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>Boundaries</title>
 		<link rel="icon" type="image/png" href="icon.png"/>
 		<link rel="apple-touch-icon-precomposed" href="icon_ios.png"/>
+<<<<<<< HEAD
 		<link rel="stylesheet" href="style.css">
 		<!--PrefixFree-->
 		<script src="prefixfree.min.js">
@@ -20,207 +21,180 @@
 		<!--Boundaries-->
 		<script src="script.js">
 		</script>
+=======
+		<!-- TODO: uncomment <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet' type='text/css'> -->
+		<link rel="stylesheet" href="boundaries.css">
+		<script src="prefixfree.min.js"></script>
+>>>>>>> AngularJS
 	</head>
 	<body>
-		<svg>
-			<defs>
-				<lineargradient id="gradientWhite" x1="50%" y1="0%" x2="50%" y2="100%">
-					<stop stop-color="#fff" offset="0" />
-					<stop stop-color="#bfbfbf" offset="1" />
-				</lineargradient>
-				<lineargradient y2="100%" x2="50%" y1="0%" x1="50%" id="gradientRed">
-					<stop stop-color="#bf0000" offset="0" />
-					<stop stop-color="#f00" offset="1" />
-				</lineargradient>
-				<lineargradient y2="100%" x2="50%" y1="0%" x1="50%" id="gradientGreen">
-					<stop stop-color="#3fbf00" offset="0"/>
-					<stop stop-color="#7fff00" offset="1"/>
-				</lineargradient>
-				<lineargradient y2="100%" x2="50%" y1="0%" x1="50%" id="gradientBlue">
-					<stop stop-color="#0000bf" offset="0"/>
-					<stop stop-color="#00f" offset="1"/>
-				</lineargradient>
-			</defs>
-		</svg>
-		<div id="settings_dialog">
-							<input id="width" type="number" min="1" value="3.5" title="Width">
-							<input id="height" type="number" min="1" value="5" title="Height">
-							<div id="actual_size" style="
-		    padding: 0;
-		    text-align: center;
-		    margin: 0;
-		    width: 9em;
-		">896 × 1280</div>
-						<a href="http://adamwhitcroft.com/batch/" target="_blank" style="
-		    font-size: .75rem;
-		
-">
-						<div id="attributions" style="
-		    color: #fff;
-		    width: 100%;
-		    text-align: center;
-		    font-size: .75rem;
-"><span>Icons by </span><span style="font-weight:bold">Adam Whitcroft</span></div></a>
-<pre id="code_wrapper"><textarea id="style_source"></textarea></pre>
-
-<div id="yes" class="button" style="
-		    position: absolute;
-		    bottom: 0;
-		    right: 0;
-		    margin: .5em;
-		    padding: 0;
-		    width: 3em;
-		    height: 3em;
-		"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 16 16" style="
-		    width: 100%;
-		    height: 100%;
-		">
-						
-		<path d="M 45.906988,16.008701 26.043875,35.997825 18.093012,28.002176 c -2.191404,-2.210962 -5.748223,-2.210962 -7.945245,0 -2.1970236,2.21096 -2.1970236,5.790343 0,7.995649 l 11.923486,11.993473 c 2.191405,2.210962 5.748221,2.210962 7.945245,0 L 53.852233,24.004351 c 2.197023,-2.21096 2.197023,-5.784688 0,-7.99565 -2.197024,-2.21096 -5.748222,-2.21096 -7.945245,0 z" fill="url(#gradientGreen)"></path>
-
-							</svg></div>
-		<div id="no" class="button" style="
-		    position: absolute;
-		    bottom: 0;
-		    left: 0;
-		    margin: .5em;
-		    padding: 0;
-		    width: 3em;
-		    height: 3em;
-		"><svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 16 16" style="
-		    width: 100%;
-		    height: 100%;
-		">
-						
-		<path d="m 53.2922,53.292111 c -2.943735,2.943852 -7.701894,2.943852 -10.645629,0 L 32.000942,42.646056 21.355313,53.292111 c -2.943735,2.943852 -7.709423,2.943852 -10.653158,0 -2.9362066,-2.943854 -2.9362066,-7.702203 0,-10.646055 L 21.355313,32 10.702155,21.353945 c -2.9362066,-2.943852 -2.9362066,-7.702201 0,-10.646055 2.943735,-2.9438518 7.709423,-2.9438518 10.653158,0 L 32.000942,21.353945 42.646571,10.70789 c 2.943735,-2.9438518 7.701894,-2.9438518 10.645629,0 2.943735,2.943854 2.943735,7.702203 0,10.646055 L 42.646571,32 53.2922,42.646056 c 2.943735,2.943852 2.943735,7.709731 0,10.646055 z" fill="url(#gradientRed)"></path>
-
-							</svg></div>
-
-
-
+		<!-- <div id="throbber" ng-controller="ThrobController" ng-hide="count == 0">
+			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
+				<circle cy="32" cx="32" r="16"/>
+				<circle cy="32" cx="80" r="16"/>
+				<circle cy="32" cx="128" r="16"/>
+			</svg>
+		</div> -->
+			<!--TODO: Usage help via ngRoute (e.g. ./help)-->
+		<div id="settings" ng-hide="true">
+					<div ng-controller="ImageController">
+						<div id="size">
+							<input type="number" min="0" ng-model="width">
+							<input type="number" min="0" ng-model="height">
+							<p id="actual_size">{{ PxSize().width * 2 }}&nbsp;&#x00D7;&nbsp;{{ PxSize().height * 2 }}</p>
 						</div>
-		<div id="sidebar">
-			<div id="search">
-				<input id="search_button" type="checkbox">
-				<label class="button" title="Search ([meta]S)" for="search_button">
-					<svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64"
-					enable-background="new 0 0 64 64">
-						<path fill="url(#gradientWhite)" d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z"
-						/>
+						<div id="format">
+							Image format:
+							<select ng-model="format">
+								<option value="jpg">JPG</option>
+								<option value="png">PNG</option>
+							</select>
+						</div>
+						<div id="rotate">
+							Orientation:
+							<select ng-model="rotate">
+								<option value="auto">Automatic</option>
+								<option value="portrait">Landscape</option>
+								<option value="landscape">Portrait</option>
+							</select>
+						</div>
+					</div>
+					<div ng-controller="MapController">
+						<div id="map_styles">
+							<div class="style_rule" ng-repeat="rule in style">
+								<button>-</button>
+								<p>{{ rule.feature }}</p>
+								<p>{{ rule.element }}</p>
+							</div>
+							<button>+</button>
+						</div>
+					</div>
+					<div ng-controller="DrawingController">
+					</div>
+						</div>
+		<div id="sidebar" style="width: 20em;">
+			<div id="search" ng-controller="SearchController">
+				<div id="search_wrapper" ng-show="show" ng-animate="'slide'" ng-keydown="keydown($event)">
+					<input id="search_box" ng-model="query" ng-change="" type="text" placeholder="Search" autocomplete="off">
+					<div id="search_results" ng-mousemove="active = -1" ng-animate="'slide'" ng-show="query != '' &amp;&amp; show" style="color:white;">
+						<div class="suggestion" ng-repeat="suggestion in suggestions" ng-bind-html="suggestion.description" ng-class="{'none': suggestion.error, 'active': $index == active}" ng-click="loadPlace(suggestion.reference)"></div>
+					</div>
+				</div>
+				
+				<label class="button" title="Search ([meta]S)" ng-class="{active: show}">
+					<input type="checkbox" ng-model="show">
+					<svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+						<path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
 					</svg>
 				</label>
 			</div>
-			<div id="colors" class="button_group">
-				<input id="red" type="radio" name="color" value="#ff0000"
-				accesskey="R">
-				<label class="button" title="Red ([meta]E)" for="red">
+			<div ng-controller="ColorController" id="colors" class="button_group">
+				<label ng-repeat="color in choices" class="button" title="{{ color.name }}" ng-class="{active: $index == $parent.active}">
+					<input name="colors" ng-value="$index" type="radio" ng-model="$parent.active">
 					<svg xmlns="https://www.w3.org/2000/svg" viewbox="0,0 64,64">
-						<g>
-							<circle fill="url(#gradientRed)" r="24" cy="32" cx="32" />
-							<path fill="url(#gradientWhite)" stroke="#000000" stroke-width="0.875"
-							stroke-miterlimit="4" d="m32,56c-13.254,0 -24,-10.746 -24,-24c0,-13.254 10.746,-24 24,-24c13.254,0 24,10.746 24,24c0,13.254 -10.746,24 -24,24zm0,-42c-9.939,0 -18,8.061 -18,18c0,9.939 8.061,18 18,18c9.939,0 18,-8.061 18,-18c0,-9.939 -8.061,-18 -18,-18z"
-							/>
-						</g>
-					</svg>
-				</label>
-				<input id="green" type="radio" name="color" value="#7fff00" accesskey="G" checked>
-				<label class="button" title="Green ([meta]G)" for="green">
-					<svg xmlns="https://www.w3.org/2000/svg" viewbox="0,0 64,64">
-						<g>
-							<circle fill="url(#gradientGreen)" r="24" cy="32" cx="32" />
-							<path fill="url(#gradientWhite)" stroke="#000000" stroke-width="0.875"
-							stroke-miterlimit="4" d="m32,56c-13.254,0 -24,-10.746 -24,-24c0,-13.254 10.746,-24 24,-24c13.254,0 24,10.746 24,24c0,13.254 -10.746,24 -24,24zm0,-42c-9.939,0 -18,8.061 -18,18c0,9.939 8.061,18 18,18c9.939,0 18,-8.061 18,-18c0,-9.939 -8.061,-18 -18,-18z"
-							/>
-						</g>
-					</svg>
-				</label>
-				<input id="blue" type="radio" name="color" value="#0000ff"
-				accesskey="B">
-				<label class="button" title="Blue ([meta]B)" for="blue">
-					<svg xmlns="https://www.w3.org/2000/svg" viewbox="0,0 64,64">
-						<g>
-							<circle fill="url(#gradientBlue)" r="24" cy="32" cx="32" />
-							<path fill="url(#gradientWhite)" d="m32,56c-13.254,0 -24,-10.746 -24,-24c0,-13.254 10.746,-24 24,-24c13.254,0 24,10.746 24,24c0,13.254 -10.746,24 -24,24zm0,-42c-9.939,0 -18,8.061 -18,18c0,9.939 8.061,18 18,18c9.939,0 18,-8.061 18,-18c0,-9.939 -8.061,-18 -18,-18z"
-							/>
-						</g>
+						<circle fill="#{{ Hex(color.rgba) }}" stroke="#fff" stroke-width="6" r="21" cy="32" cx="32" />
 					</svg>
 				</label>
 			</div>
-			<div id="modes" class="button_group">
-				<input id="flexible_line" type="radio" name="tool" value="flexibleLine" checked>
-				<label class="button" title="Flexible Line ([meta]X)" for="flexible_line">
+			<div ng-controller="ModeController" id="modes" class="button_group">
+				<label class="button" title="Flexible Line ([meta]X)" ng-class="{active: mode == 'flex'}">
+					<input type="radio" name="tool" value="flex" ng-model="mode">
 					<svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64">
-						<path d="m 11.54626,8.5035224 a 3.1944173,3.2077906 0 1 0 0.299148,6.4085436 c 0,0 9.914644,0.103318 16.685819,2.369826 3.385589,1.133254 5.474107,2.772783 5.883247,4.005341 0.204569,0.616278 0.232099,1.336454 -0.365626,2.736982 -0.597724,1.400529 -1.916437,3.359708 -4.254551,5.70761 -2.714166,2.725529 -4.557282,5.226463 -5.617337,7.71028 -1.060055,2.483817 -1.241314,5.07222 -0.498581,7.309745 1.485466,4.475053 5.712296,6.640597 9.905128,8.044059 8.385664,2.806923 18.680139,2.703605 18.680139,2.703605 a 3.1912326,3.2045926 0 1 0 0,-6.408545 c 0,0 -9.914643,-0.103316 -16.685818,-2.369826 -3.385587,-1.133254 -5.440869,-2.772782 -5.850008,-4.00534 -0.20457,-0.616279 -0.265337,-1.369832 0.332387,-2.77036 0.597724,-1.400529 1.916438,-3.326332 4.254551,-5.674232 2.714166,-2.725529 4.557282,-5.226463 5.617337,-7.71028 1.060055,-2.483818 1.274552,-5.07222 0.531819,-7.309746 C 38.97845,14.776132 34.71838,12.610587 30.525549,11.207126 22.139884,8.4002034 11.845408,8.5035224 11.845408,8.5035224 a 3.1912326,3.2045926 0 0 0 -0.299148,0 z" fill="url(#gradientWhite)" />
+						<path d="m 11.54626,8.5035224 a 3.1944173,3.2077906 0 1 0 0.299148,6.4085436 c 0,0 9.914644,0.103318 16.685819,2.369826 3.385589,1.133254 5.474107,2.772783 5.883247,4.005341 0.204569,0.616278 0.232099,1.336454 -0.365626,2.736982 -0.597724,1.400529 -1.916437,3.359708 -4.254551,5.70761 -2.714166,2.725529 -4.557282,5.226463 -5.617337,7.71028 -1.060055,2.483817 -1.241314,5.07222 -0.498581,7.309745 1.485466,4.475053 5.712296,6.640597 9.905128,8.044059 8.385664,2.806923 18.680139,2.703605 18.680139,2.703605 a 3.1912326,3.2045926 0 1 0 0,-6.408545 c 0,0 -9.914643,-0.103316 -16.685818,-2.369826 -3.385587,-1.133254 -5.440869,-2.772782 -5.850008,-4.00534 -0.20457,-0.616279 -0.265337,-1.369832 0.332387,-2.77036 0.597724,-1.400529 1.916438,-3.326332 4.254551,-5.674232 2.714166,-2.725529 4.557282,-5.226463 5.617337,-7.71028 1.060055,-2.483818 1.274552,-5.07222 0.531819,-7.309746 C 38.97845,14.776132 34.71838,12.610587 30.525549,11.207126 22.139884,8.4002034 11.845408,8.5035224 11.845408,8.5035224 a 3.1912326,3.2045926 0 0 0 -0.299148,0 z" />
 					</svg>
 				</label>
-				<input id="rigid_line" type="radio" name="tool" value="rigidLine">
-				<label class="button" title="Rigid Line ([meta]I)" for="rigid_line">
+				<label class="button" title="Rigid Line ([meta]I)" ng-class="{active: mode == 'rigid'}">
+					<input type="radio" name="tool" value="rigid" ng-model="mode">
 					<svg xmlns="https://www.w3.org/2000/svg" viewbox="0,0  64,64">
-					  <path d="M 11.442085,8.5001863 A 2.9350292,2.9355008 0 0 0 9.3938829,13.545074 L 50.480184,54.637975 a 2.9398264,2.9402987 0 1 0 4.157543,-4.158209 L 13.551426,9.3868635 A 2.9350292,2.9355008 0 0 0 11.442085,8.5001863 z" fill="url(#gradientWhite)"/>
+					  <path d="M 11.442085,8.5001863 A 2.9350292,2.9355008 0 0 0 9.3938829,13.545074 L 50.480184,54.637975 a 2.9398264,2.9402987 0 1 0 4.157543,-4.158209 L 13.551426,9.3868635 A 2.9350292,2.9355008 0 0 0 11.442085,8.5001863 z"/>
 					</svg>
 				</label>
-				<input id="polygon" type="radio" name="tool" value="polygon"
-				accesskey="P">
-				<label class="button" title="Polygon ([meta]P)" for="polygon">
+				<label class="button" title="Polygon ([meta]P)" ng-class="{active: mode == 'polygon'}">
+					<input type="radio" name="tool" value="polygon" ng-model="mode">
 					<svg xmlns="https://www.w3.org/2000/svg" viewbox="0,0  64,64">
-						<path d="M 31.71875,8 A 3.0003,3.0003 0 0 0 29.3125,9.65625 l -21,42 A 3.0003,3.0003 0 0 0 11,56 l 42,0 a 3.0003,3.0003 0 0 0 2.6875,-4.34375 l -21,-42 A 3.0003,3.0003 0 0 0 31.71875,8 z M 32,17.71875 48.125,50 15.875,50 32,17.71875 z" fill="url(#gradientWhite)"/>
+						<path d="M 31.71875,8 A 3.0003,3.0003 0 0 0 29.3125,9.65625 l -21,42 A 3.0003,3.0003 0 0 0 11,56 l 42,0 a 3.0003,3.0003 0 0 0 2.6875,-4.34375 l -21,-42 A 3.0003,3.0003 0 0 0 31.71875,8 z M 32,17.71875 48.125,50 15.875,50 32,17.71875 z"/>
 					</svg>
 				</label>
 			</div>
-			<div id="functions" class="button_group">
-				<input id="connect" type="checkbox" value="connect" checked>
-				<label class="button" title="Connect ([meta]K)" for="connect">
-					<svg xmlns="https://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
-						<path d="m 52.924939,27.669982 -4.337717,4.331851 c -2.704107,2.704108 -6.719209,3.246689 -9.983495,1.692267 l 9.983495,-9.986428 c 1.146752,-1.146753 1.146752,-3.00326 0,-4.14708 l -4.144147,-4.152947 c -1.146754,-1.146752 -3.000328,-1.146752 -4.147081,0 l -9.986427,9.989361 c -1.554423,-3.267219 -1.011842,-7.28232 1.692266,-9.989361 l 4.328919,-4.331851 c 3.437325,-3.4343918 9.009781,-3.4343918 12.44124,0 l 4.152947,4.147081 c 3.43146,3.437325 3.43146,9.009781 0,12.447107 z M 23.707673,40.293061 c -1.146754,-1.146753 -1.146754,-3.000328 0,-4.147081 l 12.44124,-12.441241 c 1.146754,-1.146753 3.000328,-1.146753 4.147081,0 1.146753,1.146752 1.146753,3.000328 0,4.147081 L 27.854753,40.293061 c -1.14382,1.146753 -3.003261,1.146753 -4.14708,0 z m -8.297094,4.150013 4.14708,4.147081 c 1.146753,1.146752 3.000327,1.146752 4.147081,0 l 9.98936,-9.989361 c 1.554422,3.267219 1.01184,7.28232 -1.692267,9.989361 l -3.965243,4.331851 c -3.437324,3.437325 -9.006848,3.437325 -12.444173,0 l -4.516623,-4.51369 c -3.4343921,-3.437325 -3.4343921,-9.006849 0,-12.444173 L 15.407646,31.9989 c 2.709973,-2.704107 6.722142,-3.246689 9.992294,-1.692267 l -9.989361,9.986428 c -1.14382,1.146753 -1.14382,3.006193 0,4.150013 z" fill="url(#gradientWhite)"/>
+			<div ng-controller="ActionController" id="actions" class="button_group">
+				<label class="button" title="New" for="new" ng-class="{active: $storage.new}">
+					<input id="new" type="checkbox" ng-model="$storage.new">
+					<svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
+						<path d="M 32,56 C 18.746,56 8,45.254 8,32 8,18.746 18.746,8 32,8 45.254,8 56,18.746 56,32 56,45.254 45.254,56 32,56 z m 0,-42 c -9.939,0 -18,8.061 -18,18 0,9.939 8.061,18 18,18 9.939,0 18,-8.061 18,-18 0,-9.939 -8.061,-18 -18,-18 z m 9,21 -6,0 0,6 c 0,1.659 -1.341,3 -3,3 -1.656,0 -3,-1.341 -3,-3 l 0,-6 -6,0 c -1.656,0 -3,-1.341 -3,-3 0,-1.656 1.344,-3 3,-3 l 6,0 0,-6 c 0,-1.656 1.344,-3 3,-3 1.659,0 3,1.344 3,3 l 0,6 6,0 c 1.659,0 3,1.344 3,3 0,1.659 -1.341,3 -3,3 z" />
 					</svg>
 				</label>
-				<input id="undo" type="button" value="Undo">
-				<label class="button" title="Undo ([meta]Z)" for="undo">
+				<label class="button trigger" title="Undo ([meta]Z)" for="undo">
+					<input id="undo" type="button" ng-click="Undo()" ng-class="{ 'disabled': History.length == 0 }">
 					<svg xmlns="https://www.w3.org/2000/svg" viewbox="0,0 64,64">
-						<path style="fill:url(#gradientWhite)" d="m8,32c0,13.254 10.746,24 24,24s24,-10.746 24,-24s-10.746,-24 -24,-24s-24,10.746 -24,24zm42,0c0,9.939 -8.061,18 -18,18s-18,-8.061 -18,-18s8.061,-18 18,-18s18,8.061 18,18zm-29.124,-2.121l6,-6c0.858,-0.855 2.148,-1.113 3.273,-0.651c1.119,0.462 1.851,1.56 1.851,2.772l0,3l9,0c1.659,0 3,1.341 3,3c0,1.659 -1.341,3 -3,3l-9,0l0,3c0,1.212 -0.732,2.31 -1.851,2.772c-1.122,0.462 -2.415,0.207 -3.273,-0.651l-6,-6c-0.585,-0.585 -0.879,-1.353 -0.879,-2.121c0,-0.768 0.294,-1.536 0.879,-2.121z"
-						/>
+						<path d="m8,32c0,13.254 10.746,24 24,24s24,-10.746 24,-24s-10.746,-24 -24,-24s-24,10.746 -24,24zm42,0c0,9.939 -8.061,18 -18,18s-18,-8.061 -18,-18s8.061,-18 18,-18s18,8.061 18,18zm-29.124,-2.121l6,-6c0.858,-0.855 2.148,-1.113 3.273,-0.651c1.119,0.462 1.851,1.56 1.851,2.772l0,3l9,0c1.659,0 3,1.341 3,3c0,1.659 -1.341,3 -3,3l-9,0l0,3c0,1.212 -0.732,2.31 -1.851,2.772c-1.122,0.462 -2.415,0.207 -3.273,-0.651l-6,-6c-0.585,-0.585 -0.879,-1.353 -0.879,-2.121c0,-0.768 0.294,-1.536 0.879,-2.121z" />
 					</svg>
 				</label>
-				<input id="clear" type="button" value="Clear">
-				<label class="button" title="Clear ([meta]L)" for="clear">
-					<svg xmlns="https://www.w3.org/2000/svg" viewBox="0,0 64,64" enable-background="new 0 0 100 100">
-						<path fill="url(#gradientWhite)" d="m32,56c-13.254,0 -24,-10.746 -24,-24s10.746,-24 24,-24s24,10.746 24,24s-10.746,24 -24,24zm0,-42c-9.939,0 -18,8.061 -18,18s8.061,18 18,18s18,-8.061 18,-18s-8.061,-18 -18,-18zm8.484,26.484c-1.173,1.173 -3.069,1.173 -4.242,0l-4.242,-4.242l-4.242,4.242c-1.173,1.173 -3.072,1.173 -4.245,0s-1.173,-3.069 0,-4.242l4.245,-4.242l-4.245,-4.242c-1.173,-1.173 -1.173,-3.072 0,-4.245s3.072,-1.173 4.245,0l4.242,4.245l4.242,-4.245c1.173,-1.173 3.069,-1.173 4.242,0s1.173,3.072 0,4.245l-4.242,4.242l4.242,4.242c1.173,1.173 1.173,3.072 0,4.242z"
-						/>
+				<label class="button trigger" title="Clear ([meta]L)" for="clear">
+					<input id="clear" type="button" ng-click="clear()">
+					<svg xmlns="https://www.w3.org/2000/svg" viewBox="0,0 64,64">
+						<path d="m32,56c-13.254,0 -24,-10.746 -24,-24s10.746,-24 24,-24s24,10.746 24,24s-10.746,24 -24,24zm0,-42c-9.939,0 -18,8.061 -18,18s8.061,18 18,18s18,-8.061 18,-18s-8.061,-18 -18,-18zm8.484,26.484c-1.173,1.173 -3.069,1.173 -4.242,0l-4.242,-4.242l-4.242,4.242c-1.173,1.173 -3.072,1.173 -4.245,0s-1.173,-3.069 0,-4.242l4.245,-4.242l-4.245,-4.242c-1.173,-1.173 -1.173,-3.072 0,-4.245s3.072,-1.173 4.245,0l4.242,4.245l4.242,-4.245c1.173,-1.173 3.069,-1.173 4.242,0s1.173,3.072 0,4.245l-4.242,4.242l4.242,4.242c1.173,1.173 1.173,3.072 0,4.242z" />
 					</svg>
 				</label>
 			</div>
-			<div id="image_controls">
-			<div id="image_functions" class="button_group">
-				<input id="rotate" type="button" value="rotate">
-				<label class="button" title="Rotate ([meta]O)" for="rotate">
+			<div id="image_controls" ng-controller="ImageController">
+			<div id="image_functions" class="button_group" ng-show="show">
+				<label class="button trigger" title="Rotate ([meta]O)">
+					<input type="button" value="rotate">
 					<svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
-						<path d="m 23,38 -12,0 c -1.656,0 -3,1.344 -3,3 l 0,12 c 0,1.659 1.344,3 3,3 l 12,0 c 1.656,0 3,-1.341 3,-3 l 0,-12 c 0,-1.656 -1.344,-3 -3,-3 z m -3,12 -6,0 0,-6 6,0 0,6 z M 53,8 41,8 c -1.659,0 -3,1.344 -3,3 l 0,12 c 0,1.656 1.341,3 3,3 l 12,0 c 1.659,0 3,-1.344 3,-3 L 56,11 C 56,9.344 54.659,8 53,8 z m -3,12 -6,0 0,-6 6,0 0,6 z M 29,11 c 1.656,0 3,1.344 3,3 0,1.656 -1.344,3 -3,3 l -6,0 c -1.656,0 -3,1.344 -3,3 l 3,0 c 1.212,0 2.31,0.732 2.772,1.851 0.462,1.122 0.207,2.412 -0.651,3.27 l -6,6 C 18.536,31.706 17.768,32 17,32 16.232,32 15.464,31.706 14.879,31.121 l -6,-6 C 8.024,24.263 7.766,22.973 8.228,21.851 8.69,20.732 9.788,20 11,20 l 3,0 c 0,-4.971 4.029,-9 9,-9 l 6,0 z m 20.121,21.879 6,6 c 0.855,0.858 1.113,2.148 0.651,3.27 C 55.31,43.268 54.212,44 53,44 l -3,0 c 0,4.968 -4.032,9 -9,9 l -6,0 c -1.659,0 -3,-1.344 -3,-3 0,-1.659 1.344,-3 3,-3 l 6,0 c 1.659,0 3,-1.341 3,-3 l -3,0 c -1.212,0 -2.31,-0.732 -2.772,-1.851 -0.462,-1.122 -0.207,-2.412 0.651,-3.27 l 6,-6 C 45.464,32.294 46.232,32 47,32 c 0.768,0 1.536,0.294 2.121,0.879 z"
-						fill="url(#gradientWhite)" />
+						<path d="m 23,38 -12,0 c -1.656,0 -3,1.344 -3,3 l 0,12 c 0,1.659 1.344,3 3,3 l 12,0 c 1.656,0 3,-1.341 3,-3 l 0,-12 c 0,-1.656 -1.344,-3 -3,-3 z m -3,12 -6,0 0,-6 6,0 0,6 z M 53,8 41,8 c -1.659,0 -3,1.344 -3,3 l 0,12 c 0,1.656 1.341,3 3,3 l 12,0 c 1.659,0 3,-1.344 3,-3 L 56,11 C 56,9.344 54.659,8 53,8 z m -3,12 -6,0 0,-6 6,0 0,6 z M 29,11 c 1.656,0 3,1.344 3,3 0,1.656 -1.344,3 -3,3 l -6,0 c -1.656,0 -3,1.344 -3,3 l 3,0 c 1.212,0 2.31,0.732 2.772,1.851 0.462,1.122 0.207,2.412 -0.651,3.27 l -6,6 C 18.536,31.706 17.768,32 17,32 16.232,32 15.464,31.706 14.879,31.121 l -6,-6 C 8.024,24.263 7.766,22.973 8.228,21.851 8.69,20.732 9.788,20 11,20 l 3,0 c 0,-4.971 4.029,-9 9,-9 l 6,0 z m 20.121,21.879 6,6 c 0.855,0.858 1.113,2.148 0.651,3.27 C 55.31,43.268 54.212,44 53,44 l -3,0 c 0,4.968 -4.032,9 -9,9 l -6,0 c -1.659,0 -3,-1.344 -3,-3 0,-1.659 1.344,-3 3,-3 l 6,0 c 1.659,0 3,-1.341 3,-3 l -3,0 c -1.212,0 -2.31,-0.732 -2.772,-1.851 -0.462,-1.122 -0.207,-2.412 0.651,-3.27 l 6,-6 C 45.464,32.294 46.232,32 47,32 c 0.768,0 1.536,0.294 2.121,0.879 z" />
 					</svg>
 				</label>
-				<input id="refresh" type="button" value="refresh">
-				<label class="button" title="Refresh ([meta]F)" for="refresh">
-					<svg xmlns="https://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16"><path d="m 55.244226,34.072183 c 0.52035,1.256072 0.231639,2.70022 -0.728491,3.660745 l -6.714195,6.716964 c -0.654634,0.654904 -1.514051,0.984035 -2.373467,0.984035 -0.859417,0 -1.718834,-0.329131 -2.373468,-0.984035 L 36.34041,37.732928 C 35.38028,36.772403 35.094926,35.328255 35.611919,34.072183 36.128912,32.81947 37.35761,32 38.713878,32 L 42.071,32 C 42.071,24.581114 36.058413,18.566073 28.642585,18.566073 21.226757,18.566073 15.214,24.581114 15.214,32 c 0,7.418886 6.012757,13.433927 13.428585,13.433927 1.749048,0 3.404097,-0.355999 4.93829,-0.963884 l 5.062503,5.004137 C 35.695847,51.166855 32.285036,52.15089 28.642585,52.15089 17.520521,52.15089 8.5,43.12665 8.5,32 8.5,20.87335 17.520521,11.84911 28.642585,11.84911 39.764649,11.84911 48.78517,20.87335 48.78517,32 l 3.357098,0 c 1.356267,0 2.584965,0.81947 3.101958,2.072183 z" fill="url(#gradientWhite)"/></svg>
+				
+				<label class="button trigger" title="Refresh ([meta]F)">
+					<input type="button" value="refresh">
+					<svg xmlns="https://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16"><path d="m 55.244226,34.072183 c 0.52035,1.256072 0.231639,2.70022 -0.728491,3.660745 l -6.714195,6.716964 c -0.654634,0.654904 -1.514051,0.984035 -2.373467,0.984035 -0.859417,0 -1.718834,-0.329131 -2.373468,-0.984035 L 36.34041,37.732928 C 35.38028,36.772403 35.094926,35.328255 35.611919,34.072183 36.128912,32.81947 37.35761,32 38.713878,32 L 42.071,32 C 42.071,24.581114 36.058413,18.566073 28.642585,18.566073 21.226757,18.566073 15.214,24.581114 15.214,32 c 0,7.418886 6.012757,13.433927 13.428585,13.433927 1.749048,0 3.404097,-0.355999 4.93829,-0.963884 l 5.062503,5.004137 C 35.695847,51.166855 32.285036,52.15089 28.642585,52.15089 17.520521,52.15089 8.5,43.12665 8.5,32 8.5,20.87335 17.520521,11.84911 28.642585,11.84911 39.764649,11.84911 48.78517,20.87335 48.78517,32 l 3.357098,0 c 1.356267,0 2.584965,0.81947 3.101958,2.072183 z"/></svg>
 				</label>
 			</div>
-			<input id="image" type="checkbox" value="image" checked>
-			<label class="button" title="Image ([meta]M)" for="image">
+			
+			<label class="button" title="Image ([meta]M)" ng-class="{active: show}">
+				<input ng-model="show" type="checkbox" value="image">
 				<svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
-					<path d="m 27.502688,40.903563 c -2.182563,0 -5.598875,-8.630375 -7.252688,-5.140625 -0.687375,1.451125 -1.833,4.544312 -2.9375,7.020625 l 0,0.966437 c 0,1.624438 1.316,2.9375 2.9375,2.9375 l 23.5,0 c 1.624438,0 2.9375,-1.313062 2.9375,-2.9375 l 0,-1.368875 C 45.027813,38.644625 42.877563,32.452375 40.8125,30.073 36.588375,25.2085 31.54175,40.903563 27.502688,40.903563 z M 46.6875,8.5000001 l -29.375,0 C 12.445063,8.5000001 8.5,12.445063 8.5,17.3125 l 0,29.375 c 0,4.8645 3.945063,8.8125 8.8125,8.8125 l 29.375,0 C 51.552,55.5 55.5,51.552 55.5,46.6875 l 0,-29.375 c 0,-4.867437 -3.948,-8.8124999 -8.8125,-8.8124999 z M 49.625,46.6875 c 0,1.624438 -1.313062,2.9375 -2.9375,2.9375 l -29.375,0 c -1.6215,0 -2.9375,-1.313062 -2.9375,-2.9375 l 0,-29.375 c 0,-1.6215 1.316,-2.9375 2.9375,-2.9375 l 29.375,0 c 1.624438,0 2.9375,1.316 2.9375,2.9375 l 0,29.375 z M 21.71875,26.125 c 2.435188,0 4.40625,-1.971062 4.40625,-4.40625 0,-2.435187 -1.971062,-4.40625 -4.40625,-4.40625 -2.435187,0 -4.40625,1.971063 -4.40625,4.40625 0,2.435188 1.971063,4.40625 4.40625,4.40625 z" fill="url(#gradientWhite)" />
+					<!--path d="m 27.502688,40.903563 c -2.182563,0 -5.598875,-8.630375 -7.252688,-5.140625 -0.687375,1.451125 -1.833,4.544312 -2.9375,7.020625 l 0,0.966437 c 0,1.624438 1.316,2.9375 2.9375,2.9375 l 23.5,0 c 1.624438,0 2.9375,-1.313062 2.9375,-2.9375 l 0,-1.368875 C 45.027813,38.644625 42.877563,32.452375 40.8125,30.073 36.588375,25.2085 31.54175,40.903563 27.502688,40.903563 z M 46.6875,8.5000001 l -29.375,0 C 12.445063,8.5000001 8.5,12.445063 8.5,17.3125 l 0,29.375 c 0,4.8645 3.945063,8.8125 8.8125,8.8125 l 29.375,0 C 51.552,55.5 55.5,51.552 55.5,46.6875 l 0,-29.375 c 0,-4.867437 -3.948,-8.8124999 -8.8125,-8.8124999 z M 49.625,46.6875 c 0,1.624438 -1.313062,2.9375 -2.9375,2.9375 l -29.375,0 c -1.6215,0 -2.9375,-1.313062 -2.9375,-2.9375 l 0,-29.375 c 0,-1.6215 1.316,-2.9375 2.9375,-2.9375 l 29.375,0 c 1.624438,0 2.9375,1.316 2.9375,2.9375 l 0,29.375 z M 21.71875,26.125 c 2.435188,0 4.40625,-1.971062 4.40625,-4.40625 0,-2.435187 -1.971062,-4.40625 -4.40625,-4.40625 -2.435187,0 -4.40625,1.971063 -4.40625,4.40625 0,2.435188 1.971063,4.40625 4.40625,4.40625 z" /-->
+					<path d="m 53,17 -6,0 c -1.659,0 -3,-1.344 -3,-3 0,-1.656 -1.341,-3 -3,-3 l -18,0 c -1.659,0 -3,1.344 -3,3 0,1.656 -1.341,3 -3,3 l -6,0 c -1.659,0 -3,1.344 -3,3 l 0,30 c 0,1.659 1.341,3 3,3 l 42,0 c 1.659,0 3,-1.341 3,-3 l 0,-30 c 0,-1.656 -1.341,-3 -3,-3 z M 32,47 c -8.286,0 -15,-6.714 -15,-15 0,-8.283 6.714,-15 15,-15 8.286,0 15,6.717 15,15 0,8.286 -6.714,15 -15,15 z m 0,-24 c -4.971,0 -9,4.029 -9,9 0,4.968 4.029,9 9,9 4.971,0 9,-4.032 9,-9 0,-4.971 -4.029,-9 -9,-9 z"/>
 				</svg>
 			</label>
+			<img ng-show="show" id="static_map" src="" alt="Static Map" title="Static Map"/>
 		</div>
+		
 		<div id="settings_wrapper">
-		<input id="settings" type="checkbox" value="settings">
-		<label class="button" title="Settings ([meta]?)" for="settings">
+		<input id="settings_button" type="checkbox" value="settings">
+		<label class="button" title="Settings ([meta]?)" for="settings_button">
 			<svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
-				<path d="M 32,8.5 C 19.022125,8.5 8.5,19.022125 8.5,32 8.5,44.977875 19.022125,55.5 32,55.5 44.977875,55.5 55.5,44.977875 55.5,32 55.5,19.022125 44.977875,8.5 32,8.5 z m 14.6875,26.4375 -3.354625,0 c -0.276125,1.066313 -0.699125,2.068 -1.2455,2.999188 l 2.376438,2.3735 c 1.145625,1.148562 1.145625,3.008 0,4.156562 -1.148563,1.145625 -3.008,1.145625 -4.156563,0 l -2.3735,-2.376437 c -0.92825,0.543437 -1.929937,0.969375 -2.99625,1.242562 l 0,3.354625 c 0,1.624438 -1.313062,2.9375 -2.9375,2.9375 -1.624437,0 -2.9375,-1.313062 -2.9375,-2.9375 l 0,-3.354625 c -1.066312,-0.276125 -2.068,-0.699125 -2.999187,-1.2455 l -2.3735,2.376438 c -1.148563,1.145625 -3.008,1.145625 -4.153625,0 -1.148563,-1.148563 -1.148563,-3.008 0,-4.156563 l 2.3735,-2.3735 C 21.36625,37.0055 20.940313,36.003813 20.667125,34.9375 l -3.354625,0 c -1.624437,0 -2.9375,-1.313062 -2.9375,-2.9375 0,-1.624437 1.313063,-2.9375 2.9375,-2.9375 l 3.354625,0 c 0.273188,-1.066312 0.699125,-2.068 1.242563,-2.999187 L 19.539125,23.69275 c -1.148562,-1.148562 -1.148562,-3.008 0,-4.153625 1.145625,-1.148562 3.005063,-1.148562 4.153625,0 l 2.3735,2.3735 c 0.92825,-0.546375 1.929938,-0.972312 2.99625,-1.2455 l 0,-3.354625 c 0,-1.624437 1.313063,-2.9375 2.9375,-2.9375 1.624438,0 2.9375,1.313063 2.9375,2.9375 l 0,3.354625 c 1.066313,0.276125 2.068,0.699125 2.999188,1.2455 l 2.3735,-2.3735 c 1.148562,-1.148562 3.008,-1.148562 4.156562,0 1.145625,1.145625 1.145625,3.005063 0,4.153625 l -2.376437,2.3735 c 0.543437,0.92825 0.969375,1.929938 1.242562,2.99625 l 3.354625,0 c 1.624438,0 2.9375,1.313063 2.9375,2.9375 0,1.624438 -1.313062,2.9375 -2.9375,2.9375 z M 32,26.125 c -3.243,0 -5.875,2.632 -5.875,5.875 0,3.243 2.632,5.875 5.875,5.875 3.243,0 5.875,-2.632 5.875,-5.875 0,-3.243 -2.632,-5.875 -5.875,-5.875 z" fill="url(#gradientWhite)" />
+				<path d="M 32,8.5 C 19.022125,8.5 8.5,19.022125 8.5,32 8.5,44.977875 19.022125,55.5 32,55.5 44.977875,55.5 55.5,44.977875 55.5,32 55.5,19.022125 44.977875,8.5 32,8.5 z m 14.6875,26.4375 -3.354625,0 c -0.276125,1.066313 -0.699125,2.068 -1.2455,2.999188 l 2.376438,2.3735 c 1.145625,1.148562 1.145625,3.008 0,4.156562 -1.148563,1.145625 -3.008,1.145625 -4.156563,0 l -2.3735,-2.376437 c -0.92825,0.543437 -1.929937,0.969375 -2.99625,1.242562 l 0,3.354625 c 0,1.624438 -1.313062,2.9375 -2.9375,2.9375 -1.624437,0 -2.9375,-1.313062 -2.9375,-2.9375 l 0,-3.354625 c -1.066312,-0.276125 -2.068,-0.699125 -2.999187,-1.2455 l -2.3735,2.376438 c -1.148563,1.145625 -3.008,1.145625 -4.153625,0 -1.148563,-1.148563 -1.148563,-3.008 0,-4.156563 l 2.3735,-2.3735 C 21.36625,37.0055 20.940313,36.003813 20.667125,34.9375 l -3.354625,0 c -1.624437,0 -2.9375,-1.313062 -2.9375,-2.9375 0,-1.624437 1.313063,-2.9375 2.9375,-2.9375 l 3.354625,0 c 0.273188,-1.066312 0.699125,-2.068 1.242563,-2.999187 L 19.539125,23.69275 c -1.148562,-1.148562 -1.148562,-3.008 0,-4.153625 1.145625,-1.148562 3.005063,-1.148562 4.153625,0 l 2.3735,2.3735 c 0.92825,-0.546375 1.929938,-0.972312 2.99625,-1.2455 l 0,-3.354625 c 0,-1.624437 1.313063,-2.9375 2.9375,-2.9375 1.624438,0 2.9375,1.313063 2.9375,2.9375 l 0,3.354625 c 1.066313,0.276125 2.068,0.699125 2.999188,1.2455 l 2.3735,-2.3735 c 1.148562,-1.148562 3.008,-1.148562 4.156562,0 1.145625,1.145625 1.145625,3.005063 0,4.153625 l -2.376437,2.3735 c 0.543437,0.92825 0.969375,1.929938 1.242562,2.99625 l 3.354625,0 c 1.624438,0 2.9375,1.313063 2.9375,2.9375 0,1.624438 -1.313062,2.9375 -2.9375,2.9375 z M 32,26.125 c -3.243,0 -5.875,2.632 -5.875,5.875 0,3.243 2.632,5.875 5.875,5.875 3.243,0 5.875,-2.632 5.875,-5.875 0,-3.243 -2.632,-5.875 -5.875,-5.875 z" />
 			</svg>
 		</label>
 	</div>
 	</div>
-		<input id="search_box" type="text" placeholder="Search">
-		<img id="static_map" src="https://maps.googleapis.com/maps/api/staticmap?size=640x640&scale=2&style=visibility:off&style=feature:road%7Cvisibility:on&style=element:geometry.fill%7Clightness:100&style=element:labels.text.stroke%7Clightness:100&style=element:geometry.stroke%7Clightness:-50%7Csaturation:-100&sensor=false" alt="Static Map" title="Static Map"/>
-		<div id="map_canvas"></div>
+	<div ng-controller="MapController" id="map_wrapper">
+		
+		<div id="throbber" ng-controller="ThrobController" ng-hide="count == 0">
+			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
+				<circle cy="32" cx="32" r="16"/>
+				<circle cy="32" cx="80" r="16"/>
+				<circle cy="32" cx="128" r="16"/>
+			</svg>
+		</div>
+		
+		<div id="map_canvas" ui-map="map" ui-options="options" ui-event="{'map-click': 'map_click($params)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'map_idle()'}"></div>
+		<div ng-controller="DrawingController">
+			<div ng-repeat="drawing in drawings">
+				<div ng-repeat="node in drawing.nodes" ui-map-marker="node._marker" ui-event="{ 'map-click': 'marker_click($parent.$index, $index)', 'map-rightclick': 'marker_rightclick($parent.$index, $index)', 'map-dragstart': 'marker_dragstart($parent.$index, $index)', 'map-dragend': 'marker_dragend($parent.$index, $index)' }"></div>
+			</div>
+		</div>
+	</div>
+	<div id="places_attributions"></div>
+	
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular-route.js"></script>
+	<script src="event.js"></script>
+	<script src="ui-map.js"></script>
+	<script src="ngStorage.min.js"></script>
+	<script src="boundaries.js"></script>
 	</body>
 </html>
