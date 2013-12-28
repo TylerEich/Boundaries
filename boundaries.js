@@ -863,7 +863,6 @@ function SearchController($scope, $sce, $location, settingService, utilityServic
     $scope.active = 0;
 
     // Bolds matched substrings
-
     function formatSuggestions(suggestions) {
         for (var i = 0; i < suggestions.length; i++) {
             var desc = suggestions[i].description;
@@ -882,7 +881,6 @@ function SearchController($scope, $sce, $location, settingService, utilityServic
         return suggestions;
     }
     // Notifies user that no results were found
-
     function errorMessage(message) {
         if (typeof message == 'string') return [{
             description: $sce.trustAsHtml('<i>' + message + '</i>'),
@@ -890,6 +888,7 @@ function SearchController($scope, $sce, $location, settingService, utilityServic
         }]
     }
 
+    // Get suggestions when query changes
     $scope.$watch('query', function() {
         utilityService.map.suggestions($scope.query).then(function(suggestions) {
             $scope.suggestions = formatSuggestions(suggestions);
@@ -899,11 +898,6 @@ function SearchController($scope, $sce, $location, settingService, utilityServic
             $scope.active = -1;
         });
     });
-    $scope.$watch('[query, show]', function() {
-        settingService.settings.search.query = $scope.query;
-        settingService.settings.search.show = $scope.show;
-        settingService.Save();
-    }, true);
 }
 
 
