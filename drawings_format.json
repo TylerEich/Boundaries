@@ -1,0 +1,15 @@
+{
+	"drawings": [{
+		"polygon": false,
+		"activeColor": 1,
+		"_poly": {},
+		"nodes":[{
+			"index": 0,
+			"lat": 10,
+			"lng": 10,
+			"rigid": true,
+			"_marker": {},
+			"_unbind": {}
+		}]
+	}]
+}
