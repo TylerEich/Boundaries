@@ -7,7 +7,7 @@ angular.bootstrap(document.querySelector('#map_canvas'), ['boundaries']);
 
 // Register all services
 boundaries.service('settingService', settingService);
-boundaries.service('utilityService', ['$rootScope', '$q', '$http', utilityService]);
+boundaries.service('utilityService', ['$rootScope', '$localStorage', '$q', '$http', utilityService]);
 
 // Register all controllers
 // Every controller that needs to communicate gets $rootScope
@@ -16,9 +16,9 @@ boundaries.controller('ModeController', ['$scope', 'settingService', ModeControl
 boundaries.controller('ActionController', ['$scope', '$rootScope', '$localStorage', ActionController]);
 boundaries.controller('MapController', ['$scope', '$rootScope', '$location', 'settingService', 'utilityService', MapController]);
 boundaries.controller('ImageController', ['$scope', 'settingService', ImageController]);
-boundaries.controller('DrawingController', ['$scope', '$rootScope', '$location', '$localStorage', 'utilityService', DrawingController]);
+boundaries.controller('DrawingController', ['$scope', '$rootScope', '$location', '$localStorage', '$q', 'utilityService', DrawingController]);
 boundaries.controller('SearchController', ['$scope', '$sce', '$location', 'settingService', 'utilityService', SearchController]);
-boundaries.controller('ThrobController', ['$scope', '$rootScope', '$location', ThrobController]);
+boundaries.controller('ThrobController', ['$scope', '$rootScope', '$localStorage', ThrobController]);
 
 // Configure deep-linking for Boundaries
 boundaries.config(function($locationProvider, $routeProvider) {
@@ -163,15 +163,24 @@ function settingService() {
 }
 // Useful functions available to multiple controllers
 
-function utilityService($rootScope, $q, $http) {
+function utilityService($rootScope, $localStorage, $q, $http) {
     var directions = new google.maps.DirectionsService();
     var autocomplete = new google.maps.places.AutocompleteService();
     var placeService = new google.maps.places.PlacesService(document.querySelector('#places_attributions'));
     var map;
+    $rootScope.$storage = $localStorage;
     $rootScope.$on('map', function(event, param) {
-        console.log('utilityService: map');
         map = param;
     });
+    this.throb = {
+        on: function() {
+            $rootScope.$broadcast('throb', true);
+        },
+        off: function() {
+            if ($rootScope.$storage.throbCounter <= 0) return;
+            $rootScope.$broadcast('throb', false);
+        }
+    };
     this.color = {
         toHex: function(rgba, alpha) {
             var rgba = angular.copy(rgba);
@@ -233,26 +242,25 @@ function utilityService($rootScope, $q, $http) {
                 reference: reference
             }, revealOnMap);
         },
-        directions: function(start, end) {
+        makePath: function(start, end, rigid) {
             var deferred = $q.defer();
-            
-            // Get the directions. The callback returns a promise, which can be handled synchronously.
-            directions.route({
-                origin: start,
-                destination: end,
-                travelMode: google.maps.TravelMode.DRIVING
-            }, function(result, status) {
-                if (status == google.maps.DirectionsStatus.OK) {
-                    // Resolve with path
-                    var path = result.routes[0].overview_path;
-                    deferred.resolve(path);
-                } else {
-                    // Reject with status
-                    deferred.reject(status);
-                }
-                return deferred.promise;
-            });
-            
+            if (rigid) {
+                deferred.resolve([start, end]);
+            } else {
+                directions.route({
+                    origin: start,
+                    destination: end,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }, function(result, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        // Resolve with path
+                        deferred.resolve(result.routes[0].overview_path);
+                    } else {
+                        // Reject with status
+                        deferred.reject(status);
+                    }
+                });
+            }
             return deferred.promise;
         }
     };
@@ -283,15 +291,6 @@ function utilityService($rootScope, $q, $http) {
                 cache: true
             });
             return promise;
-        }
-    },
-    this.throb = {
-        on: function() {
-            $rootScope.$broadcast('throb', true);
-        },
-        off: function() {
-            if (VariableService.throb <= 0) return;
-            $rootScope.$broadcast('throb', false);
         }
     };
 }
@@ -490,79 +489,106 @@ function MapController($scope, $rootScope, $location, $localStorage, utilityServ
     });
 }
 
-function DrawingController($scope, $rootScope, $location, $localStorage, utilityService) {
+function DrawingController($scope, $rootScope, $location, $localStorage, $q, utilityService) {
     $scope.$storage = $localStorage.$default({
         drawings: [],
         new: true
     });
 
-    function makeHexColor(alpha) {
-        var color = $scope.colors[$scope.activeColor];
+    function makeHexColor(drawing, alpha) {
+        var color = $scope.colors[drawing.activeColor];
         return utilityService.color.toHex(color.rgba, alpha);
     }
-    function makeIcon() {
+    function makeIcon(drawing, isNodeMarker, hide) {
+        var scale;
+        
+        if (hide) {
+            return {
+                path: google.maps.SymbolPath.CIRCLE,
+                strokeOpacity: 0,
+                strokeWeight: 0
+            }
+        }
+        
+        if (isNodeMarker) {
+            scale = 20;
+        } else {
+            scale = 10;
+        }
+        
         return {
             path: google.maps.SymbolPath.CIRCLE,
-            scale: 10,
-            strokeColor: makeHexColor(false),
+            scale: scale,
+            strokeColor: makeHexColor(drawing, false),
             strokeOpacity: 1,
             strokeWeight: 2.5
         };
     }
     function makeLatLng(node) {
-        console.log('makeLatLng: node ->', node);
         return new google.maps.LatLng(node.lat, node.lng);
     }
-    function makeMarkerOptions(node) {
+    function makeMarkerOptions(drawing, node, isNodeMarker) {
+        var clickable, cursor, draggable;
+        
+        if (isNodeMarker) {
+            clickable = false;
+            cursor = 'none';
+            draggable = false;
+        } else {
+            clickable = true;
+            cursor = 'pointer';
+            draggable = true;
+        }
+        
         return {
-            clickable: true,
+            clickable: clickable,
             crossOnDrag: false,
-            cursor: 'pointer',
-            draggable: true,
+            cursor: cursor,
+            draggable: draggable,
             flat: true,
-            icon: makeIcon(),
-            map: $scope.map,
+            icon: makeIcon(drawing, isNodeMarker),
+            map: map,
             position: makeLatLng(node)
         };
     }
-    function makeMarker(node) {
-        return new google.maps.Marker(makeMarkerOptions(node));
+    function makeMarker(drawing, node, isNodeMarker) {
+        return new google.maps.Marker(makeMarkerOptions(drawing, node, isNodeMarker));
     }
-    function makePolylineOptions() {
-        var color = $scope.colors[$scope.activeColor];
+    function makePolylineOptions(drawing) {
+        var color = $scope.colors[drawing.activeColor];
         return {
             clickable: true,
             draggable: false,
             editable: false,
-            strokeColor: '#' + makeHexColor(false),
+            strokeColor: '#' + makeHexColor(drawing, false),
             strokeOpacity: color.rgba.a,
             strokeWeight: color.weight,
-            map: $scope.map
+            map: map
         };
     }
-    function makePolygonOptions() {
-        var color = $scope.colors[$scope.activeColor];
+    function makePolygonOptions(drawing) {
+        var color = $scope.colors[drawing.activeColor];
         return {
             clickable: true,
             draggable: false,
             editable: false,
-            fillColor: '#' + makeHexColor(false),
+            fillColor: '#' + makeHexColor(drawing, false),
             fillOpacity: color.rgba.a,
             map: $scope.map
         };
     }
-    function makePolyline() {
-        return new google.maps.Polyline(makePolylineOptions());
+    function makePolyline(drawing) {
+        return new google.maps.Polyline(makePolylineOptions(drawing));
     }
-    function makePolygon() {
-        return new google.maps.Polygon(makePolygonOptions(node));
+    function makePolygon(drawing) {
+        return new google.maps.Polygon(makePolygonOptions(drawing));
     }
-    function makePoly() {
-        if ($scope.polygon) return makePolygon();
-        else return makePolyline();
+    function makePoly(drawing) {
+        if (drawing.polygon) return makePolygon(drawing);
+        else return makePolyline(drawing);
     }
     function makePath(start, end, rigid) {
-        var path;
+        var deferred;
         if (rigid) {
             path = [start, end];
         } else {
@@ -570,11 +596,13 @@ function DrawingController($scope, $rootScope, $location, $localStorage, utility
             utilityService.map.directions(start, end).then(function(resultPath) {
                 // Success
                 path = resultPath;
+                console.log('makePath success:', path);
             }, function(status) {
                 // Failure
                 console.error('The directions request failed. Status:', status);
             });
         }
+        console.log('makePath:', path);
         return path;
     }
 
@@ -583,8 +611,6 @@ function DrawingController($scope, $rootScope, $location, $localStorage, utility
         else $scope.drawings.splice(drawingIndex, removeLength);
     }
     function splicePolyPath(drawingIndex, nodeIndex, removeLength, newPath) {
-        console.log(drawingIndex, nodeIndex, removeLength, newPath);
-        
         if (nodeIndex == -1) nodeIndex = $scope.drawings[drawingIndex].nodes.length - 1;
         
         var path = $scope.drawings[drawingIndex]._poly.getPath();
@@ -607,14 +633,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, utility
             console.error('drawingIndex > $scope.drawings.length');
             return;
         }
-        /*// If this is a new drawing...
-        if (drawingIndex == $scope.drawings.length || drawingIndex == -1) {
-            // ...then nodeIndex must be the end of the path
-            if (nodeIndex > 0 || nodeIndex < -1) {
-                console.error('nodeIndex > 0 || nodeIndex < -1');
-                return;
-            }
-        }*/
+
         var drawing = $scope.drawings[drawingIndex];
         
         drawing.nodes.splice(nodeIndex, removeLength, newNode);
@@ -625,25 +644,43 @@ function DrawingController($scope, $rootScope, $location, $localStorage, utility
         var path = [];
         
         // Create a marker at the specified location
-        newNode._marker = makeMarker(newNode);
+        drawing.nodes[nodeIndex]._marker = makeMarker(drawing, newNode);
         
         // Generate polyline to be spliced later
-        console.log('spliceNode, calling makePath with nodeIndex:', nodeIndex);
         if (drawing.nodes.length > 1) {
-            path = makePath(makeLatLng(drawing.nodes[nodeIndex - 1]), makeLatLng(drawing.nodes[nodeIndex]), newNode.rigid);
-        }
-
-        // Add all previous indicies to find current index
-        var pathIndex = 0;
-        for (var i = 0; i < nodeIndex; i++) {
-            pathIndex += drawing.nodes[i].index;
-        }
-        // Add length of new path to index
-        pathIndex += path.length;
-        $scope.drawings[drawingIndex].nodes[nodeIndex].index = pathIndex;
+            // Let user know something's going on
+            utilityService.throb.on();
+            
+            utilityService.map.makePath(makeLatLng(drawing.nodes[nodeIndex - 1]), makeLatLng(drawing.nodes[nodeIndex]), drawing.nodes[nodeIndex].rigid).then(function(path) {
+                // Add all previous indicies to find current index
+                var pathIndex = 0;
+                for (var i = 0; i < nodeIndex; i++) {
+                    pathIndex += drawing.nodes[i].index;
+                }
         
-        // Update the poly
-        splicePolyPath(drawingIndex, nodeIndex, 0, path);
+                // Add length of new path to index
+                pathIndex += path.length;
+                drawing.nodes[nodeIndex].index = pathIndex;
+        
+                // Update the poly
+                splicePolyPath(drawingIndex, nodeIndex, 0, path);
+            }).finally(function() {
+                utilityService.throb.off();
+            });
+        }
+    }
+    
+    function markNode(drawingIndex, nodeIndex, hide) {
+        if (typeof drawingIndex === 'number' && typeof nodeIndex === 'number') {
+            var drawing = $scope.drawings[drawingIndex];
+            var node = drawing.nodes[nodeIndex];
+        }
+        var icon = makeIcon(drawing, true, hide);
+        
+        if (!hide) {
+            nodeMarker.setPosition(makeLatLng(node));
+        }
+        nodeMarker.setIcon(icon);
     }
     
     function map_click($event, $param) {
@@ -657,13 +694,13 @@ function DrawingController($scope, $rootScope, $location, $localStorage, utility
         
         if ($scope.$storage.new) {
             // Add a new drawing
-            spliceDrawing(drawingIndex, 0, {
+            var drawing = {
                 polygon: $scope.polygon,
                 activeColor: $scope.activeColor,
-                _poly: makePoly(newNode,
-                                $scope.polygon),
                 nodes: []
-            });
+            }
+            drawing._poly = makePoly(drawing);
+            spliceDrawing(drawingIndex, 0, drawing);
         } else {
             // Set to length - 1 for last drawing
             drawingIndex--;
@@ -675,6 +712,10 @@ function DrawingController($scope, $rootScope, $location, $localStorage, utility
         // Add node to end of current drawing
         spliceNode(drawingIndex, nodeIndex, 0, newNode);
         
+        // Identify the latest node
+        markNode(drawingIndex, nodeIndex);
+        
+        // Now drawing; new should be false so lines connect.
         $scope.$storage.new = false;
     }
     $scope.marker_click = function($event) {
@@ -691,12 +732,15 @@ function DrawingController($scope, $rootScope, $location, $localStorage, utility
         }
         $scope.drawings = [];
         
+        // Hide nodeMarker
+        markNode(null, null, true);
     }
     function undo() {
         
     }
 
     var map;
+    var nodeMarker;
     $scope.drawings = [];
     $scope.colors = [{
         name: 'Red',
@@ -727,11 +771,18 @@ function DrawingController($scope, $rootScope, $location, $localStorage, utility
         weight: 10
     }];
     $scope.activeColor = 1;
-    $scope.rigid = true;
+    $scope.rigid = false;
+    $scope.polygon = false;
     
     // When MapController emits the value of map, capture it.
     $scope.$on('map', function($event, $param) {
         map = $param;
+        nodeMarker = makeMarker({
+            activeColor: $scope.activeColor
+        }, {
+            lat: 0,
+            lng: 0
+        }, true);
     });
     $scope.$on('map.click', map_click);
     $scope.$on('drawing.clear', clear);
@@ -770,9 +821,6 @@ function DrawingController($scope, $rootScope, $location, $localStorage, utility
 function ActionController($scope, $rootScope, $localStorage) {
     $scope.$storage = $localStorage;
     
-    $scope.$watch('$storage.new', function() {
-        console.log('ActionController:', $scope.$storage.new);
-    });
     $scope.undo = function() {
         $rootScope.$broadcast('drawing.undo');
     };
@@ -825,11 +873,13 @@ function ImageController($scope, settingService) {
 // 
 // }
 
-function ThrobController($scope, $rootScope, $location, $routeParams) {
-    $scope.count = 0;
-    $rootScope.$on('throb', function(event, count) {
-        if (count === true) $scope.count++;
-        if (count === false) $scope.count--;
+function ThrobController($scope, $localStorage) {
+    $scope.$storage = $localStorage;
+    
+    $scope.$storage.throbCounter = 0;
+    $scope.$on('throb', function(event, count) {
+        if (count === true) $scope.$storage.throbCounter++;
+        if (count === false) $scope.$storage.throbCounter--;
     });
 }
 
