@@ -3,57 +3,59 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<title>Boundaries</title>
-		<link rel="icon" type="image/png" href="icon.png"/>
-		<link rel="apple-touch-icon-precomposed" href="icon_ios.png"/>
+		<link rel="icon" type="image/png" href="icons/icon.png"/>
+		<link rel="apple-touch-icon-precomposed" href="icons/icon_ios.png"/>
 		<!-- TODO: uncomment <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet' type='text/css'> -->
-		<link rel="stylesheet" href="boundaries.css">
-		<script src="prefixfree.min.js"></script>
+		<link rel="stylesheet" href="style.css">
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
 	</head>
 	<body>
-		<!-- <div id="throbber" ng-controller="ThrobController" ng-hide="count == 0">
-			<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
-				<circle cy="32" cx="32" r="16"/>
-				<circle cy="32" cx="80" r="16"/>
-				<circle cy="32" cx="128" r="16"/>
-			</svg>
-		</div> -->
 			<!--TODO: Usage help via ngRoute (e.g. ./help)-->
 		<div id="settings" ng-hide="true">
-					<div ng-controller="ImageController">
-						<div id="size">
-							<input type="number" min="0" ng-model="width">
-							<input type="number" min="0" ng-model="height">
-							<p id="actual_size">{{ PxSize().width * 2 }}&nbsp;&#x00D7;&nbsp;{{ PxSize().height * 2 }}</p>
-						</div>
-						<div id="format">
-							Image format:
-							<select ng-model="format">
-								<option value="jpg">JPG</option>
-								<option value="png">PNG</option>
-							</select>
-						</div>
-						<div id="rotate">
-							Orientation:
-							<select ng-model="rotate">
-								<option value="auto">Automatic</option>
-								<option value="portrait">Landscape</option>
-								<option value="landscape">Portrait</option>
-							</select>
-						</div>
-					</div>
-					<div ng-controller="MapController">
-						<div id="map_styles">
-							<div class="style_rule" ng-repeat="rule in style">
-								<button>-</button>
-								<p>{{ rule.feature }}</p>
-								<p>{{ rule.element }}</p>
-							</div>
-							<button>+</button>
-						</div>
-					</div>
-					<div ng-controller="DrawingController">
-					</div>
-						</div>
+	<div ng-controller="SettingController">
+		<div id="size">
+			<input type="number" min="0" ng-model="$storage.width"> <input type="number" min="0" ng-model="$storage.height">
+			<p id="actual_size">
+				{{ pxSize(1280, 1280).width }}&nbsp;&#x00D7;&nbsp;{{ pxSize(1280, 1280).height }}
+			</p>
+		</div>
+		<div id="format">
+			Image format: <select ng-model="$storage.format">
+				<option value="jpg">
+					JPG
+				</option>
+				<option value="png">
+					PNG
+				</option>
+			</select>
+		</div>
+		<!-- <div id="rotate">
+			Orientation: <select ng-model="rotate">
+				<option value="auto">
+					Automatic
+				</option>
+				<option value="portrait">
+					Landscape
+				</option>
+				<option value="landscape">
+					Portrait
+				</option>
+			</select>
+		</div> -->
+		<div id="map_styles">
+			<div class="rule" ng-repeat="rule in $storage.style">
+				<button>-</button>
+				<span class="feature">
+					{{ rule.feature }}
+				</span>
+				<span class="element">
+					{{ rule.element }}
+				</span>
+			</div><button>+</button>
+		</div>
+	</div>
+</div>
+
 		<div id="sidebar" style="width: 20em;">
 			<div id="search" ng-controller="SearchController">
 				<div id="search_wrapper" ng-show="show" ng-animate="'slide'" ng-keydown="keydown($event)">
@@ -71,28 +73,28 @@
 				</label>
 			</div>
 			<div ng-controller="ColorController" id="colors" class="button_group">
-				<label ng-repeat="color in choices" class="button" title="{{ color.name }}" ng-class="{active: $index == $parent.active}">
-					<input name="colors" ng-value="$index" type="radio" ng-model="$parent.active">
+				<label ng-repeat="color in $storage.colors" class="button" title="{{ color.name }}" ng-class="{active: $index == $parent.$storage.activeColor}">
+					<input name="colors" ng-value="$index" type="radio" ng-model="$parent.$storage.activeColor">
 					<svg xmlns="https://www.w3.org/2000/svg" viewbox="0,0 64,64">
 						<circle fill="#{{ Hex(color.rgba) }}" stroke="#fff" stroke-width="6" r="21" cy="32" cx="32" />
 					</svg>
 				</label>
 			</div>
 			<div ng-controller="ModeController" id="modes" class="button_group">
-				<label class="button" title="Flexible Line ([meta]X)" ng-class="{active: mode == 'flex'}">
-					<input type="radio" name="tool" value="flex" ng-model="mode">
+				<label class="button" title="Flexible Line ([meta]X)" ng-class="{active: !$storage.rigid}">
+					<input type="radio" name="tool" ng-value="false" ng-model="$storage.rigid">
 					<svg xmlns="https://www.w3.org/2000/svg" viewBox="0 0 64 64">
 						<path d="m 11.54626,8.5035224 a 3.1944173,3.2077906 0 1 0 0.299148,6.4085436 c 0,0 9.914644,0.103318 16.685819,2.369826 3.385589,1.133254 5.474107,2.772783 5.883247,4.005341 0.204569,0.616278 0.232099,1.336454 -0.365626,2.736982 -0.597724,1.400529 -1.916437,3.359708 -4.254551,5.70761 -2.714166,2.725529 -4.557282,5.226463 -5.617337,7.71028 -1.060055,2.483817 -1.241314,5.07222 -0.498581,7.309745 1.485466,4.475053 5.712296,6.640597 9.905128,8.044059 8.385664,2.806923 18.680139,2.703605 18.680139,2.703605 a 3.1912326,3.2045926 0 1 0 0,-6.408545 c 0,0 -9.914643,-0.103316 -16.685818,-2.369826 -3.385587,-1.133254 -5.440869,-2.772782 -5.850008,-4.00534 -0.20457,-0.616279 -0.265337,-1.369832 0.332387,-2.77036 0.597724,-1.400529 1.916438,-3.326332 4.254551,-5.674232 2.714166,-2.725529 4.557282,-5.226463 5.617337,-7.71028 1.060055,-2.483818 1.274552,-5.07222 0.531819,-7.309746 C 38.97845,14.776132 34.71838,12.610587 30.525549,11.207126 22.139884,8.4002034 11.845408,8.5035224 11.845408,8.5035224 a 3.1912326,3.2045926 0 0 0 -0.299148,0 z" />
 					</svg>
 				</label>
-				<label class="button" title="Rigid Line ([meta]I)" ng-class="{active: mode == 'rigid'}">
-					<input type="radio" name="tool" value="rigid" ng-model="mode">
+				<label class="button" title="Rigid Line ([meta]I)" ng-class="{active: $storage.rigid}">
+					<input type="radio" name="tool" ng-value="true" ng-model="$storage.rigid">
 					<svg xmlns="https://www.w3.org/2000/svg" viewbox="0,0  64,64">
 					  <path d="M 11.442085,8.5001863 A 2.9350292,2.9355008 0 0 0 9.3938829,13.545074 L 50.480184,54.637975 a 2.9398264,2.9402987 0 1 0 4.157543,-4.158209 L 13.551426,9.3868635 A 2.9350292,2.9355008 0 0 0 11.442085,8.5001863 z"/>
 					</svg>
 				</label>
-				<label class="button" title="Polygon ([meta]P)" ng-class="{active: mode == 'polygon'}">
-					<input type="radio" name="tool" value="polygon" ng-model="mode">
+				<label class="button" title="Polygon ([meta]P)" ng-class="{active: $storage.polygon}">
+					<input type="checkbox" ng-model="$storage.polygon">
 					<svg xmlns="https://www.w3.org/2000/svg" viewbox="0,0  64,64">
 						<path d="M 31.71875,8 A 3.0003,3.0003 0 0 0 29.3125,9.65625 l -21,42 A 3.0003,3.0003 0 0 0 11,56 l 42,0 a 3.0003,3.0003 0 0 0 2.6875,-4.34375 l -21,-42 A 3.0003,3.0003 0 0 0 31.71875,8 z M 32,17.71875 48.125,50 15.875,50 32,17.71875 z"/>
 					</svg>
@@ -169,14 +171,14 @@
 			</div>
 		</div>
 	</div>
-	<div id="places_attributions"></div>
 	
 	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular-route.js"></script>
-	<script src="event.js"></script>
-	<script src="ui-map.js"></script>
-	<script src="ngStorage.min.js"></script>
-	<script src="boundaries.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.5/angular-animate.js"></script>
+	<script src="plugins/event.js"></script>
+	<script src="plugins/ui-map.js"></script>
+	<script src="plugins/ngStorage.min.js"></script>
+	<script src="script.js"></script>
 	</body>
 </html>
