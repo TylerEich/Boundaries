@@ -1,23 +1,37 @@
 "use strict";
 
 // TODO: Privacy Policy and Terms of Service (https://developers.google.com/places/policies)
-var boundaries = angular.module('boundaries', ['ngStorage', 'ngRoute', 'ui.map', 'ui.event']);
+var boundaries = angular.module('boundaries', ['ngAnimate', 'ngStorage', 'ngRoute', 'ui.map', 'ui.event']);
 
 angular.bootstrap(document.querySelector('#map_canvas'), ['boundaries']);
+
+boundaries.directive('ngLoad', function() {
+    return {
+        restrict: 'A',
+        scope: {
+            loadHandler: '&ngLoad'
+        },
+        link: function (scope, element, attr) {
+            element.on('load', function() {
+                scope.$apply(scope.loadHandler);
+            });
+        }
+    };
+});
 
 // Register all services
 boundaries.service('utilityService', ['$rootScope', '$localStorage', '$q', '$http', utilityService]);
 
 // Register all controllers
 // Every controller that needs to communicate gets $rootScope
-boundaries.controller('SettingController', ['$scope', '$localStorage', SettingController]);
+boundaries.controller('SettingController', ['$scope', '$localStorage', 'utilityService', SettingController]);
 boundaries.controller('ColorController', ['$scope', '$localStorage', 'utilityService', ColorController]);
 boundaries.controller('ModeController', ['$scope', '$localStorage', ModeController]);
 boundaries.controller('ActionController', ['$scope', '$rootScope', '$localStorage', ActionController]);
-boundaries.controller('MapController', ['$scope', '$rootScope', '$location', '$localStorage', 'utilityService', MapController]);
-boundaries.controller('ImageController', ['$scope', '$localStorage', ImageController]);
+boundaries.controller('MapController', ['$scope', '$rootScope', '$location', '$localStorage', '$timeout', 'utilityService', MapController]);
+boundaries.controller('ImageController', ['$scope', '$rootScope', '$localStorage', '$timeout', 'utilityService', ImageController]);
 boundaries.controller('DrawingController', ['$scope', '$rootScope', '$location', '$localStorage', '$q', 'utilityService', DrawingController]);
-boundaries.controller('SearchController', ['$scope', '$sce', SearchController]);
+boundaries.controller('SearchController', ['$scope', '$sce', 'utilityService', SearchController]);
 boundaries.controller('ThrobController', ['$scope', '$rootScope', '$localStorage', ThrobController]);
 
 // Configure deep-linking for Boundaries
@@ -42,124 +56,7 @@ boundaries.config(function($locationProvider, $routeProvider) {
             controller: 'ColorController'
         });
 });
-// Services
-// Used to store settings and share between controllers
-function $localStorage() {
-    // Defaults also serve as an object specification
-    this.defaults = {
-        map: {
-            lat: undefined,
-            lng: undefined,
-            zoom: 5,
-            drawings: [],
-            style: [{
-                stylers: [{
-                    color: "#ffffff"
-                }]
-            }, {
-                elementType: "geometry.stroke",
-                featureType: "road",
-                stylers: [{
-                    color: "#808080"
-                }]
-            }, {
-                elementType: "labels.text.fill",
-                stylers: [{
-                    color: "#000000"
-                }]
-            }]
-        },
-        image: {
-            width: 5,
-            height: 3.5,
-            format: 'jpg',
-            show: true,
-            rotate: false
-        },
-        color: {
-            active: 1,
-            choices: [{
-                name: 'Red',
-                rgba: {
-                    r: 1,
-                    g: 0,
-                    b: 0,
-                    a: 0.25
-                },
-                weight: 10
-            }, {
-                name: 'Green',
-                rgba: {
-                    r: 0,
-                    g: 1,
-                    b: 0,
-                    a: 0.25
-                },
-                weight: 10
-            }, {
-                name: 'Blue',
-                rgba: {
-                    r: 0,
-                    g: 0,
-                    b: 1,
-                    a: 0.25
-                },
-                weight: 10
-            }]
-        },
-        search: {
-            query: '',
-            show: false
-        },
-        mode: {
-            polygon: false,
-            rigid: false
-        }
-        // More defaults...
-    };
-    try {
-        this.settings = JSON.parse(localStorage.settings);
-        //this.settings = this.defaults; // TODO: Remove. This is for testing only
-    } catch (e) {
-        this.settings = this.defaults;
-        // this.Save();
-        console.log('Default settings loaded');
-    }
 
-    // Keep saved object keys aligned with default object keys (while preserving values). If a key is missing, it will be added. If an extra key is found, it will be removed.
-
-    function syncProperties(master, check, deleteFromCheck) {
-        if (typeof master != 'object' || typeof check != 'object') return;
-        if (!deleteFromCheck) {
-            var masterKeys = Object.keys(master).sort(); // Pull keys from master as array
-            for (var i = 0; i < masterKeys.length; i++) {
-                if (!check.hasOwnProperty(masterKeys[i])) {
-                    check[masterKeys[i]] = master[masterKeys[i]];
-                } else {
-                    syncProperties(master[masterKeys[i]], check[masterKeys[i]]);
-                }
-            }
-        }
-        var checkKeys = Object.keys(check).sort(); // Pull keys from check as array
-        for (var i = 0; i < checkKeys.length; i++) {
-            if (!master.hasOwnProperty(checkKeys[i])) {
-                delete check[checkKeys[i]];
-            } else {
-                syncProperties(master[checkKeys[i]], check[checkKeys[i]], true);
-            }
-        }
-    }
-    syncProperties(this.defaults, this.settings);
-
-    function censor(key, value) {
-        if (typeof key == 'string') var substring = key.substring(0, 1);
-        if (substring && (substring == '_' || substring == '$')) return undefined;
-        return value;
-    }
-    this.Save = function() {
-        localStorage.settings = JSON.stringify(this.settings, censor);
-    };
-}
 // Useful functions available to multiple controllers
 function utilityService($rootScope, $localStorage, $q, $http) {
     var directions = new google.maps.DirectionsService();
@@ -184,16 +81,17 @@ function utilityService($rootScope, $localStorage, $q, $http) {
     };
     this.color = {
         toHex: function(rgba, alpha) {
-            var rgba = angular.copy(rgba);
+            var rgba255 = {};
             var keys = Object.keys(rgba);
+            
             for (var i = 0; i < keys.length; i++) {
                 var key = keys[i];
-                rgba[key] = Math.round(rgba[key] * 255);
+                rgba255[key] = Math.round(rgba[key] * 255);
             }
-            var hex = ((1 << 24) | (rgba.r << 16) | (rgba.g << 8) | rgba.b).toString(16).substring(1);
-
-            if (alpha === true || (alpha === undefined && rgba.a !== 255)) {
-                var a = ((1 << 8) | rgba.a).toString(16).substring(1);
+            
+            var hex = ((1 << 24) | (rgba255.r << 16) | (rgba255.g << 8) | rgba255.b).toString(16).substring(1);
+            if (alpha === true || (alpha === undefined && rgba255.a !== 255)) {
+                var a = ((1 << 8) | rgba255.a).toString(16).substring(1);
                 return hex + a;
             } else {
                 return hex;
@@ -265,6 +163,16 @@ function utilityService($rootScope, $localStorage, $q, $http) {
             return deferred.promise;
         }
     };
+    this.image = {
+        pxSize: function(maxWidth, maxHeight) {
+            var ratio = $localStorage.width / $localStorage.height;
+            return {
+                ratio: ratio,
+                width: (ratio >= 1) ? maxWidth : Math.round(ratio * maxWidth),
+                height: (ratio < 1) ? maxHeight : Math.round(1 / ratio * maxHeight)
+            }
+        }
+    }
     // Interface for the HTML5 Geolocation API
     this.location = {
         exact: function() {
@@ -297,7 +205,7 @@ function utilityService($rootScope, $localStorage, $q, $http) {
 }
 
 // Controllers
-function SettingController($scope, $localStorage) {
+function SettingController($scope, $localStorage, utilityService) {
     $scope.$storage = $localStorage.$default({
         activeColor: 1,
         compressedDrawings: '',
@@ -335,35 +243,20 @@ function SettingController($scope, $localStorage) {
         polygon: false,
         rigid: false,
         style: [{
+            elementType: "labels.stroke",
             stylers: [{
-                saturation: -80
+                color: "#ffffff"
             }]
         }, {
-            featureType: "road.arterial",
-            elementType: "geometry",
+            elementType: "labels.fill",
             stylers: [{
-                hue: "#00ffee"
-            }, {
-                saturation: 50
-            }]
-        }, {
-            featureType: "poi.business",
-            elementType: "labels",
-            stylers: [{
-                visibility: "off"
+                color: "#000000"
             }]
         }],
         width: 5
     });
     
-    $scope.pxSize = function(maxWidth, maxHeight) {
-        var ratio = $scope.$storage.width / $scope.$storage.height;
-        return {
-            ratio: ratio,
-            width: (ratio >= 1) ? maxWidth : Math.round(ratio * maxWidth),
-            height: (ratio < 1) ? maxHeight : Math.round(1 / ratio * maxHeight)
-        }
-    };
+    $scope.pxSize = utilityService.image.pxSize;
 }
 
 function ColorController($scope, $localStorage, utilityService) {
@@ -416,7 +309,7 @@ function ModeController($scope, $localStorage) {
     $scope.$storage = $localStorage;
 }
 
-function MapController($scope, $rootScope, $location, $localStorage, utilityService) {
+function MapController($scope, $rootScope, $location, $localStorage, $timeout, utilityService) {
     function updateStyle() {
         $scope.map.mapTypes.set('custom', new google.maps.StyledMapType($scope.$storage.style, {
             name: 'Customized'
@@ -476,7 +369,7 @@ function MapController($scope, $rootScope, $location, $localStorage, utilityServ
 
     // Event binders
     $scope.$storage = $localStorage;
-
+    
     $scope.map_click = function($param) {
         $scope.$broadcast('map.click', $param);
     };
@@ -531,7 +424,21 @@ function MapController($scope, $rootScope, $location, $localStorage, utilityServ
             style: google.maps.ZoomControlStyle.SMALL
         }
     };
-
+    $scope.flash = false;
+    
+    function flash() {
+        // Use timeouts to allow digest cycles
+        $timeout(function() {
+            $scope.flash = true;
+            console.log('Flash:', $scope.flash);
+        });
+        $timeout(function() {
+            $scope.flash = false;
+            console.log('Flash:', $scope.flash);
+        });
+    }
+    $scope.$on('image.flash', flash);
+    
     // Listen once; when the map is defined, load its watchers
     var unbindWatcher = $scope.$watch('map', function() {
         if ($scope.map == undefined) return;
@@ -628,7 +535,8 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             editable: false,
             fillColor: '#' + makeHexColor(drawing, false),
             fillOpacity: color.rgba.a,
-            map: $scope.map
+            map: $scope.map,
+            strokeWeight: 0
         };
     }
     function makePolyline(drawing) {
@@ -784,7 +692,9 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
                 $scope.drawings[drawingIndex].nodes[nodeIndex]._marker.setMap(null);
             }
         }
-        $scope.drawings = [];
+        
+        // Empty drawings
+        $scope.drawings.length = 0;
         
         // Hide nodeMarker
         markNode(null, null, true);
@@ -811,6 +721,11 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     $scope.$on('drawing.clear', clear);
     $scope.$on('drawing.undo', undo);
     
+    var unbind = $scope.$watch('drawings', function() {
+        if (!$scope.drawings) return;
+        $rootScope.$broadcast('drawings', $scope.drawings);
+        unbind();
+    });
     $scope.$watch('drawings.length', function() {
         if ($scope.drawings.length === 0) $scope.$storage.new = true;
     });
@@ -819,6 +734,16 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         var drawing = $scope.drawings[$scope.drawings.length - 1];
         if ($scope.$storage.activeColor !== drawing.activeColor) $scope.$storage.new = true;
         else $scope.$storage.new = false;
+    });
+    $scope.$watch('$storage.new', function() {
+        if ($scope.drawings.length === 0) $scope.$storage.new = true;
+        // If starting new drawing, hide nodeMarker
+        if ($scope.$storage.new) markNode(null, null, true);
+        else {
+            var drawingIndex = $scope.drawings.length - 1;
+            var nodeIndex = $scope.drawings[drawingIndex].nodes.length - 1;
+            markNode(drawingIndex, nodeIndex);
+        }
     });
     
     $scope.marker_dragstart = function(drawingIndex, nodeIndex) {
@@ -859,8 +784,167 @@ function ActionController($scope, $rootScope, $localStorage) {
     };
 }
 
-function ImageController($scope, $localStorage) {
+function ImageController($scope, $rootScope, $localStorage, $timeout, utilityService) {
     $scope.$storage = $localStorage;
+        
+    $scope.show = true;
+    $scope.imageUrl = '';
+    $scope.throb = false;
+    $scope.loadImage = function() {
+        var imageUrl = createUrl();
+        if (!imageUrl) return;
+        
+        if (imageUrl.length <= 2048) {
+            $rootScope.$broadcast('image.flash');
+            if ($scope.imageUrl !== imageUrl) $scope.throb = true;
+            $scope.imageUrl = imageUrl;
+        } else {
+            window.alert('Your image is too complex!');
+        }
+    };
+    
+    $scope.$watch('throb', function() {
+        console.log('Throb:', $scope.throb);
+    });
+    
+    var drawings;
+    $scope.$on('drawings', function($event, $param) {
+        drawings = $param;
+        $scope.loadImage();
+    });
+    
+    var computeHeading = google.maps.geometry.spherical.computeHeading;
+    
+    // Prevents serialization of hidden properties (AngularJS = '$', Boundaries = '_')
+    function censor(key, value) {
+        if (typeof key == 'string') var substring = key.substring(0, 1);
+        if (substring && (substring == '_' || substring == '$')) return undefined;
+        return value;
+    }
+    function stripDrawings() {
+        return JSON.stringify(drawings, censor);
+    }
+    
+    // Create URL from style and drawing
+    function createUrl() {
+        if (!drawings) return;
+        
+        var path = 'https://maps.googleapis.com/maps/api/staticmap';
+        
+        var params = [];
+        
+        var pxSize = utilityService.image.pxSize(640, 640);
+        
+        // Generate style from map styling and drawings
+        var i, j;
+        var rule, urlRule, styler, key, value;
+        for (i = 0; i < $scope.$storage.style.length; i++) {
+            rule = $scope.$storage.style[i];
+            urlRule = [];
+             
+            // Add selectors to urlRule
+            if ('featureType' in rule && rule.featureType !== 'all') urlRule.push('feature:' + rule.featureType);
+            if ('elementType' in rule && rule.elementType !== 'all') urlRule.push('element:' + rule.elementType);
+            
+            // Loop through every styler, add to urlRule
+            for (j = 0; j < rule.stylers.length; j++) {
+                styler = rule.stylers[j];
+                
+                for (key in styler) {
+                    value = styler[key];
+                    
+                    if (key === 'color') value = '0x' + value.substring(1);
+                    
+                    urlRule.push(key + ':' + value);
+                }
+            }
+            
+            urlRule = urlRule.join('%7C');
+            
+            // Add urlRule to params if not empty string
+            if (urlRule) {
+                params.push('style=' + urlRule);
+            }
+        }
+        
+        // Generate paths from drawings
+        var drawing, urlPath, polyPath, encodedPath, color, hex;
+        var bounds = new google.maps.LatLngBounds();
+        for (i = 0; i < drawings.length; i++) {
+            urlPath = [];
+            drawing = drawings[i];
+            polyPath = drawing._poly.getPath().getArray();
+            
+            for (j = 0; j < polyPath.length; j++) {
+                bounds.extend(polyPath[j]);
+            }
+            
+            encodedPath = google.maps.geometry.encoding.encodePath(polyPath);
+            color = $scope.$storage.colors[drawing.activeColor];
+            hex = '0x' + utilityService.color.toHex(color.rgba);
+            
+            // If drawing is polygon, use 'fillcolor'
+            if (drawing.polygon) {
+                urlPath.push('color:0x00000000');
+                urlPath.push('fillcolor:' + hex);
+            } else {
+                urlPath.push('color:' + hex);
+                urlPath.push('weight:' + color.weight);
+            }
+            urlPath.push('enc:' + encodedPath);
+            
+            urlPath = urlPath.join('%7C');
+            
+            // Add urlPath to params if not empty string
+            if (urlPath) {
+                params.push('path=' + urlPath);
+            }
+        }
+        
+        var northEast = bounds.getNorthEast();
+        var southWest = bounds.getSouthWest();
+        console.log(northEast, southWest);
+        
+        Number.prototype.toRad = function() {
+            return this * Math.PI / 180;
+        };
+        Number.prototype.toDeg = function() {
+            return this * 180 / Math.PI;
+        };
+        var lat1 = northEast.lat();
+        var lat2 = southWest.lat();
+        var lon1 = northEast.lng();
+        var lon2 = southWest.lng();
+        
+        var dLon = (lon2 - lon1).toRad();
+        var dLat = (lat2 - lat1).toRad();
+        var y = Math.sin(dLon) * Math.cos(lat2);
+        var x = Math.cos(lat1)*Math.sin(lat2) -
+                Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+        var brng = Math.atan2(y, x).toDeg();
+        console.log('bearing:', brng);
+        
+        var heading = Math.abs(computeHeading(northEast, southWest) + computeHeading(southWest, northEast)) / 2;
+        
+        // Check orientation
+        if ((45 <= heading && heading < 135) == (pxSize.ratio >= 1)) {
+            // Landscape
+            params.push('size=' + pxSize.height + 'x' + pxSize.width);
+            console.log('Landscape');
+        } else {
+            // Portrait
+            console.log('Portrait');
+            params.push('size=' + pxSize.width + 'x' + pxSize.height);
+        }
+        console.log('heading:', heading, 'ratio:', pxSize.ratio);
+        
+        params.push('scale=2');
+        params.push('sensor=true');
+        
+        return (path + '?' + params.join('&'));
+    }
+    
+    // $scope.$watch(stripDrawings, createUrl);
     
     // Image orientation logic
     /*var drawingBounds = new google.maps.LatLngBounds();
@@ -916,7 +1000,14 @@ function SearchController($scope, $sce, utilityService) {
     $scope.query = '';
     $scope.suggestions = [];
     $scope.active = 0;
-
+    
+    $scope.$watch('query', function(newVal) {
+        utilityService.map.suggestions($scope.query).then(formatSuggestions, errorMessage);
+        if (newVal !== $scope.query) refreshResults();
+    });
+    function refreshResults() {
+        $scope.$apply();
+    }
     // Bolds matched substrings
     function formatSuggestions(suggestions) {
         for (var i = 0; i < suggestions.length; i++) {
@@ -933,57 +1024,13 @@ function SearchController($scope, $sce, utilityService) {
             suggestions[i].description = '<span>' + suggestions[i].description + '</span>';
             suggestions[i].description = $sce.trustAsHtml(suggestions[i].description);
         }
-        return suggestions;
+        $scope.suggestions = suggestions;
     }
     // Notifies user that no results were found
     function errorMessage(message) {
-        if (typeof message == 'string') return [{
+        if (typeof message == 'string') $scope.suggestions = [{
             description: $sce.trustAsHtml('<i>' + message + '</i>'),
             error: true
-        }]
+        }];
     }
-}
-
-
-
-
-
-
-
-
-
-/* 
--------------------------DEPRECATED CODE-------------------------
-*/
-// TODO: Migrate logic from the following functions into AngularJS controllers and/or services
-
-function getBaseUrl(mapX, mapY) {
-    var url = 'http://maps.googleapis.com/maps/api/staticmap?';
-    var params = [];
-    params.push('sensor=false');
-    params.push('size=' + mapX + 'x' + mapY);
-    params.push('scale=2');
-    for (var i = 0; i < mapStyle.length; i++) {
-        var mapStyleRule = [];
-        if (mapStyle[i].featureType != undefined && mapStyle[i].featureType != 'all') {
-            mapStyleRule.push('feature:' + mapStyle[i].featureType);
-        }
-        if (mapStyle[i].elementType != undefined && mapStyle[i].elementType != 'all') {
-            mapStyleRule.push('element:' + mapStyle[i].elementType)
-        }
-        for (var j = 0; j < mapStyle[i].stylers.length; j++) {
-            for (var p in mapStyle[i].stylers[j]) {
-                var ruleArg = mapStyle[i].stylers[j][p];
-                if (p == 'hue' || p == 'color') {
-                    ruleArg = '0x' + ruleArg.substring(1);
-                }
-                mapStyleRule.push(p + ':' + ruleArg);
-            }
-        }
-        var rule = mapStyleRule.join('|');
-        if (rule != '') {
-            params.push('style=' + rule);
-        }
-    }
-    return (url + params.join('&'));
 }
