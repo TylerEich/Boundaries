@@ -1,0 +1,381 @@
+@keyframes bezel {
+	0% {
+		opacity: 1;
+	}
+	12.5% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+
+}
+@keyframes throb {
+	0% {
+		fill-opacity: 1;
+	}
+	100% {
+		fill-opacity: 0.25;
+	}
+}
+
+body, html {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	font: 1em "Source Sans Pro", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+	display: flex;
+}
+
+* {
+	transition: all 0.25s ease;
+	box-sizing: border-box;
+	-webkit-font-smoothing: antialiased;
+}
+
+#suggestions {
+	transform-origin: center top;
+	display: block !important;
+	max-height: 12em;
+}
+#suggestions.ng-hide-add,
+#suggestions.ng-hide-remove.ng-hide-remove-active {
+	max-height: 12em;
+	opacity: 1;
+	transform: scaleY(1);
+}
+#suggestions.ng-hide,
+#suggestions.ng-hide-add.ng-hide-add-active,
+#suggestions.ng-hide-remove {
+	max-height: 0;
+	opacity: 0;
+	transform: scaleY(0);
+}
+
+.suggestion {
+	color: white;
+	cursor: pointer;
+	padding: 0.5em;
+	background: #606060;
+	width: 12em;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.suggestion span {;
+	opacity: 0.75;
+}
+.suggestion.error {
+	text-align: center;
+	pointer-events: none;
+}
+.suggestion:hover, .suggestion:active, .suggestion.active {
+	background: #404040;
+}
+.suggestion:hover span, .suggestion:active span, .suggestion.active span {
+	opacity: 1;
+}
+.suggestion.ng-animate {
+	transition: none;
+}
+
+#flash {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: #fff;
+	pointer-events: none;
+	transition: none;
+}
+#flash.ng-animate {
+	display: block !important;
+}
+#flash.ng-hide {
+	opacity: 0;
+	transition: 0.5s ease;
+}
+
+#bezel {
+	z-index: 10000;
+	position: fixed;
+	top: 50%;
+	right: 50%;
+	bottom: 50%;
+	left: 50%;
+	width: 10em;
+	margin: -5em;
+	height: 10em;
+	background: rgba(0,0,0,.75);
+	border-radius: 1em;
+	box-shadow: 0 .5em 2em #000;
+	opacity: 0;
+	pointer-events: none;
+	animation: bezel 1s ease-out;
+}
+
+.throbber {
+	pointer-events: none;
+}
+.throbber.ng-animate {
+	display: block !important;
+	opacity: 1;
+}
+
+.throbber.ng-hide-add {
+	transition: 0.25s ease-out;
+	opacity: 1;
+}
+.throbber.ng-hide-add-active {
+	opacity: 0;
+}
+.throbber.ng-hide-remove {
+	transition: 0.125s ease-out;
+	opacity: 0;
+}
+.throbber.ng-hide-remove-active {
+	opacity: 1;
+}
+
+.throbber svg circle {
+	fill: #fff;
+	transition: none;
+	animation: throb 0.25s ease alternate infinite;
+}
+.throbber svg circle:nth-of-type(1) {
+	animation-delay: -0.25s;
+}
+.throbber svg circle:nth-of-type(2) {
+	animation-delay: -0.125s;
+}
+.throbber svg circle:nth-of-type(3) {
+	animation-delay: 0s;
+}
+#map_wrapper .throbber {
+	height: 2em;
+	width: 5em;
+	z-index: 1;
+	position: absolute;
+	top: 0;
+	left: 50%;
+	margin-left: -2.5em;
+	background: rgba(0, 0, 0, 0.625);
+	border-radius: 0 0 0.25em 0.25em;
+}
+
+#icon, #logo {
+	height: 2em;
+	padding-left: 0.25em;
+	padding-right: 0.25em;
+}
+
+#logo {
+	padding-top: 0.25em;
+	padding-bottom: 0.25em;
+}
+
+#header, #footer {
+	flex: none;
+	border: 0 solid #7F7F7F;
+	background: #3F3F3F;
+}
+
+#header {
+	border-bottom-width: 1px;
+	cursor: pointer;
+	align-self: flex-start;
+}
+
+#header:hover {
+	background: #7F7F7F;
+}
+
+#content {
+	flex: 1;
+	padding: 0.25em 0;
+	overflow-y: auto;
+}
+
+.row {
+	width: 100%;
+	padding: 0.25em;
+	box-sizing: border-box;
+	justify-content: space-around;
+	display: flex;
+}
+
+#sidebar {
+	width: 12.5em;
+	height: 100%;
+	box-sizing: border-box;
+	background: #000;
+	display: flex;
+	flex: none;
+	flex-direction: column;
+	border-right: 1px solid #7F7F7F;
+}
+
+input {
+	display: none;
+}
+
+input[type="text"] {
+	display: block !important;
+	width: 9.5rem;
+	height: 2.5rem;
+	box-sizing: border-box;
+	padding: 0.5em;
+	background: #fff;
+	border: 1px solid #7F7F7F;
+	font: inherit;
+}
+
+input:focus {
+	outline: none;
+}
+
+.group {
+	margin: 0 0;
+}
+
+.group.horizontal *:first-child {
+	border-top-left-radius: 0.25em;
+	border-bottom-left-radius: 0.25em;
+	border-left-width: 1px;
+}
+
+.group.vertical *:first-child {
+	border-top-left-radius: 0.25em;
+	border-top-right-radius: 0.25em;
+	border-left-width: 1px;
+}
+
+.group.horizontal *:last-child {
+	border-top-right-radius: 0.25em;
+	border-bottom-right-radius: 0.25em;
+}
+.group.vertical *:last-child {
+	border-bottom-left-radius: 0.25em;
+	border-bottom-right-radius: 0.25em;
+}
+
+.group.horizontal * {
+	border-left-width: 0;
+}
+.group.vertical * {
+	border-top-width: 0;
+}
+
+.group.horizontal * {
+	float: left;
+}
+
+.button {
+	background: #3F3F3F;
+	border: 1px solid #7F7F7F;
+	width: 2.5em;
+	height: 2.5em;
+	box-sizing: border-box;
+	cursor: pointer;
+}
+
+.button:active, .button.active {
+	background: #000 !important;
+}
+
+.button:hover {
+	background: #7F7F7F;
+}
+
+.button.trigger:active, .button.trigger.active {
+	transition: none;
+}
+
+svg :not(circle) {
+	fill: #fff;
+}
+
+svg * {
+	opacity: 0.625;
+	/*fill-opacity: 0.625;
+	stroke-opacity: 0.625;*/
+}
+.active svg *, .button:active svg *, input:checked + .button svg * {
+	opacity: 1;
+	/*fill-opacity: 1;
+	stroke-opacity: 1;*/
+}
+
+#footer {
+	border-top-width: 1px;
+	align-self: flex-end;
+	flex-direction: column;
+}
+
+#footer .image_wrapper {
+	position: relative;
+	max-width: 100%;
+	max-height: 12.5em;
+	box-sizing: border-box;
+	flex: none;
+}
+
+#footer img {
+	max-width: 100%;
+	max-height: 100%;
+	border-radius: 0.25em;
+	border: 1px solid #7F7F7F;
+	flex: none;
+	cursor: pointer;
+}
+
+.image_wrapper .throbber {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: 0.25em;
+	border: 1px solid #7F7F7F;
+	background: rgba(0, 0, 0, 0.75);
+	flex: none;
+}
+
+.image_wrapper .throbber svg {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -1.25em;
+	margin-left: -2.5em;
+	padding: 0.5em;
+	height: 2.5em;
+	width: 5em;
+	max-width: 100%;
+	max-height: 100%;
+}
+
+#sidebar {
+	height: 100%;
+	overflow-x: hidden;
+	position: relative;
+	z-index: 1;
+	background: #000;
+	padding: 0;
+	box-sizing: content-box;
+	box-flex: 0;
+}
+
+#map_wrapper {
+	z-index: 0;
+	flex: 1;
+	height: 100%;
+}
+
+#map_canvas {
+	height: 100%;
+	width: 100%;
+}
+#map_canvas * {
+	transition: none;
+}
