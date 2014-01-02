@@ -5,18 +5,53 @@ var boundaries = angular.module('boundaries', ['ngAnimate', 'ngStorage', 'ngRout
 
 angular.bootstrap(document.querySelector('#map_canvas'), ['boundaries']);
 
-boundaries.directive('ngLoad', function() {
+// Directives
+boundaries.directive('bndError', ['$parse', function($parse) {
     return {
         restrict: 'A',
-        scope: {
-            loadHandler: '&ngLoad'
-        },
-        link: function (scope, element, attr) {
+        link: function(scope, element, attr) {
+            var errorHandler = $parse(attr.bndError);
+            element.on('error', function() {
+                scope.$apply(function() {
+                    errorHandler(scope);
+                });
+            });
+        }
+    }
+}]);
+boundaries.directive('bndLoad', ['$parse', function($parse) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attr) {
+            var loadHandler = $parse(attr.bndLoad);
             element.on('load', function() {
-                scope.$apply(scope.loadHandler);
+                scope.$apply(function() {
+                    loadHandler(scope);
+                });
             });
         }
     };
+}]);
+boundaries.directive('bndHotkey', function() {
+    return {
+        restrict: 'E',
+        scope: {
+            key: '@',
+            keycode: '@',
+            
+            ctrl: '&',
+            alt: '&',
+            meta: '&',
+            shift: '&',
+            
+            action: '&'
+        },
+        link: function(scope, element, attr) {
+            var isMac = (navigator.platform.lastIndexOf('Mac') === 0);
+            element.on('keypress');
+            console.log(scope.key.charCodeAt(0));
+        }
+    }
 });
 
 // Register all services
@@ -31,7 +66,7 @@ boundaries.controller('ActionController', ['$scope', '$rootScope', '$localStorag
 boundaries.controller('MapController', ['$scope', '$rootScope', '$location', '$localStorage', '$timeout', 'utilityService', MapController]);
 boundaries.controller('ImageController', ['$scope', '$rootScope', '$localStorage', '$timeout', 'utilityService', ImageController]);
 boundaries.controller('DrawingController', ['$scope', '$rootScope', '$location', '$localStorage', '$q', 'utilityService', DrawingController]);
-boundaries.controller('SearchController', ['$scope', '$sce', 'utilityService', SearchController]);
+boundaries.controller('SearchController', ['$scope', '$sce', '$timeout', 'utilityService', SearchController]);
 boundaries.controller('ThrobController', ['$scope', '$rootScope', '$localStorage', ThrobController]);
 
 // Configure deep-linking for Boundaries
@@ -425,16 +460,59 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         }
     };
     $scope.flash = false;
+    $scope.$storage.style = [{
+        "stylers": [{
+            "visibility": "off"
+        }]
+    }, {
+        "featureType": "road",
+        "stylers": [{
+            "visibility": "on"
+        }]
+    }, {
+        "stylers": [{
+            "color": "#ffffff"
+        }],
+        "elementType": "geometry.fill"
+    }, {
+        "featureType": "road",
+        "elementType": "geometry.stroke",
+        "stylers": [{
+            "color": "#808080"
+        }]
+    }, {
+        "stylers": [{
+            "color": "#ffffff"
+        }],
+        "elementType": "labels.text.stroke"
+    }, {
+        "stylers": [{
+            "color": "#000000"
+        }],
+        "elementType": "labels.text.fill"
+    }, {
+        "featureType": "water",
+        "stylers": [{
+            "visibility": "on"
+        }, {
+            "color": "#40bfbf"
+        }]
+    }, {
+        "featureType": "water",
+        "elementType": "labels.text.stroke",
+        "stylers": [{
+            "color": "#ffffff"
+        }]
+    }];
+
     
     function flash() {
         // Use timeouts to allow digest cycles
         $timeout(function() {
             $scope.flash = true;
-            console.log('Flash:', $scope.flash);
         });
         $timeout(function() {
             $scope.flash = false;
-            console.log('Flash:', $scope.flash);
         });
     }
     $scope.$on('image.flash', flash);
@@ -496,9 +574,9 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             cursor = 'none';
             draggable = false;
         } else {
-            clickable = true;
+            clickable = false;
             cursor = 'pointer';
-            draggable = true;
+            draggable = false;
         }
         
         return {
@@ -518,7 +596,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     function makePolylineOptions(drawing) {
         var color = $scope.$storage.colors[drawing.activeColor];
         return {
-            clickable: true,
+            clickable: false,
             draggable: false,
             editable: false,
             strokeColor: '#' + makeHexColor(drawing, false),
@@ -530,7 +608,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     function makePolygonOptions(drawing) {
         var color = $scope.$storage.colors[drawing.activeColor];
         return {
-            clickable: true,
+            clickable: false,
             draggable: false,
             editable: false,
             fillColor: '#' + makeHexColor(drawing, false),
@@ -941,10 +1019,13 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
         params.push('scale=2');
         params.push('sensor=true');
         
-        return (path + '?' + params.join('&'));
+        return encodeURI(path + '?' + params.join('&'));
     }
     
-    // $scope.$watch(stripDrawings, createUrl);
+    $scope.$watch(stripDrawings, function() {
+        var url = createUrl();
+        console.log(url.length, url);
+    });
     
     // Image orientation logic
     /*var drawingBounds = new google.maps.LatLngBounds();
@@ -972,7 +1053,7 @@ function ThrobController($scope, $localStorage) {
     });
 }
 
-function SearchController($scope, $sce, utilityService) {
+function SearchController($scope, $sce, $timeout, utilityService) {
     $scope.loadPlace = function(reference) {
         utilityService.throb.on();
         utilityService.map.loadPlace(reference);
@@ -983,27 +1064,32 @@ function SearchController($scope, $sce, utilityService) {
         enter = (e.which == 13);
         up = (e.which == 38);
         down = (e.which == 40);
+        
         if (enter || up || down) {
             e.preventDefault();
         } else {
+            $scope.active = 0;
             return;
         }
-        if (enter) {
-            $scope.loadPlace($scope.suggestions[$scope.active].reference);
-        } else if (up && $scope.active > -1) {
-            $scope.active--;
-        } else if (down && $scope.active < $scope.suggestions.length - 1) {
-            $scope.active++;
+        
+        if ($scope.suggestions[$scope.active]) {
+            if (enter) {
+                $scope.loadPlace($scope.suggestions[$scope.active].reference);
+            } else if (up && $scope.active > -1) {
+                $scope.active--;
+            } else if (down && $scope.active < $scope.suggestions.length - 1) {
+                $scope.active++;
+            }
         }
-    }
+    };
     
     $scope.query = '';
     $scope.suggestions = [];
-    $scope.active = 0;
+    $scope.active = -1;
     
     $scope.$watch('query', function(newVal) {
         utilityService.map.suggestions($scope.query).then(formatSuggestions, errorMessage);
-        if (newVal !== $scope.query) refreshResults();
+        if (newVal !== $scope.query) $timeout($scope.$apply);
     });
     function refreshResults() {
         $scope.$apply();
@@ -1012,6 +1098,7 @@ function SearchController($scope, $sce, utilityService) {
     function formatSuggestions(suggestions) {
         for (var i = 0; i < suggestions.length; i++) {
             var desc = suggestions[i].description;
+            console.log(angular.copy(suggestions[i]));
             suggestions[i].description = '';
             var index = 0;
             for (var j = 0; j < suggestions[i].matched_substrings.length; j++) {
