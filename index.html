@@ -103,8 +103,8 @@
             <div id="footer" class="row" ng-controller="ImageController">
                 <div class="row">
                     <div class="image_wrapper">
-                        <img bnd-load="throb = false" bnd-error="alert('Error!')" ng-click="loadImage()" id="static_map" ng-src="{{ imageUrl }}" alt="Static Map" title="Static Map"/>
-                        <div class="throbber" ng-show="throb">
+                        <img bnd-load="throb = false" bnd-error="alert('Error!')" ng-click="loadImage()" id="static_map" ng-src="{{ $storage.imageUrl }}" alt="Static Map" title="Static Map"/>
+                        <div class="throbber" ng-show="$storage.imageThrob">
                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
                                 <circle cy="32" cx="32" r="16"/>
                                 <circle cy="32" cx="80" r="16"/>
@@ -124,13 +124,21 @@
                             </svg>
                         </label>
                     </div>
+                    <div class="group horizontal">
+                        <label class="button trigger" title="Full Screen">
+                            <input type="button" ng-click="fullscreen()" value="refresh">
+                            <svg xmlns="https://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
+                                <path d="M 10.999547,56 C 10.172232,56 9.4212847,55.664832 8.8782267,55.121774 8.3351687,54.578716 8,53.827768 8,53.000453 L 8,44.515172 C 8,43.301777 8.7339768,42.207175 9.8540339,41.740485 10.97197,41.275916 12.265975,41.534717 13.122989,42.39173 l 2.12132,2.121321 6.363961,-6.363961 c 1.17309,-1.173091 3.069551,-1.173091 4.242641,0 1.17309,1.17309 1.17309,3.06955 0,4.24264 l -6.363961,6.363961 2.12132,2.121321 c 0.857013,0.857013 1.115815,2.151018 0.651245,3.268954 C 21.790704,55.268145 20.696102,55.997879 19.484828,56 l -8.485281,0 z M 53.000453,8 c 0.827315,0 1.578262,0.335169 2.12132,0.878227 C 55.664831,9.421284 56,10.172232 56,10.999547 l 0,8.485281 c 0,1.213395 -0.733977,2.307997 -1.854034,2.774687 -1.117936,0.464569 -2.411941,0.205768 -3.268955,-0.651245 l -2.12132,-2.121321 -6.363961,6.363961 c -1.17309,1.173091 -3.069551,1.173091 -4.242641,1e-6 -1.17309,-1.17309 -1.17309,-3.069551 0,-4.242641 l 6.363961,-6.363961 -2.12132,-2.12132 C 41.534717,12.265975 41.275916,10.97197 41.740485,9.854034 42.209297,8.731856 43.303898,8.002121 44.515172,8 l 8.485281,0 z"/>
+                            </svg>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div id="settings" class="row" ng-controller="SettingController" ng-hide="true"/>
         </div>
     </div>
     <div ng-controller="MapController" id="map_wrapper">
-        <div class="throbber" ng-controller="ThrobController" ng-hide="$storage.throbCounter === 0">
+        <div class="throbber" ng-controller="ThrobController" ng-hide="$storage.mapThrobCounter === 0">
             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
                 <circle cy="32" cx="32" r="16"/>
                 <circle cy="32" cx="80" r="16"/>
@@ -145,9 +153,32 @@
         </div>
         <div id="flash" ng-show="flash"></div>
     </div>
+    <div id="lightbox" ng-controller="LightboxController" ng-show="$storage.fullscreen">
+        <div class="image_wrapper">
+            <img bnd-load="$storage.imageThrob = false" bnd-error="" id="static_map" ng-src="{{ $storage.imageUrl }}" alt="Static Map" title="Static Map"/>
+            <div class="throbber" ng-show="$storage.imageThrob">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
+                    <circle cy="32" cx="32" r="16"/>
+                    <circle cy="32" cx="80" r="16"/>
+                    <circle cy="32" cx="128" r="16"/>
+                </svg>
+            </div>
+        </div>
+        <div class="row">
+            <div class="group horizontal">
+                <label class="button trigger" title="Full Screen">
+                    <input type="button" ng-click="$storage.fullscreen = false" value="refresh">
+                    <svg xmlns="https://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
+                        <path d="M 10.999547,56 C 10.172232,56 9.4212847,55.664832 8.8782267,55.121774 8.3351687,54.578716 8,53.827768 8,53.000453 L 8,44.515172 C 8,43.301777 8.7339768,42.207175 9.8540339,41.740485 10.97197,41.275916 12.265975,41.534717 13.122989,42.39173 l 2.12132,2.121321 6.363961,-6.363961 c 1.17309,-1.173091 3.069551,-1.173091 4.242641,0 1.17309,1.17309 1.17309,3.06955 0,4.24264 l -6.363961,6.363961 2.12132,2.121321 c 0.857013,0.857013 1.115815,2.151018 0.651245,3.268954 C 21.790704,55.268145 20.696102,55.997879 19.484828,56 l -8.485281,0 z M 53.000453,8 c 0.827315,0 1.578262,0.335169 2.12132,0.878227 C 55.664831,9.421284 56,10.172232 56,10.999547 l 0,8.485281 c 0,1.213395 -0.733977,2.307997 -1.854034,2.774687 -1.117936,0.464569 -2.411941,0.205768 -3.268955,-0.651245 l -2.12132,-2.121321 -6.363961,6.363961 c -1.17309,1.173091 -3.069551,1.173091 -4.242641,1e-6 -1.17309,-1.17309 -1.17309,-3.069551 0,-4.242641 l 6.363961,-6.363961 -2.12132,-2.12132 C 41.534717,12.265975 41.275916,10.97197 41.740485,9.854034 42.209297,8.731856 43.303898,8.002121 44.515172,8 l 8.485281,0 z"/>
+                    </svg>
+                </label>
+            </div>
+        </div>
+    </div>
     
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-touch.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-route.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-animate.js"></script>
     <script src="plugins/event.js"></script>
