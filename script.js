@@ -65,6 +65,7 @@ boundaries.controller('ModeController', ['$scope', '$localStorage', ModeControll
 boundaries.controller('ActionController', ['$scope', '$rootScope', '$localStorage', ActionController]);
 boundaries.controller('MapController', ['$scope', '$rootScope', '$location', '$localStorage', '$timeout', 'utilityService', MapController]);
 boundaries.controller('ImageController', ['$scope', '$rootScope', '$localStorage', '$timeout', 'utilityService', ImageController]);
+boundaries.controller('LightboxController', ['$scope', '$localStorage', LightboxController]);
 boundaries.controller('DrawingController', ['$scope', '$rootScope', '$location', '$localStorage', '$q', 'utilityService', DrawingController]);
 boundaries.controller('SearchController', ['$scope', '$sce', '$timeout', 'utilityService', SearchController]);
 boundaries.controller('ThrobController', ['$scope', '$rootScope', '$localStorage', ThrobController]);
@@ -110,7 +111,7 @@ function utilityService($rootScope, $localStorage, $q, $http) {
             $rootScope.$broadcast('throb', true);
         },
         off: function() {
-            if ($rootScope.$storage.throbCounter <= 0) return;
+            if ($rootScope.$storage.mapThrobCounter <= 0) return;
             $rootScope.$broadcast('throb', false);
         }
     };
@@ -274,6 +275,7 @@ function SettingController($scope, $localStorage, utilityService) {
             weight: 10
         }],
         format: 'jpg',
+        fullscreen: false,
         height: 3.5,
         new: true,
         polygon: false,
@@ -881,22 +883,25 @@ function ActionController($scope, $rootScope, $localStorage) {
 
 function ImageController($scope, $rootScope, $localStorage, $timeout, utilityService) {
     $scope.$storage = $localStorage;
-        
-    $scope.show = true;
-    $scope.imageUrl = '';
-    $scope.throb = false;
+    
+    $scope.$storage.imageUrl = '';
+    $scope.$storage.imageThrob = false;
     $scope.loadImage = function() {
         var imageUrl = createUrl();
         if (!imageUrl) return;
 
         if (imageUrl.length <= 2048) {
             $rootScope.$broadcast('image.flash');
-            if ($scope.imageUrl !== imageUrl) $scope.throb = true;
-            $scope.imageUrl = imageUrl;
+            if ($scope.$storage.imageUrl !== imageUrl) $scope.throb = true;
+            $scope.$storage.imageUrl = imageUrl;
         } else {
             window.alert('Your image is too complex!');
         }
     };
+    $scope.fullscreen = function() {
+        $scope.$storage.fullscreen = true;
+        $scope.loadImage();
+    }
     
     var drawings;
     $scope.$on('drawings', function($event, $param) {
@@ -1035,13 +1040,17 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
 	*/
 }
 
+function LightboxController($scope, $localStorage) {
+    $scope.$storage = $localStorage;
+}
+
 function ThrobController($scope, $localStorage) {
     $scope.$storage = $localStorage;
     
-    $scope.$storage.throbCounter = 0;
+    $scope.$storage.mapThrobCounter = 0;
     $scope.$on('throb', function(event, count) {
-        if (count === true) $scope.$storage.throbCounter++;
-        if (count === false) $scope.$storage.throbCounter--;
+        if (count === true) $scope.$storage.mapThrobCounter++;
+        if (count === false) $scope.$storage.mapThrobCounter--;
     });
 }
 
