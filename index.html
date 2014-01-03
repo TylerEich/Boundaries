@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="style.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
     </head>
-    <body>
+    <body bnd-touch>
         <!--TODO: Usage help via ngRoute (e.g. ./help)-->
         <div id="sidebar" class="ng-cloak">
             <div id="header" class="row">
@@ -50,8 +50,8 @@
                 </div>
                 <div class="row" ng-controller="ActionController">
                     <div class="group horizontal">
-                        <label class="button trigger" title="Clear ([meta]L)" for="clear">
-                            <input id="clear" type="button" ng-click="clear()">
+                        <label  ng-click="clear()" class="button trigger" title="Clear ([meta]L)" for="clear">
+                            <input id="clear" type="button">
                             <svg xmlns="https://www.w3.org/2000/svg" viewBox="0,0 64,64">
                                 <path d="m32,56c-13.254,0 -24,-10.746 -24,-24s10.746,-24 24,-24s24,10.746 24,24s-10.746,24 -24,24zm0,-42c-9.939,0 -18,8.061 -18,18s8.061,18 18,18s18,-8.061 18,-18s-8.061,-18 -18,-18zm8.484,26.484c-1.173,1.173 -3.069,1.173 -4.242,0l-4.242,-4.242l-4.242,4.242c-1.173,1.173 -3.072,1.173 -4.245,0s-1.173,-3.069 0,-4.242l4.245,-4.242l-4.245,-4.242c-1.173,-1.173 -1.173,-3.072 0,-4.245s3.072,-1.173 4.245,0l4.242,4.245l4.242,-4.245c1.173,-1.173 3.069,-1.173 4.242,0s1.173,3.072 0,4.245l-4.242,4.242l4.242,4.242c1.173,1.173 1.173,3.072 0,4.242z" />
                             </svg>
