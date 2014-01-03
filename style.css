@@ -70,10 +70,10 @@ body, html {
 	text-align: center;
 	pointer-events: none;
 }
-.suggestion:hover, .suggestion:active, .suggestion.active {
+.no-touch .suggestion:hover, .suggestion:active, .suggestion.active {
 	background: #404040;
 }
-.suggestion:hover span, .suggestion:active span, .suggestion.active span {
+.no-touch .suggestion:hover span, .suggestion:active span, .suggestion.active span {
 	opacity: 1;
 }
 .suggestion.ng-animate {
@@ -188,7 +188,7 @@ body, html {
 	align-self: flex-start;
 }
 
-#header:hover {
+.no-touch #header:hover {
 	background: #7F7F7F;
 }
 
@@ -289,7 +289,7 @@ input:focus {
 	background: #000 !important;
 }
 
-.button:hover {
+.no-touch .button:hover {
 	background: #7F7F7F;
 }
 

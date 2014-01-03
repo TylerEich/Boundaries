@@ -6,6 +6,18 @@ var boundaries = angular.module('boundaries', ['ngTouch', 'ngAnimate', 'ngStorag
 angular.bootstrap(document.querySelector('#map_canvas'), ['boundaries']);
 
 // Directives
+boundaries.directive('bndTouch', function() {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attr) {
+            if ('ontouchstart' in document.documentElement) {
+                element.addClass('touch');
+            } else {
+                element.addClass('no-touch');
+            }
+        }
+    }
+});
 boundaries.directive('bndError', ['$parse', function($parse) {
     return {
         restrict: 'A',
