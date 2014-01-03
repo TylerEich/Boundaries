@@ -63,7 +63,7 @@ body, html {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
-.suggestion span {;
+.suggestion span {
 	opacity: 0.75;
 }
 .suggestion.error {
@@ -215,6 +215,10 @@ body, html {
 	flex: none;
 	flex-direction: column;
 	border-right: 1px solid #7F7F7F;
+}
+#sidebar.ng-cloak {
+    width: 0;
+    display: block !important;
 }
 
 input {

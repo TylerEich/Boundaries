@@ -11,7 +11,7 @@
     </head>
     <body>
         <!--TODO: Usage help via ngRoute (e.g. ./help)-->
-        <div id="sidebar">
+        <div id="sidebar" class="ng-cloak">
             <div id="header" class="row">
                 <div class="group horizontal">
                     <img id="icon" src="https://i.cloudup.com/jSODvKmdge.png">
@@ -103,7 +103,7 @@
             <div id="footer" class="row" ng-controller="ImageController">
                 <div class="row">
                     <div class="image_wrapper">
-                        <img bnd-load="throb = false" bnd-error="alert('Alert!')" ng-click="loadImage()" id="static_map" ng-src="{{ imageUrl }}" alt="Static Map" title="Static Map"/>
+                        <img bnd-load="throb = false" bnd-error="alert('Error!')" ng-click="loadImage()" id="static_map" ng-src="{{ imageUrl }}" alt="Static Map" title="Static Map"/>
                         <div class="throbber" ng-show="throb">
                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
                                 <circle cy="32" cx="32" r="16"/>

@@ -256,7 +256,7 @@ function SettingController($scope, $localStorage, utilityService) {
         }, {
             name: 'Green',
             rgba: {
-                r: 0,
+                r: 0.5,
                 g: 1,
                 b: 0,
                 a: 0.25
@@ -338,6 +338,34 @@ function ColorController($scope, $localStorage, utilityService) {
     };
     
     $scope.$storage = $localStorage;
+    $scope.$storage.colors = [{
+            name: 'Red',
+            rgba: {
+                r: 1,
+                g: 0,
+                b: 0,
+                a: 0.25
+            },
+            weight: 10
+        }, {
+            name: 'Green',
+            rgba: {
+                r: 0.5,
+                g: 1,
+                b: 0,
+                a: 0.25
+            },
+            weight: 10
+        }, {
+            name: 'Blue',
+            rgba: {
+                r: 0,
+                g: 0,
+                b: 1,
+                a: 0.25
+            },
+            weight: 10
+        }];
 }
 
 function ModeController($scope, $localStorage) {
@@ -871,7 +899,7 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
     $scope.loadImage = function() {
         var imageUrl = createUrl();
         if (!imageUrl) return;
-        
+
         if (imageUrl.length <= 2048) {
             $rootScope.$broadcast('image.flash');
             if ($scope.imageUrl !== imageUrl) $scope.throb = true;
@@ -937,7 +965,7 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
                 }
             }
             
-            urlRule = urlRule.join('%7C');
+            urlRule = urlRule.join('|');
             
             // Add urlRule to params if not empty string
             if (urlRule) {
@@ -971,7 +999,7 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
             }
             urlPath.push('enc:' + encodedPath);
             
-            urlPath = urlPath.join('%7C');
+            urlPath = urlPath.join('|');
             
             // Add urlPath to params if not empty string
             if (urlPath) {
@@ -1024,6 +1052,7 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
     
     $scope.$watch(stripDrawings, function() {
         var url = createUrl();
+        if (!url) return;
         console.log(url.length, url);
     });
     
