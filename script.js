@@ -49,7 +49,7 @@ boundaries.directive('bndHotkey', function() {
         link: function(scope, element, attr) {
             var isMac = (navigator.platform.lastIndexOf('Mac') === 0);
             element.on('keypress');
-            console.log(scope.key.charCodeAt(0));
+            // console.log(scope.key.charCodeAt(0));
         }
     }
 });
@@ -241,6 +241,7 @@ function utilityService($rootScope, $localStorage, $q, $http) {
 
 // Controllers
 function SettingController($scope, $localStorage, utilityService) {
+    console.log('storage');
     $scope.$storage = $localStorage.$default({
         activeColor: 1,
         compressedDrawings: '',
@@ -278,19 +279,77 @@ function SettingController($scope, $localStorage, utilityService) {
         polygon: false,
         rigid: false,
         style: [{
-            elementType: "labels.stroke",
-            stylers: [{
-                color: "#ffffff"
+            "stylers": [{
+                "visibility": "off"
             }]
         }, {
-            elementType: "labels.fill",
-            stylers: [{
-                color: "#000000"
+            "featureType": "landscape",
+            "stylers": [{
+                "visibility": "on"
+            }, {
+                "color": "#ffffff"
+            }]
+        }, {
+            "featureType": "road",
+            "stylers": [{
+                "visibility": "on"
+            }]
+        }, {
+            "elementType": "geometry.fill",
+            "stylers": [{
+                "color": "#ffffff"
+            }]
+        }, {
+            "featureType": "road",
+            "elementType": "geometry.stroke",
+            "stylers": [{
+                "color": "#808080"
+            }]
+        }, {
+            "elementType": "labels.text.stroke",
+            "stylers": [{
+                "color": "#ffffff"
+            }]
+        }, {
+            "elementType": "labels.text.fill",
+            "stylers": [{
+                "color": "#000000"
+            }]
+        }, {
+            "featureType": "water",
+            "stylers": [{
+                "visibility": "on"
+            }, {
+                "color": "#40bfbf"
+            }]
+        }, {
+            "featureType": "water",
+            "elementType": "labels.text.stroke",
+            "stylers": [{
+                "color": "#ffffff"
+            }]
+        }, {
+            "featureType": "road.local",
+            "elementType": "geometry",
+            "stylers": [{
+                "color": "#dfdfdf"
+            }]
+        }, {
+            "featureType": "road.local",
+            "elementType": "geometry.stroke",
+            "stylers": [{
+                "visibility": "off"
+            }]
+        }, {
+            "featureType": "landscape.man_made",
+            "stylers": [{
+                "visibility": "off"
             }]
         }],
+
         width: 5
     });
-    
+
     $scope.pxSize = utilityService.image.pxSize;
 }
 
@@ -338,34 +397,6 @@ function ColorController($scope, $localStorage, utilityService) {
     };
     
     $scope.$storage = $localStorage;
-    $scope.$storage.colors = [{
-            name: 'Red',
-            rgba: {
-                r: 1,
-                g: 0,
-                b: 0,
-                a: 0.25
-            },
-            weight: 10
-        }, {
-            name: 'Green',
-            rgba: {
-                r: 0.5,
-                g: 1,
-                b: 0,
-                a: 0.25
-            },
-            weight: 10
-        }, {
-            name: 'Blue',
-            rgba: {
-                r: 0,
-                g: 0,
-                b: 1,
-                a: 0.25
-            },
-            weight: 10
-        }];
 }
 
 function ModeController($scope, $localStorage) {
@@ -488,51 +519,6 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         }
     };
     $scope.flash = false;
-    $scope.$storage.style = [{
-        "stylers": [{
-            "visibility": "off"
-        }]
-    }, {
-        "featureType": "road",
-        "stylers": [{
-            "visibility": "on"
-        }]
-    }, {
-        "stylers": [{
-            "color": "#ffffff"
-        }],
-        "elementType": "geometry.fill"
-    }, {
-        "featureType": "road",
-        "elementType": "geometry.stroke",
-        "stylers": [{
-            "color": "#808080"
-        }]
-    }, {
-        "stylers": [{
-            "color": "#ffffff"
-        }],
-        "elementType": "labels.text.stroke"
-    }, {
-        "stylers": [{
-            "color": "#000000"
-        }],
-        "elementType": "labels.text.fill"
-    }, {
-        "featureType": "water",
-        "stylers": [{
-            "visibility": "on"
-        }, {
-            "color": "#40bfbf"
-        }]
-    }, {
-        "featureType": "water",
-        "elementType": "labels.text.stroke",
-        "stylers": [{
-            "color": "#ffffff"
-        }]
-    }];
-
     
     function flash() {
         // Use timeouts to allow digest cycles
@@ -714,12 +700,14 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         // Create a marker at the specified location
         drawing.nodes[nodeIndex]._marker = makeMarker(drawing, newNode);
         
-        // Generate polyline to be spliced later
+        // If there are at least two points...
         if (drawing.nodes.length > 1) {
             // Let user know something's going on
             utilityService.throb.on();
             
-            utilityService.map.makePath(makeLatLng(drawing.nodes[nodeIndex - 1]), makeLatLng(drawing.nodes[nodeIndex]), drawing.nodes[nodeIndex].rigid).then(function(path) {
+            // Generate polyline, act when resolved
+            utilityService.map.makePath(makeLatLng(drawing.nodes[nodeIndex - 1]), makeLatLng(drawing.nodes[nodeIndex]), drawing.nodes[nodeIndex].rigid)
+            .then(function(path) {
                 // Add all previous indicies to find current index
                 var pathIndex = 0;
                 for (var i = 0; i < nodeIndex; i++) {
@@ -732,9 +720,10 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         
                 // Update the poly
                 splicePolyPath(drawingIndex, nodeIndex, 0, path);
-            }).finally(function() {
-                utilityService.throb.off();
-            });
+            })
+            .finally(utilityService.throb.off);
+        } else { // Otherwise, put a inital index of 0
+            drawing.nodes[nodeIndex].index = 0;
         }
     }
     
@@ -909,10 +898,6 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
         }
     };
     
-    $scope.$watch('throb', function() {
-        console.log('Throb:', $scope.throb);
-    });
-    
     var drawings;
     $scope.$on('drawings', function($event, $param) {
         drawings = $param;
@@ -1009,26 +994,6 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
         
         var northEast = bounds.getNorthEast();
         var southWest = bounds.getSouthWest();
-        console.log(northEast, southWest);
-        
-        Number.prototype.toRad = function() {
-            return this * Math.PI / 180;
-        };
-        Number.prototype.toDeg = function() {
-            return this * 180 / Math.PI;
-        };
-        var lat1 = northEast.lat();
-        var lat2 = southWest.lat();
-        var lon1 = northEast.lng();
-        var lon2 = southWest.lng();
-        
-        var dLon = (lon2 - lon1).toRad();
-        var dLat = (lat2 - lat1).toRad();
-        var y = Math.sin(dLon) * Math.cos(lat2);
-        var x = Math.cos(lat1)*Math.sin(lat2) -
-                Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
-        var brng = Math.atan2(y, x).toDeg();
-        console.log('bearing:', brng);
         
         var heading = Math.abs(computeHeading(northEast, southWest) + computeHeading(southWest, northEast)) / 2;
         
@@ -1036,14 +1001,12 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
         if ((45 <= heading && heading < 135) == (pxSize.ratio >= 1)) {
             // Landscape
             params.push('size=' + pxSize.height + 'x' + pxSize.width);
-            console.log('Landscape');
         } else {
             // Portrait
-            console.log('Portrait');
             params.push('size=' + pxSize.width + 'x' + pxSize.height);
         }
-        console.log('heading:', heading, 'ratio:', pxSize.ratio);
         
+        params.push('format=' + $scope.$storage.format);
         params.push('scale=2');
         params.push('sensor=true');
         
