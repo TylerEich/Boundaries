@@ -1,7 +1,7 @@
 "use strict";
 
 // TODO: Privacy Policy and Terms of Service (https://developers.google.com/places/policies)
-var boundaries = angular.module('boundaries', ['ngAnimate', 'ngStorage', 'ngRoute', 'ui.map', 'ui.event']);
+var boundaries = angular.module('boundaries', ['ngTouch', 'ngAnimate', 'ngStorage', 'ngRoute', 'ui.map', 'ui.event']);
 
 angular.bootstrap(document.querySelector('#map_canvas'), ['boundaries']);
 
