@@ -18,6 +18,30 @@
 		fill-opacity: 0.25;
 	}
 }
+@keyframes flash {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+@keyframes zoom {
+    0% {
+        transform: scale(0);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+@keyframes fade {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
 
 body, html {
 	height: 100%;
@@ -25,6 +49,9 @@ body, html {
 	margin: 0;
 	padding: 0;
 	font: 1em "Source Sans Pro", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+body {
 	display: flex;
 }
 
@@ -34,6 +61,9 @@ body, html {
 	-webkit-font-smoothing: antialiased;
 }
 
+.ng-cloak {
+    display: none !important;
+}
 #suggestions {
 	transform-origin: center top;
 	display: block !important;
@@ -90,16 +120,15 @@ body, html {
 	pointer-events: none;
 	transition: none;
 }
-#flash.ng-animate {
+#flash.ng-hide-add, #flash.ng-hide-remove {
 	display: block !important;
 }
-#flash.ng-hide {
-	opacity: 0;
-	transition: 0.5s ease;
+#flash.ng-hide-add {
+    animation: flash 1s ease-out;
 }
 
 #bezel {
-	z-index: 10000;
+	z-index: 10;
 	position: fixed;
 	top: 50%;
 	right: 50%;
@@ -164,6 +193,13 @@ body, html {
 	background: rgba(0, 0, 0, 0.625);
 	border-radius: 0 0 0.25em 0.25em;
 }
+svg.logo {
+    height: 2em;
+    width: 100%;
+}
+.logo * {
+    opacity: 1;
+}
 
 #icon, #logo {
 	height: 2em;
@@ -209,10 +245,14 @@ body, html {
 #sidebar {
 	width: 12.5em;
 	height: 100%;
-	box-sizing: border-box;
+	padding: 0;
+    box-sizing: content-box;
 	background: #000;
 	display: flex;
+	overflow-x: hidden;
 	flex: none;
+	z-index: 1;
+	position: relative;
 	flex-direction: column;
 	border-right: 1px solid #7F7F7F;
 }
@@ -241,7 +281,7 @@ input:focus {
 }
 
 .group {
-	margin: 0 0;
+	margin: 0;
 }
 
 .group.horizontal *:first-child {
@@ -253,7 +293,7 @@ input:focus {
 .group.vertical *:first-child {
 	border-top-left-radius: 0.25em;
 	border-top-right-radius: 0.25em;
-	border-left-width: 1px;
+	border-top-width: 1px;
 }
 
 .group.horizontal *:last-child {
@@ -264,15 +304,14 @@ input:focus {
 	border-bottom-left-radius: 0.25em;
 	border-bottom-right-radius: 0.25em;
 }
-
 .group.horizontal * {
 	border-left-width: 0;
 }
 .group.vertical * {
 	border-top-width: 0;
+    clear: both;
 }
-
-.group.horizontal * {
+.group.horizontal *, .group.vertical * {
 	float: left;
 }
 
@@ -366,36 +405,58 @@ svg * {
     bottom: 0;
     left: 0;
     z-index: 2;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.875);
+    opacity: 1;
+    display: flex;
     flex-direction: column;
+    justify-content: center;
+}
+#lightbox, #lightbox * {
+    animation-duration: 0.5s;
+    animation-timing-function: ease;
+}
+#lightbox * {
+    transform-origin: bottom left;
+}
+#lightbox .button {
+    background: transparent;
+}
+.no-touch #lightbox .button:hover {
+    background: #7F7F7F;
 }
 #lightbox .image_wrapper {
-    flex: 1;
-}
-#lightbox .row {
-    flex: 0;
+    padding: 0.5em 0.5em 0 0.5em;
 }
 #lightbox img {
-    max-height: 100%;
+    max-height: calc(100% - 4.5em);
     max-width: 100%;
+    border: 1px solid #7F7F7F;
+    border-radius: 0.25em;
 }
-#lightbox.ng-hide ~ div {
+#lightbox.ng-hide-remove {
+    animation-name: fade;
+    animation-direction: normal;
+}
+#lightbox.ng-hide-add,
+#lightbox.ng-hide-add * {
+    animation-name: fade;
+    animation-direction: reverse;
+}
+#lightbox.ng-hide-remove * {
+    animation-name: zoom;
+    animation-direction: normal;
+}
+#lightbox.ng-hide-add, #lightbox.ng-hide-remove {
+    display: flex !important;
+}
+/*#lightbox.ng-hide ~ * {
+    -webkit-filter: blur(0) !important;
     filter: blur(0) !important;
 }
-#lightbox ~ div {
-    filter: blur(1em);
-}
-
-#sidebar {
-	height: 100%;
-	overflow-x: hidden;
-	position: relative;
-	z-index: 1;
-	background: #000;
-	padding: 0;
-	box-sizing: content-box;
-	box-flex: 0;
-}
+#lightbox ~ * {
+    -webkit-filter: blur(0.25em);
+    filter: blur(0.25em);
+}*/
 
 #map_wrapper {
 	z-index: 0;
@@ -407,6 +468,46 @@ svg * {
 	height: 100%;
 	width: 100%;
 }
-#map_canvas * {
+#map_canvas, #map_canvas * {
 	transition: none;
+}
+
+#map_controls {
+/*    width: 8em;*/
+    width: 3em;
+	padding: 0;
+    box-sizing: content-box;
+	background: #000;
+	overflow-y: scroll;
+	flex: none;
+	z-index: 1;
+	position: relative;
+	border-left: 1px solid #7F7F7F;
+}
+#d-pad .group.horizontal, #d-pad .group.horizontal * {
+    clear: none !important;
+}
+#d-pad .group.horizontal .button {
+    border: 1px solid #7F7F7F;
+}
+#d-pad .group.horizontal:first-of-type .button:last-of-type {
+    border: 1px solid #7F7F7F;
+    border-radius: 0.25em 0.25em 0 0;
+    border-bottom-width: 0;
+}
+#d-pad .group.horizontal .button:first-of-type {
+    border-radius: 0.25em 0 0 0.25em;
+    border-right-width: 0;
+}
+#d-pad .group.horizontal .button:last-of-type {
+    border-radius: 0 0.25em 0.25em 0;
+    border-left-width: 0;
+}
+#d-pad .group.horizontal:last-of-type .button:last-of-type {
+    border: 1px solid #7F7F7F;
+    border-radius: 0 0 0.25em 0.25em;
+    border-top-width: 0;
+}
+.blank {
+    visibility: hidden;
 }

@@ -3,19 +3,50 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <title>Boundaries</title>
-        <link rel="icon" type="image/png" href="icons/icon.png"/>
-        <link rel="apple-touch-icon-precomposed" href="icons/icon_ios.png"/>
+        <link rel="icon" type="image/x-icon" href="icons/icon.ico"/>
+        <link rel="apple-touch-icon-precomposed" sizes="57x57" href="icon-ios-114.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="icon-ios-114.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="icon-ios-144.png" />
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="icon-ios-144.png" />
         <!-- TODO: uncomment <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet' type='text/css'> -->
         <link rel="stylesheet" href="style.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
     </head>
     <body bnd-touch>
         <!--TODO: Usage help via ngRoute (e.g. ./help)-->
+        <div id="lightbox" class="ng-cloak" ng-controller="LightboxController" ng-show="$storage.fullscreen">
+            <div class="row">
+                <div class="image_wrapper">
+                    <img bnd-load="$storage.imageThrob = false" bnd-error="" id="static_map" ng-src="{{ $storage.imageUrl }}" alt="Static Map" title="Static Map"/>
+                    <div class="throbber" ng-show="$storage.imageThrob">
+                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
+                            <circle cy="32" cx="32" r="16"/>
+                            <circle cy="32" cx="80" r="16"/>
+                            <circle cy="32" cx="128" r="16"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="group horizontal">
+                    <label class="button trigger" title="Full Screen">
+                        <input type="button" ng-click="$storage.fullscreen = false" value="refresh">
+                        <svg xmlns="https://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
+                            <path d="m 40.268819,26.730728 c -0.827315,0 -1.578262,-0.335169 -2.12132,-0.878227 -0.543058,-0.543057 -0.878227,-1.294005 -0.878227,-2.12132 l 0,-8.485281 c 0,-1.213395 0.733977,-2.307997 1.854034,-2.774687 1.117936,-0.464569 2.411941,-0.205768 3.268955,0.651245 l 2.12132,2.121321 6.363961,-6.3639609 c 1.17309,-1.173091 3.069551,-1.173091 4.24264,-10e-7 1.17309,1.1730899 1.17309,3.0695509 0,4.2426409 l -6.36396,6.363961 2.12132,2.12132 c 0.857013,0.857014 1.115814,2.151019 0.651245,3.268955 -0.468812,1.122178 -1.563413,1.851913 -2.774687,1.854034 l -8.485281,0 z M 23.731181,37.269272 c 0.827315,0 1.578262,0.335168 2.12132,0.878226 0.543058,0.543058 0.878227,1.294006 0.878227,2.121321 l 0,8.485281 c 0,1.213395 -0.733977,2.307997 -1.854034,2.774687 -1.117936,0.464569 -2.411941,0.205768 -3.268955,-0.651245 l -2.12132,-2.121321 -6.363961,6.36396 c -1.17309,1.173091 -3.069551,1.173091 -4.2426407,0 -1.17309,-1.173089 -1.17309,-3.069549 0,-4.242639 l 6.3639607,-6.363961 -2.12132,-2.121321 c -0.857013,-0.857013 -1.115815,-2.151018 -0.651245,-3.268954 0.468811,-1.122179 1.563413,-1.851913 2.774687,-1.854034 l 8.485281,0 z" />
+                        </svg>
+                    </label>
+                </div>
+            </div>
+        </div>
         <div id="sidebar" class="ng-cloak">
             <div id="header" class="row">
                 <div class="group horizontal">
-                    <img id="icon" src="https://i.cloudup.com/jSODvKmdge.png">
-                    <img id="logo" src="https://i.cloudup.com/YyfNqqSSC1.png">
+                    <svg class="logo" xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 368 64" enable-background="new 0 0 368 64">
+                        <path d="M 23.999999,0 C 10.747999,0 0,10.748 0,24 0,37.252001 23.999999,64 23.999999,64 23.999999,64 48,37.252001 48,24 48,10.748 37.252,0 23.999999,0 z m 0,40 C 15.164,40 8.0000012,32.836001 8.0000012,24 8.0000012,15.164001 15.164,8 23.999999,8 32.836001,8 40,15.164001 40,24 40,32.836001 32.836001,40 23.999999,40 z" id="path3" style="fill:#ffffff;fill-opacity:1;stroke:none" />
+                        <text xml:space="preserve" style="font-size:65.01413727px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Source Sans Pro;-inkscape-font-specification:Source Sans Pro" x="58.148727" y="54.754948" id="text2986" sodipodi:linespacing="125%">Boundaries</text>
+                    </svg>
+                    <!-- <img id="icon" src="https://i.cloudup.com/jSODvKmdge.png">
+                    <img id="logo" src="https://i.cloudup.com/YyfNqqSSC1.png"> -->
                 </div>
             </div>
             <div id="content">
@@ -103,7 +134,7 @@
             <div id="footer" class="row" ng-controller="ImageController">
                 <div class="row">
                     <div class="image_wrapper">
-                        <img bnd-load="throb = false" bnd-error="alert('Error!')" ng-click="loadImage()" id="static_map" ng-src="{{ $storage.imageUrl }}" alt="Static Map" title="Static Map"/>
+                        <img bnd-load="$storage.imageThrob = false" bnd-error="alert('Error!')" ng-click="loadImage()" id="static_map" ng-src="{{ $storage.imageUrl }}" alt="Static Map" title="Static Map"/>
                         <div class="throbber" ng-show="$storage.imageThrob">
                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
                                 <circle cy="32" cx="32" r="16"/>
@@ -134,56 +165,127 @@
                     </div>
                 </div>
             </div>
-            <div id="settings" class="row" ng-controller="SettingController" ng-hide="true"/>
+            <div id="settings" class="row" ng-controller="SettingController" ng-hide="true"></div>
         </div>
-    </div>
-    <div ng-controller="MapController" id="map_wrapper">
-        <div class="throbber" ng-controller="ThrobController" ng-hide="$storage.mapThrobCounter === 0">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
-                <circle cy="32" cx="32" r="16"/>
-                <circle cy="32" cx="80" r="16"/>
-                <circle cy="32" cx="128" r="16"/>
-            </svg>
-        </div>
-        <div id="map_canvas" ui-map="map" ui-options="options" ui-event="{'map-click': 'map_click($params)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'map_idle()'}"></div>
-        <div ng-controller="DrawingController">
-            <div ng-repeat="drawing in drawings">
-                <div ng-repeat="node in drawing.nodes" ui-map-marker="node._marker" ui-event="{ 'map-click': 'marker_click($parent.$index, $index)', 'map-rightclick': 'marker_rightclick($parent.$index, $index)', 'map-dragstart': 'marker_dragstart($parent.$index, $index)', 'map-dragend': 'marker_dragend($parent.$index, $index)' }"></div>
-            </div>
-        </div>
-        <div id="flash" ng-show="flash"></div>
-    </div>
-    <div id="lightbox" ng-controller="LightboxController" ng-show="$storage.fullscreen">
-        <div class="image_wrapper">
-            <img bnd-load="$storage.imageThrob = false" bnd-error="" id="static_map" ng-src="{{ $storage.imageUrl }}" alt="Static Map" title="Static Map"/>
-            <div class="throbber" ng-show="$storage.imageThrob">
-                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
-                    <circle cy="32" cx="32" r="16"/>
-                    <circle cy="32" cx="80" r="16"/>
-                    <circle cy="32" cx="128" r="16"/>
-                </svg>
-            </div>
-        </div>
-        <div class="row">
-            <div class="group horizontal">
-                <label class="button trigger" title="Full Screen">
-                    <input type="button" ng-click="$storage.fullscreen = false" value="refresh">
-                    <svg xmlns="https://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
-                        <path d="M 10.999547,56 C 10.172232,56 9.4212847,55.664832 8.8782267,55.121774 8.3351687,54.578716 8,53.827768 8,53.000453 L 8,44.515172 C 8,43.301777 8.7339768,42.207175 9.8540339,41.740485 10.97197,41.275916 12.265975,41.534717 13.122989,42.39173 l 2.12132,2.121321 6.363961,-6.363961 c 1.17309,-1.173091 3.069551,-1.173091 4.242641,0 1.17309,1.17309 1.17309,3.06955 0,4.24264 l -6.363961,6.363961 2.12132,2.121321 c 0.857013,0.857013 1.115815,2.151018 0.651245,3.268954 C 21.790704,55.268145 20.696102,55.997879 19.484828,56 l -8.485281,0 z M 53.000453,8 c 0.827315,0 1.578262,0.335169 2.12132,0.878227 C 55.664831,9.421284 56,10.172232 56,10.999547 l 0,8.485281 c 0,1.213395 -0.733977,2.307997 -1.854034,2.774687 -1.117936,0.464569 -2.411941,0.205768 -3.268955,-0.651245 l -2.12132,-2.121321 -6.363961,6.363961 c -1.17309,1.173091 -3.069551,1.173091 -4.242641,1e-6 -1.17309,-1.17309 -1.17309,-3.069551 0,-4.242641 l 6.363961,-6.363961 -2.12132,-2.12132 C 41.534717,12.265975 41.275916,10.97197 41.740485,9.854034 42.209297,8.731856 43.303898,8.002121 44.515172,8 l 8.485281,0 z"/>
+        <div ng-controller="MapController" id="map_wrapper">
+            <div id="map_canvas" ui-map="map" ui-options="options" ui-event="{'map-click': 'map_click($params)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'map_idle()'}">
+                <div class="throbber" ng-controller="ThrobController" ng-hide="$storage.mapThrobCounter === 0">
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
+                        <circle cy="32" cx="32" r="16"/>
+                        <circle cy="32" cx="80" r="16"/>
+                        <circle cy="32" cx="128" r="16"/>
                     </svg>
-                </label>
+                </div>
+            </div>
+            <div ng-controller="DrawingController">
+                <div ng-repeat="drawing in drawings">
+                    <div ui-map-polyline="drawing._poly" ui-event="{ 'map-click': 'polyline_click($params)' }"></div>
+                
+                    <div ng-repeat="node in drawing.nodes" ui-map-marker="node._marker" ui-event="{ 'map-click': 'marker_click($parent.$index, $index)', 'map-rightclick': 'marker_rightclick($parent.$index, $index)', 'map-dragstart': 'marker_dragstart($parent.$index, $index)', 'map-dragend': 'marker_dragend($parent.$index, $index)' }"></div>
+                </div>
+            </div>
+            <div id="flash" class="ng-cloak" ng-show="flash"></div>
+        </div>
+        <div id="map_controls" ng-controller="MapControlsController">
+            <div class="row">
+                <div class="group vertical">
+                    <label class="button" title="Customized Map" ng-click="setMap('custom')">
+                        <input type="radio">
+                        <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                            <path  />
+                        </svg>
+                    </label>
+                    <label class="button" title="Road Map" ng-click="setMap('roadmap')">
+                        <input type="radio">
+                        <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                            <path d="m 34.304903,28.005746 a 1.50015,1.50015 0 0 0 -0.875,0.4375 l -5,5 a 1.5026019,1.5026019 0 1 0 2.125,2.125 l 5,-5 a 1.50015,1.50015 0 0 0 -1.25,-2.5625 z m 14,-14 a 1.50015,1.50015 0 0 0 -0.875,0.4375 l -5,5 a 1.5026019,1.5026019 0 1 0 2.125,2.125 l 5,-5 a 1.50015,1.50015 0 0 0 -1.25,-2.5625 z m -28,28 a 1.50015,1.50015 0 0 0 -0.875,0.4375 l -5,5 a 1.5026019,1.5026019 0 1 0 2.125,2.125 l 5,-5 a 1.50015,1.50015 0 0 0 -1.25,-2.5625 z m 22,-34.0000007 a 1.50015,1.50015 0 0 0 -0.875,0.4375 L 8.4299031,41.443246 a 1.5026019,1.5026019 0 1 0 2.1249999,2.125 l 33,-33 a 1.50015,1.50015 0 0 0 -1.25,-2.5625007 z m 12,12.0000007 a 1.50015,1.50015 0 0 0 -0.875,0.4375 l -33,33 a 1.5026019,1.5026019 0 1 0 2.125,2.125 l 33,-33 a 1.50015,1.50015 0 0 0 -1.25,-2.5625 z" />
+                        </svg>
+                    </label>
+                    <label class="button" title="Satellite Map" ng-click="setMap('hybrid')">
+                        <input type="radio">
+                        <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                            <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
+                        </svg>
+                    </label>
+                </div>
+            </div>
+            <!-- <div class="row">
+                <div id="d-pad" class="group vertical">
+                    <div class="group horizontal">
+                        <div class="button blank"></div>
+                        <label class="button" title="Zoom In">
+                            <input type="checkbox">
+                            <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                                <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="group horizontal">
+                        <label class="button" title="Zoom In">
+                            <input type="checkbox">
+                            <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                                <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
+                            </svg>
+                        </label>
+                        <label class="button" title="Zoom Out">
+                            <input type="checkbox">
+                            <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                                <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
+                            </svg>
+                        </label>
+                        <label class="button" title="Zoom Out">
+                            <input type="checkbox">
+                            <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                                <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
+                            </svg>
+                        </label>
+                    </div>
+                    <div class="group horizontal">
+                        <div class="button blank"></div>
+                        <label class="button" title="Zoom Out">
+                            <input type="checkbox">
+                            <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                                <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
+                            </svg>
+                        </label>
+                    </div>
+                </div>
+            </div> -->
+            <div class="row">
+                <div id="zoom" class="group vertical">
+                    <label class="button" title="Zoom In" ng-click="zoomIn()">
+                        <input type="checkbox">
+                        <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                            <path d="m 47.000002,56 -30.000004,0 c -4.971,0 -9,-4.032 -9,-9 l 0,-30 c 0,-4.971 4.029,-9 9,-9 l 30.000004,0 c 4.971,0 9,4.029 9,9 l 0,30 c 0,4.968 -4.029,9 -9,9 z m 3,-39 c 0,-1.656 -1.341,-3 -3,-3 l -30.000004,0 c -1.659,0 -3,1.344 -3,3 l 0,30 c 0,1.659 1.341,3 3,3 l 30.000004,0 c 1.659,0 3,-1.341 3,-3 l 0,-30 z m -9,18 -6.000004,0 0,6 c 0,1.659 -1.341,3 -3,3 -1.659,0 -3,-1.341 -3,-3 l 0,-6 -6,0 c -1.659,0 -3,-1.344 -3,-3 0,-1.656 1.341,-3 3,-3 l 6,0 0,-6 c 0,-1.656 1.341,-3 3,-3 1.659,0 3,1.344 3,3 l 0,6 6.000004,0 c 1.659,0 3,1.344 3,3 0,1.656 -1.341,3 -3,3 z" />
+                        </svg>
+                    </label>
+                    <label class="button" title="Zoom Out" ng-click="zoomOut()">
+                        <input type="checkbox">
+                        <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                            <path d="M 47,56 17,56 C 12.029,56 8,51.968 8,47 L 8,17 c 0,-4.971 4.029,-9 9,-9 l 30,0 c 4.971,0 9,4.029 9,9 l 0,30 c 0,4.968 -4.029,9 -9,9 z m 3,-39 c 0,-1.656 -1.341,-3 -3,-3 l -30,0 c -1.659,0 -3,1.344 -3,3 l 0,30 c 0,1.659 1.341,3 3,3 l 30,0 c 1.659,0 3,-1.341 3,-3 l 0,-30 z m -9,18 -18,0 c -1.659,0 -3,-1.344 -3,-3 0,-1.656 1.341,-3 3,-3 l 18,0 c 1.659,0 3,1.344 3,3 0,1.656 -1.341,3 -3,3 z" />
+                        </svg>
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div id="zoom" class="group vertical">
+                    <label class="button" title="Fit Drawing" ng-click="fitDrawings()">
+                        <input type="checkbox">
+                        <svg xmlns="https://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                            <path d="m 19.843966,18.503115 a 1.5001231,1.5000133 0 0 0 -1.343726,1.499863 l 0,23.997814 a 1.5001231,1.5000133 0 0 0 1.499974,1.499865 l 23.999571,0 a 1.5001231,1.5000133 0 0 0 1.499973,-1.499865 l 0,-23.997814 a 1.5001231,1.5000133 0 0 0 -1.499973,-1.499863 l -23.999571,0 a 1.5001231,1.5000133 0 0 0 -0.156248,0 z m 1.656221,2.999727 20.999625,0 0,20.998087 -20.999625,0 0,-20.998087 z M 10.68788,8.004071 a 3.0002464,3.0000268 0 0 0 -2.6874519,2.999727 l 0,8.99918 a 3.0002464,3.0000268 0 1 0 5.9998929,0 l 0,-5.999453 5.999893,0 a 3.0002464,3.0000268 0 1 0 0,-5.999454 l -8.99984,0 a 3.0002464,3.0000268 0 0 0 -0.312494,0 z m 41.968,32.965747 a 3.0002464,3.0000268 0 0 0 -2.656202,3.030974 l 0,5.999454 -5.999893,0 a 3.0002464,3.0000268 0 1 0 0,5.999454 l 8.999839,0 a 3.0002464,3.0000268 0 0 0 2.999947,-2.999726 l 0,-8.999182 A 3.0002464,3.0000268 0 0 0 52.65588,40.969818 z M 43.687291,8.004071 a 3.0040128,3.0037929 0 1 0 0.312494,5.999454 l 5.999893,0 0,5.999453 a 3.0002464,3.0000268 0 1 0 5.999893,0 l 0,-8.99918 A 3.0002464,3.0000268 0 0 0 52.999624,8.004071 l -8.999839,0 a 3.0002464,3.0000268 0 0 0 -0.312494,0 z m -33.03066,32.965747 a 3.0002464,3.0000268 0 0 0 -2.6562029,3.030974 l 0,8.999182 A 3.0002464,3.0000268 0 0 0 11.000374,55.9997 l 8.99984,0 a 3.0002464,3.0000268 0 1 0 0,-5.999454 l -5.999893,0 0,-5.999454 a 3.0002464,3.0000268 0 0 0 -3.34369,-3.030974 z" />
+                        </svg>
+                    </label>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-touch.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-route.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-animate.js"></script>
-    <script src="plugins/event.js"></script>
-    <script src="plugins/ui-map.js"></script>
-    <script src="plugins/ngStorage.min.js"></script>
-    <script src="script.js"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-touch.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-route.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular-animate.js"></script>
+        <script src="plugins/event.js"></script>
+        <script src="plugins/ui-map.js"></script>
+        <script src="plugins/ngStorage.min.js"></script>
+        <script src="script.js"></script>
     </body>
 </html>
