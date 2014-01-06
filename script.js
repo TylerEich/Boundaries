@@ -76,6 +76,7 @@ boundaries.controller('ColorController', ['$scope', '$localStorage', 'utilitySer
 boundaries.controller('ModeController', ['$scope', '$localStorage', ModeController]);
 boundaries.controller('ActionController', ['$scope', '$rootScope', '$localStorage', ActionController]);
 boundaries.controller('MapController', ['$scope', '$rootScope', '$location', '$localStorage', '$timeout', 'utilityService', MapController]);
+boundaries.controller('MapControlsController', ['$scope', '$rootScope', '$localStorage', MapControlsController]);
 boundaries.controller('ImageController', ['$scope', '$rootScope', '$localStorage', '$timeout', 'utilityService', ImageController]);
 boundaries.controller('LightboxController', ['$scope', '$localStorage', LightboxController]);
 boundaries.controller('DrawingController', ['$scope', '$rootScope', '$location', '$localStorage', '$q', 'utilityService', DrawingController]);
@@ -206,6 +207,8 @@ function utilityService($rootScope, $localStorage, $q, $http) {
                         // Reject with status
                         deferred.reject(status);
                     }
+                }, function() {
+                    deferred.reject();
                 });
             }
             return deferred.promise;
@@ -481,15 +484,13 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
     $scope.map_click = function($param) {
         $scope.$broadcast('map.click', $param);
     };
-    $scope.map_center_changed = function() {
+    $scope.map_idle = function() {
         var center = $scope.map.getCenter();
+        
         $scope.$storage.lat = center.lat();
         $scope.$storage.lng = center.lng();
-    };
-    $scope.map_zoom_changed = function() {
         $scope.$storage.zoom = $scope.map.getZoom();
-    };
-    $scope.map_idle = function() {
+        
         $location.search('lat', $scope.$storage.lat);
         $location.search('lng', $scope.$storage.lng);
         $location.search('zoom', $scope.$storage.zoom);
@@ -514,8 +515,8 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         disableDoubleClickZoom: true,
         draggableCursor: 'crosshair',
         draggingCursor: 'move',
-        mapTypeControl: true,
-        mapTypeControlOptions: {
+        mapTypeControl: false,
+        /*mapTypeControlOptions: {
             mapTypeIds: ['custom', google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.HYBRID],
             position: google.maps.ControlPosition.TOP_RIGHT,
             style: google.maps.MapTypeControlStyle.DEFAULT
@@ -526,7 +527,7 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
 		},*/
         scaleControl: true,
         zoom: $scope.$storage.zoom || 8,
-        zoomControl: true,
+        zoomControl: false,
         zoomControlOptions: {
             position: google.maps.ControlPosition.RIGHT_CENTER,
             style: google.maps.ZoomControlStyle.SMALL
@@ -546,8 +547,12 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
     $scope.$on('image.flash', flash);
     
     // Listen once; when the map is defined, load its watchers
-    var unbindWatcher = $scope.$watch('map', function() {
+    var unbindMap = $scope.$watch('map', function() {
         if ($scope.map == undefined) return;
+        
+        google.maps.event.addListenerOnce($scope.map, 'idle', function() {
+            google.maps.event.trigger($scope.map, 'resize');
+        });
         $rootScope.$broadcast('map', $scope.map);
         updateStyle();
 
@@ -555,11 +560,64 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         syncUrl();
 
         if (!$scope.$storage.lat || !$scope.$storage.lng) panToCurrentLocation();
-        unbindWatcher();
+        unbindMap();
     });
 }
 
+function MapControlsController($scope, $rootScope, $localStorage) {
+    $scope.$storage = $localStorage;
+    
+    var map;
+    var drawings;
+    
+    // Catch values from other controllers
+    var unbindMap = $scope.$on('map', function($event, $param) {
+        map = $param;
+        unbindMap();
+    });
+    var unbindDrawings = $scope.$on('drawings', function($event, $param) {
+        drawings = $param;
+        unbindDrawings();
+    });
+    
+    $scope.setMap = function(mapType) {
+        if (!map) return;
+        map.setMapTypeId(mapType);
+    };
+    // Zoom functions
+    $scope.zoomIn = function() {
+        if (!map) return;
+        console.log('zoom in');
+        map.setZoom(++$scope.$storage.zoom);
+    };
+    $scope.zoomOut = function() {
+        if (!map) return;
+        console.log('zoom out');
+        map.setZoom(--$scope.$storage.zoom);
+    };
+    
+    // Make map contain drawings
+    $scope.fitDrawings = function() {
+        if (drawings === undefined && map === undefined) return;
+        
+        var bounds = new google.maps.LatLngBounds();
+        
+        var drawing, polyPath;
+        for (var i = 0; i < drawings.length; i++) {
+            drawing = drawings[i];
+            polyPath = drawing._poly.getPath().getArray();
+            
+            for (var j = 0; j < polyPath.length; j++) {
+                bounds.extend(polyPath[j]);
+            }
+            
+            map.fitBounds(bounds);
+        }
+    };
+}
+
 function DrawingController($scope, $rootScope, $location, $localStorage, $q, utilityService) {
+    console.log('DrawingsController');
     $scope.$storage = $localStorage;
 
     function makeHexColor(drawing, alpha) {
@@ -602,7 +660,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             cursor = 'none';
             draggable = false;
         } else {
-            clickable = false;
+            clickable = true;
             cursor = 'pointer';
             draggable = false;
         }
@@ -624,7 +682,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     function makePolylineOptions(drawing) {
         var color = $scope.$storage.colors[drawing.activeColor];
         return {
-            clickable: false,
+            clickable: true,
             draggable: false,
             editable: false,
             strokeColor: '#' + makeHexColor(drawing, false),
@@ -712,7 +770,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         var path = [];
         
         // Create a marker at the specified location
-        drawing.nodes[nodeIndex]._marker = makeMarker(drawing, newNode);
+        if (!drawing.nodes[nodeIndex]._marker) drawing.nodes[nodeIndex]._marker = makeMarker(drawing, newNode);
         
         // If there are at least two points...
         if (drawing.nodes.length > 1) {
@@ -727,13 +785,20 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
                 for (var i = 0; i < nodeIndex; i++) {
                     pathIndex += drawing.nodes[i].index;
                 }
-        
+                
                 // Add length of new path to index
                 pathIndex += path.length;
                 drawing.nodes[nodeIndex].index = pathIndex;
         
                 // Update the poly
                 splicePolyPath(drawingIndex, nodeIndex, 0, path);
+                
+                // Move marker to end of poly; keeps on shape. Also mark using last argument 'true'
+                updateNodeLatLng(drawingIndex, nodeIndex, path[path.length - 1], true);
+                
+                if (drawing.nodes.length == 2) {
+                    updateNodeLatLng(drawingIndex, 0, path[0]);
+                }
             })
             .finally(utilityService.throb.off);
         } else { // Otherwise, put a inital index of 0
@@ -741,28 +806,18 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         }
     }
     
-    function markNode(drawingIndex, nodeIndex, hide) {
-        if (typeof drawingIndex === 'number' && typeof nodeIndex === 'number') {
-            var drawing = $scope.drawings[drawingIndex];
-            var node = drawing.nodes[nodeIndex];
-        }
-        var icon = makeIcon(drawing, true, hide);
+    function updateNodeLatLng(drawingIndex, nodeIndex, latLng, mark) {
+        var node = $scope.drawings[drawingIndex].nodes[nodeIndex];
         
-        if (!hide) {
-            nodeMarker.setPosition(makeLatLng(node));
-        }
-        nodeMarker.setIcon(icon);
+        node._marker.setPosition(latLng);
+        node.lat = latLng.lat();
+        node.lng = latLng.lng();
+        
+        if (mark) markNode(drawingIndex, nodeIndex);
     }
-    
-    function map_click($event, $param) {
-        var newNode = {
-            lat: $param[0].latLng.lat(),
-            lng: $param[0].latLng.lng(),
-            rigid: $scope.$storage.rigid
-        };
-        
+    function pushNode(newNode) {
         var drawingIndex = $scope.drawings.length;
-        
+        console.log($scope.$storage.new);
         if ($scope.$storage.new) {
             // Add a new drawing
             var drawing = {
@@ -785,15 +840,56 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         
         // Identify the latest node
         markNode(drawingIndex, nodeIndex);
-        
-        // Now drawing; new should be false so lines connect.
-        $scope.$storage.new = false;
     }
-    $scope.marker_click = function(drawingIndex, nodeIndex) {
+    
+    function markNode(drawingIndex, nodeIndex, hide) {
+        if (typeof drawingIndex === 'number' && typeof nodeIndex === 'number') {
+            var drawing = $scope.drawings[drawingIndex];
+            var node = drawing.nodes[nodeIndex];
+        }
+        var icon = makeIcon(drawing, true, hide);
         
+        if (!hide) {
+            nodeMarker.setPosition(makeLatLng(node));
+        }
+        nodeMarker.setIcon(icon);
     }
+    
+    function map_click($event, $params) {
+        var newNode = {
+            lat: $params[0].latLng.lat(),
+            lng: $params[0].latLng.lng(),
+            rigid: $scope.$storage.rigid
+        };
+        
+        pushNode(newNode);
+    }
+    $scope.marker_click = function(drawingIndexOfMarker, nodeIndexOfMarker) {
+        var node = $scope.drawings[drawingIndexOfMarker].nodes[nodeIndexOfMarker];
+        
+        var newNode = {
+            lat: node._marker.getPosition().lat(),
+            lng: node._marker.getPosition().lng(),
+            rigid: $scope.$storage.rigid
+        };
+        
+        pushNode(newNode);
+    };
+    $scope.polyline_click = function($params) {
+        var newNode = {
+            lat: $params[0].latLng.lat(),
+            lng: $params[0].latLng.lng(),
+            rigid: $scope.$storage.rigid
+        };
+        
+        pushNode(newNode)
+    };
 
     function clear() {
+        // Hide nodeMarker
+        markNode(null, null, true);
+        
+        // Remove every poly, marker from map
         for (var drawingIndex = 0; drawingIndex < $scope.drawings.length; drawingIndex++) {
             $scope.drawings[drawingIndex]._poly.setMap(null);
 
@@ -804,9 +900,6 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         
         // Empty drawings
         $scope.drawings.length = 0;
-        
-        // Hide nodeMarker
-        markNode(null, null, true);
     }
     function undo() {
         
@@ -817,7 +910,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     $scope.drawings = [];
         
     // When MapController emits the value of map, capture it.
-    $scope.$on('map', function($event, $param) {
+    var unbindMap = $scope.$on('map', function($event, $param) {
         map = $param;
         nodeMarker = makeMarker({
             activeColor: $scope.$storage.activeColor
@@ -825,35 +918,36 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             lat: 0,
             lng: 0
         }, true);
+        
+        unbindMap();
     });
     $scope.$on('map.click', map_click);
     $scope.$on('drawing.clear', clear);
     $scope.$on('drawing.undo', undo);
     
-    var unbind = $scope.$watch('drawings', function() {
-        if (!$scope.drawings) return;
-        $rootScope.$broadcast('drawings', $scope.drawings);
-        unbind();
-    });
-    $scope.$watch('drawings.length', function() {
-        if ($scope.drawings.length === 0) $scope.$storage.new = true;
-    });
-    $scope.$watch('$storage.activeColor', function() {
-        if ($scope.drawings.length === 0) return;
-        var drawing = $scope.drawings[$scope.drawings.length - 1];
-        if ($scope.$storage.activeColor !== drawing.activeColor) $scope.$storage.new = true;
-        else $scope.$storage.new = false;
-    });
-    $scope.$watch('$storage.new', function() {
-        if ($scope.drawings.length === 0) $scope.$storage.new = true;
-        // If starting new drawing, hide nodeMarker
-        if ($scope.$storage.new) markNode(null, null, true);
-        else {
-            var drawingIndex = $scope.drawings.length - 1;
-            var nodeIndex = $scope.drawings[drawingIndex].nodes.length - 1;
-            markNode(drawingIndex, nodeIndex);
+    function updateNew() {
+        if ($scope.drawings.length === 0) {
+            $scope.$storage.new = true;
+            return;
         }
+        
+        var drawing = $scope.drawings[$scope.drawings.length - 1];
+        $scope.$storage.new = ($scope.drawings.length === 0 ||
+            $scope.$storage.activeColor !== drawing.activeColor ||
+            drawing.nodes.length === 0);
+        
+        if ($scope.$storage.new) markNode(null, null, true);
+    }
+    var unbindDrawings = $scope.$watch('drawings', function() {
+        if ($scope.drawings === undefined) return;
+        console.log('drawings created');
+        $rootScope.$broadcast('drawings', $scope.drawings);
+        unbindDrawings();
     });
+    
+    // Keep 'new' up to date
+    $scope.$watch(updateNew);
+    $scope.$watch('$storage.new');
     
     $scope.marker_dragstart = function(drawingIndex, nodeIndex) {
         console.log('dragstart:', drawingIndex, nodeIndex);
@@ -866,19 +960,6 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     $scope.marker_dragend = function(drawingIndex, nodeIndex) {
         $scope.drawings[drawingIndex].nodes[nodeIndex]._unbind();
         delete $scope.drawings[drawingIndex].nodes[nodeIndex]._unbind;
-    };
-    /*$scope.marker_drag = function(node, drawingIndex, nodeIndex) {
-		changeNode(node, drawingIndex, nodeIndex, false);
-	};*/
-    $scope.marker_click = function(drawingIndex, nodeIndex) {
-        console.log('marker click');
-        var markerPosition = $scope.drawings[drawingIndex].nodes[nodeIndex]._marker.getPosition();
-        addNode({
-            activeColor: $scope.$storage.activeColor,
-            lat: markerPosition.lat(),
-            lng: markerPosition.lng(),
-            rigid: $scope.$storage.rigid
-        });
     };
 }
 
@@ -903,9 +984,11 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
         if (!imageUrl) return;
 
         if (imageUrl.length <= 2048) {
-            $rootScope.$broadcast('image.flash');
-            if ($scope.$storage.imageUrl !== imageUrl) $scope.throb = true;
-            $scope.$storage.imageUrl = imageUrl;
+            if ($scope.$storage.imageUrl !== imageUrl) {
+                $rootScope.$broadcast('image.flash');
+                $scope.$storage.imageThrob = true;
+                $scope.$storage.imageUrl = imageUrl;
+            }
         } else {
             window.alert('Your image is too complex!');
         }
@@ -917,6 +1000,7 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
     
     var drawings;
     $scope.$on('drawings', function($event, $param) {
+        console.log('drawing');
         drawings = $param;
         $scope.loadImage();
     });
@@ -1033,23 +1117,7 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
     $scope.$watch(stripDrawings, function() {
         var url = createUrl();
         if (!url) return;
-        console.log(url.length, url);
     });
-    
-    // Image orientation logic
-    /*var drawingBounds = new google.maps.LatLngBounds();
-	for (var i = 0; i < VariableService.drawing.length; i++) {
-		var marker = VariableService.markers[i];
-		
-	}
-	var northEast = VariableService.markers.get
-	var heading = Math.abs(google.maps.geometry.spherical.computeHeading(latLng1, latLng2));
-	if (45 <= heading || heading < 135) {
-		console.log('Landscape');
-	} else {
-		console.log('Portrait');
-	}
-	*/
 }
 
 function LightboxController($scope, $localStorage) {
