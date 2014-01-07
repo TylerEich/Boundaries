@@ -898,7 +898,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             }
         }
         
-        // Empty drawings
+        // Empty drawings while preserving the reference
         $scope.drawings.length = 0;
     }
     function undo() {
@@ -925,18 +925,84 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     $scope.$on('drawing.clear', clear);
     $scope.$on('drawing.undo', undo);
     
+    $scope.$storage.override = false;
+    var drawingsLength;
     function updateNew() {
+        // Check for drawings
+        if (!$scope.drawings) return;
+        
+        // If drawings is empty, new is true
         if ($scope.drawings.length === 0) {
             $scope.$storage.new = true;
             return;
         }
         
-        var drawing = $scope.drawings[$scope.drawings.length - 1];
-        $scope.$storage.new = ($scope.drawings.length === 0 ||
+        // Define latest indicies of drawings
+        var drawingIndex = $scope.drawings.length - 1;
+        var nodeIndex = $scope.drawings[drawingIndex].nodes.length - 1;
+        
+        // drawingLength is undefined unless override is true
+        if (drawingsLength === undefined) {
+            // Automatically set value of new
+            $scope.$storage.new = ($scope.drawings.length === 0 ||
+                $scope.$storage.activeColor !== $scope.drawings[drawingIndex].activeColor ||
+                $scope.drawings[drawingIndex].nodes.length === 0);
+        }
+        
+        // If override is true, new is true
+        if ($scope.$storage.override) {
+            // If drawings length or color changed, cancel
+            if ((drawingsLength !== undefined &&
+                drawingsLength !== $scope.drawings.length) ||
+                $scope.$storage.activeColor !== $scope.drawings[drawingIndex].activeColor) {
+                $scope.$storage.override = false;
+            } else {
+                $scope.$storage.new = true;
+            }
+            
+            // Capture drawings length
+            drawingsLength = $scope.drawings.length;
+        } else {
+            // If override was just disabled, automatically determine value of new
+            if (drawingsLength !== undefined) {
+                $scope.$storage.new = ($scope.drawings.length === 0 ||
+                    $scope.$storage.activeColor !== $scope.drawings[drawingIndex].activeColor ||
+                    $scope.drawings[drawingIndex].nodes.length === 0);
+            }
+            drawingsLength = undefined;
+        }
+        
+        // If new is true, override is false
+        if ($scope.$storage.new) {
+            // Hide node marker
+            markNode(null, null, true);
+        } else {
+            // Sync node marker
+            markNode(drawingIndex, nodeIndex);
+        }
+        
+        /*var drawing = $scope.drawings[$scope.drawings.length - 1];
+        if ($scope.$storage.override &&
+            $scope.$storage.activeColor === drawing.activeColor) {
+                if (drawingsLength === undefined) {
+                    drawingsLength = $scope.drawings.length;
+                    $scope.$storage.new = true;
+                }
+                if (drawingsLength !== $scope.drawings.length) {
+                    $scope.$storage.override = false;
+                    drawingsLength = undefined;
+                }
+            }
+        
+        if (!$scope.$storage.override) $scope.$storage.new = ($scope.drawings.length === 0 ||
             $scope.$storage.activeColor !== drawing.activeColor ||
             drawing.nodes.length === 0);
         
         if ($scope.$storage.new) markNode(null, null, true);
+        else {
+            
+            markNode(drawingIndex, nodeIndex);
+        }*/
     }
     var unbindDrawings = $scope.$watch('drawings', function() {
         if ($scope.drawings === undefined) return;
