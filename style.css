@@ -334,7 +334,10 @@ input:focus {
 	background: #7F7F7F;
 }
 
-.button.trigger:active, .button.trigger.active {
+.button.trigger:active,
+.button.trigger:active *,
+.button.trigger.active,
+.button.trigger.active * {
 	transition: none;
 }
 
@@ -347,7 +350,8 @@ svg * {
 	/*fill-opacity: 0.625;
 	stroke-opacity: 0.625;*/
 }
-.active svg *, .button:active svg *, input:checked + .button svg * {
+.button.active svg *,
+.button:active svg * {
 	opacity: 1;
 	/*fill-opacity: 1;
 	stroke-opacity: 1;*/
