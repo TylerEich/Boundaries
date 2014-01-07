@@ -336,7 +336,7 @@ input:focus {
 	cursor: pointer;
 }
 
-.button:active,
+/*.button:active,*/
 .button.active {
 	background: #000 !important;
 }
@@ -361,8 +361,8 @@ svg * {
 	/*fill-opacity: 0.625;
 	stroke-opacity: 0.625;*/
 }
-.button.active svg *,
-.button:active svg * {
+/*.button:active svg *,*/
+.button.active svg * {
 	opacity: 1;
 	/*fill-opacity: 1;
 	stroke-opacity: 1;*/
