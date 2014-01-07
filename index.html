@@ -181,24 +181,21 @@
         <div id="map_controls" ng-controller="MapControlsController">
             <div class="row">
                 <div class="group vertical">
-                    <label class="button" title="Customized Map" ng-click="setMap('custom')">
-                        <input type="radio">
+                    <div class="button" title="Customized Map" ng-click="setMapTypeId('custom')" ng-class="{'active': getMapTypeId() == 'custom'}">
                         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
                             <path  />
                         </svg>
-                    </label>
-                    <label class="button" title="Road Map" ng-click="setMap('roadmap')">
-                        <input type="radio">
+                    </div>
+                    <div class="button" title="Road Map" ng-click="setMapTypeId('roadmap')" ng-class="{'active': getMapTypeId() == 'roadmap'}">
                         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
                             <path d="m 34.304903,28.005746 a 1.50015,1.50015 0 0 0 -0.875,0.4375 l -5,5 a 1.5026019,1.5026019 0 1 0 2.125,2.125 l 5,-5 a 1.50015,1.50015 0 0 0 -1.25,-2.5625 z m 14,-14 a 1.50015,1.50015 0 0 0 -0.875,0.4375 l -5,5 a 1.5026019,1.5026019 0 1 0 2.125,2.125 l 5,-5 a 1.50015,1.50015 0 0 0 -1.25,-2.5625 z m -28,28 a 1.50015,1.50015 0 0 0 -0.875,0.4375 l -5,5 a 1.5026019,1.5026019 0 1 0 2.125,2.125 l 5,-5 a 1.50015,1.50015 0 0 0 -1.25,-2.5625 z m 22,-34.0000007 a 1.50015,1.50015 0 0 0 -0.875,0.4375 L 8.4299031,41.443246 a 1.5026019,1.5026019 0 1 0 2.1249999,2.125 l 33,-33 a 1.50015,1.50015 0 0 0 -1.25,-2.5625007 z m 12,12.0000007 a 1.50015,1.50015 0 0 0 -0.875,0.4375 l -33,33 a 1.5026019,1.5026019 0 1 0 2.125,2.125 l 33,-33 a 1.50015,1.50015 0 0 0 -1.25,-2.5625 z" />
                         </svg>
-                    </label>
-                    <label class="button" title="Satellite Map" ng-click="setMap('hybrid')">
-                        <input type="radio">
+                    </div>
+                    <div class="button" title="Satellite Map" ng-click="setMapTypeId('hybrid')" ng-class="{'active': getMapTypeId() == 'hybrid'}">
                         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
                             <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
                         </svg>
-                    </label>
+                    </div>
                 </div>
             </div>
             <!-- <div class="row">
@@ -245,12 +242,12 @@
             </div> -->
             <div class="row">
                 <div id="zoom" class="group vertical">
-                    <div class="button" title="Zoom In" ng-click="zoomIn()">
+                    <div class="button trigger" title="Zoom In" ng-click="zoomIn()">
                         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
                             <path d="m 47.000002,56 -30.000004,0 c -4.971,0 -9,-4.032 -9,-9 l 0,-30 c 0,-4.971 4.029,-9 9,-9 l 30.000004,0 c 4.971,0 9,4.029 9,9 l 0,30 c 0,4.968 -4.029,9 -9,9 z m 3,-39 c 0,-1.656 -1.341,-3 -3,-3 l -30.000004,0 c -1.659,0 -3,1.344 -3,3 l 0,30 c 0,1.659 1.341,3 3,3 l 30.000004,0 c 1.659,0 3,-1.341 3,-3 l 0,-30 z m -9,18 -6.000004,0 0,6 c 0,1.659 -1.341,3 -3,3 -1.659,0 -3,-1.341 -3,-3 l 0,-6 -6,0 c -1.659,0 -3,-1.344 -3,-3 0,-1.656 1.341,-3 3,-3 l 6,0 0,-6 c 0,-1.656 1.341,-3 3,-3 1.659,0 3,1.344 3,3 l 0,6 6.000004,0 c 1.659,0 3,1.344 3,3 0,1.656 -1.341,3 -3,3 z" />
                         </svg>
                     </div>
-                    <div class="button" title="Zoom Out" ng-click="zoomOut()">
+                    <div class="button trigger" title="Zoom Out" ng-click="zoomOut()">
                         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
                             <path d="M 47,56 17,56 C 12.029,56 8,51.968 8,47 L 8,17 c 0,-4.971 4.029,-9 9,-9 l 30,0 c 4.971,0 9,4.029 9,9 l 0,30 c 0,4.968 -4.029,9 -9,9 z m 3,-39 c 0,-1.656 -1.341,-3 -3,-3 l -30,0 c -1.659,0 -3,1.344 -3,3 l 0,30 c 0,1.659 1.341,3 3,3 l 30,0 c 1.659,0 3,-1.341 3,-3 l 0,-30 z m -9,18 -18,0 c -1.659,0 -3,-1.344 -3,-3 0,-1.656 1.341,-3 3,-3 l 18,0 c 1.659,0 3,1.344 3,3 0,1.656 -1.341,3 -3,3 z" />
                         </svg>

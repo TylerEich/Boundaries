@@ -60,7 +60,10 @@ body {
 * {
 	transition: all 0.25s ease;
 	box-sizing: border-box;
-	-webkit-font-smoothing: antialiased;
+    tap-highlight-color: transparent;
+	font-smoothing: antialiased;
+    user-select: none;
+    appearance: none;
 }
 
 .ng-cloak {
@@ -102,10 +105,14 @@ body {
 	text-align: center;
 	pointer-events: none;
 }
-.no-touch .suggestion:hover, .suggestion:active, .suggestion.active {
+.no-touch .suggestion:hover,
+.suggestion:active,
+.suggestion.active {
 	background: #404040;
 }
-.no-touch .suggestion:hover span, .suggestion:active span, .suggestion.active span {
+.no-touch .suggestion:hover span,
+.suggestion:active span,
+.suggestion.active span {
 	opacity: 1;
 }
 .suggestion.ng-animate {
@@ -122,7 +129,8 @@ body {
 	pointer-events: none;
 	transition: none;
 }
-#flash.ng-hide-add, #flash.ng-hide-remove {
+#flash.ng-hide-add,
+#flash.ng-hide-remove {
 	display: block !important;
 }
 #flash.ng-hide-add {
@@ -195,7 +203,7 @@ body {
 	background: rgba(0, 0, 0, 0.625);
 	border-radius: 0 0 0.25em 0.25em;
 }
-svg.logo {
+.logo {
     height: 2em;
     width: 100%;
 }
@@ -268,6 +276,7 @@ input {
 }
 
 input[type="text"] {
+    user-select: text;
 	display: block !important;
 	width: 9.5rem;
 	height: 2.5rem;
@@ -275,6 +284,7 @@ input[type="text"] {
 	padding: 0.5em;
 	background: #fff;
 	border: 1px solid #7F7F7F;
+    border-radius: 0;
 	font: inherit;
 }
 
@@ -326,7 +336,8 @@ input:focus {
 	cursor: pointer;
 }
 
-.button:active, .button.active {
+.button:active,
+.button.active {
 	background: #000 !important;
 }
 
@@ -334,8 +345,8 @@ input:focus {
 	background: #7F7F7F;
 }
 
-.button.trigger:active,
-.button.trigger:active *,
+/*.button.trigger:active,
+.button.trigger:active *,*/
 .button.trigger.active,
 .button.trigger.active * {
 	transition: none;
@@ -417,7 +428,8 @@ svg * {
     flex-direction: column;
     justify-content: center;
 }
-#lightbox, #lightbox * {
+#lightbox,
+#lightbox * {
     animation-duration: 0.5s;
     animation-timing-function: ease;
 }
@@ -452,7 +464,8 @@ svg * {
     animation-name: zoom;
     animation-direction: normal;
 }
-#lightbox.ng-hide-add, #lightbox.ng-hide-remove {
+#lightbox.ng-hide-add,
+#lightbox.ng-hide-remove {
     display: flex !important;
 }
 /*#lightbox.ng-hide ~ * {
@@ -474,7 +487,8 @@ svg * {
 	height: 100%;
 	width: 100%;
 }
-#map_canvas, #map_canvas * {
+#map_canvas,
+#map_canvas * {
 	transition: none;
 }
 
@@ -490,7 +504,8 @@ svg * {
 	position: relative;
 	border-left: 1px solid #7F7F7F;
 }
-#d-pad .group.horizontal, #d-pad .group.horizontal * {
+#d-pad .group.horizontal,
+#d-pad .group.horizontal * {
     clear: none !important;
 }
 #d-pad .group.horizontal .button {

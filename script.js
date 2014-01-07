@@ -580,7 +580,11 @@ function MapControlsController($scope, $rootScope, $localStorage) {
         unbindDrawings();
     });
     
-    $scope.setMap = function(mapType) {
+    $scope.getMapTypeId = function() {
+        if (!map) return;
+        return map.getMapTypeId();
+    };
+    $scope.setMapTypeId = function(mapType) {
         if (!map) return;
         map.setMapTypeId(mapType);
     };
