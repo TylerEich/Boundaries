@@ -257,7 +257,6 @@ function utilityService($rootScope, $localStorage, $q, $http) {
 
 // Controllers
 function SettingController($scope, $localStorage, utilityService) {
-    console.log('storage');
     $scope.$storage = $localStorage.$default({
         activeColor: 1,
         compressedDrawings: '',
@@ -621,7 +620,6 @@ function MapControlsController($scope, $rootScope, $localStorage) {
 }
 
 function DrawingController($scope, $rootScope, $location, $localStorage, $q, utilityService) {
-    console.log('DrawingsController');
     $scope.$storage = $localStorage;
 
     function makeHexColor(drawing, alpha) {
@@ -656,7 +654,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     function makeLatLng(node) {
         return new google.maps.LatLng(node.lat, node.lng);
     }
-    function makeMarkerOptions(drawing, node, isNodeMarker) {
+    function makeMarkerOptions(drawing, node, isNodeMarker, hide) {
         var clickable, cursor, draggable;
         
         if (isNodeMarker) {
@@ -675,13 +673,13 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             cursor: cursor,
             draggable: draggable,
             flat: true,
-            icon: makeIcon(drawing, isNodeMarker),
+            icon: makeIcon(drawing, isNodeMarker, hide),
             map: map,
             position: makeLatLng(node)
         };
     }
-    function makeMarker(drawing, node, isNodeMarker) {
-        return new google.maps.Marker(makeMarkerOptions(drawing, node, isNodeMarker));
+    function makeMarker(drawing, node, isNodeMarker, hide) {
+        return new google.maps.Marker(makeMarkerOptions(drawing, node, isNodeMarker, hide));
     }
     function makePolylineOptions(drawing) {
         var color = $scope.$storage.colors[drawing.activeColor];
@@ -886,7 +884,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             rigid: $scope.$storage.rigid
         };
         
-        pushNode(newNode)
+        pushNode(newNode);
     };
 
     function clear() {
@@ -921,7 +919,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         }, {
             lat: 0,
             lng: 0
-        }, true);
+        }, true, true);
         
         unbindMap();
     });
