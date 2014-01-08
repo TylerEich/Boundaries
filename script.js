@@ -808,6 +808,28 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         }
     }
     
+    function updateDrawingPoly(drawingIndex, isPolygon) {
+        if (typeof drawingIndex !== 'number') {
+            console.error('drawingIndex is not a number');
+            return;
+        }
+        
+        var drawing = $scope.drawings[drawingIndex];
+        var path;
+        
+        // Only polygons have getPaths method
+        var drawingIsPolygon = ('getPaths' in drawing._poly);
+        
+        // Check if desired poly is different than current poly
+        if (isPolygon !== drawingIsPolygon) {
+            path = drawing._poly.getPath();
+            drawing.polygon = isPolygon;
+            
+            drawing._poly.setMap(null);
+            drawing._poly = makePoly(drawing);
+            drawing._poly.setPath(path);
+        }
+    }
     function updateNodeLatLng(drawingIndex, nodeIndex, latLng, mark) {
         var node = $scope.drawings[drawingIndex].nodes[nodeIndex];
         
@@ -1013,9 +1035,15 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         unbindDrawings();
     });
     
-    // Keep 'new' up to date
+    // Keep new up to date
     $scope.$watch(updateNew);
     $scope.$watch('$storage.new');
+    
+    // Watch polygon, update current poly to reflect state
+    $scope.$watch('$storage.polygon', function() {
+        if ($scope.drawings.length < 1) return;
+        updateDrawingPoly($scope.drawings.length - 1, $scope.$storage.polygon);
+    });
     
     $scope.marker_dragstart = function(drawingIndex, nodeIndex) {
         console.log('dragstart:', drawingIndex, nodeIndex);
