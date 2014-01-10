@@ -809,6 +809,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     }
     
     function updateDrawingPoly(drawingIndex, isPolygon) {
+        if ($scope.$storage.new === true) return;
         if (typeof drawingIndex !== 'number') {
             console.error('drawingIndex is not a number');
             return;
