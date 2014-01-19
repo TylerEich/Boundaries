@@ -61,6 +61,7 @@ body {
 	transition: all 0.25s ease;
 	box-sizing: border-box;
     tap-highlight-color: transparent;
+    color: #fff;
 	font-smoothing: antialiased;
     user-select: none;
     appearance: none;
@@ -203,6 +204,7 @@ body {
 	background: rgba(0, 0, 0, 0.625);
 	border-radius: 0 0 0.25em 0.25em;
 }
+
 .logo {
     height: 2em;
     width: 100%;
@@ -271,12 +273,28 @@ body {
     display: block !important;
 }
 
-input {
-	display: none;
+/*input {
+    display: none;
+}*/
+
+#settings #format input {
+    display: none;
+}
+#settings #format .button {
+    text-align: center;
+    font-weight: bold;
+}
+#settings #size input {
+    width: 4em;
+}
+#settings .text {
+    line-height: 2.5em;
 }
 
-input[type="text"] {
+input[type="text"],
+input[type="number"] {
     user-select: text;
+    color: black;
 	display: block !important;
 	width: 9.5rem;
 	height: 2.5rem;
@@ -336,17 +354,17 @@ input:focus {
 	cursor: pointer;
 }
 
-/*.button:active,*/
+.button:active,
 .button.active {
-	background: #000 !important;
+	background: #7F7F7F !important;
 }
 
 .no-touch .button:hover {
-	background: #7F7F7F;
+	background: #5F5F5F;
 }
 
-/*.button.trigger:active,
-.button.trigger:active *,*/
+.button.trigger:active,
+.button.trigger:active *,
 .button.trigger.active,
 .button.trigger.active * {
 	transition: none;
@@ -361,7 +379,7 @@ svg * {
 	/*fill-opacity: 0.625;
 	stroke-opacity: 0.625;*/
 }
-/*.button:active svg *,*/
+.button:active svg *,
 .button.active svg * {
 	opacity: 1;
 	/*fill-opacity: 1;

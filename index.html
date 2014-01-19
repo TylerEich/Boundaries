@@ -3,7 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name = "viewport" content = "width=device-width, initial-scale=1, user-scalable = no">
-        <title>Boundaries</title>
+        <title ng-controller="DescriptionController" ng-bind-html="title()">Boundaries</title>
         <link rel="icon" type="image/x-icon" href="icons/icon.ico"/>
         <link rel="apple-touch-icon-precomposed" sizes="57x57" href="icons/ios-114.png">
         <link rel="apple-touch-icon-precomposed" sizes="114x114" href="icons/ios-114.png">
@@ -30,12 +30,11 @@
             </div>
             <div class="row">
                 <div class="group horizontal">
-                    <label class="button trigger" title="Full Screen">
-                        <input type="button" ng-click="$storage.fullscreen = false" value="refresh">
+                    <div class="button trigger" ng-click="$storage.fullscreen = false" title="Full Screen">
                         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
                             <path d="m 40.268819,26.730728 c -0.827315,0 -1.578262,-0.335169 -2.12132,-0.878227 -0.543058,-0.543057 -0.878227,-1.294005 -0.878227,-2.12132 l 0,-8.485281 c 0,-1.213395 0.733977,-2.307997 1.854034,-2.774687 1.117936,-0.464569 2.411941,-0.205768 3.268955,0.651245 l 2.12132,2.121321 6.363961,-6.3639609 c 1.17309,-1.173091 3.069551,-1.173091 4.24264,-10e-7 1.17309,1.1730899 1.17309,3.0695509 0,4.2426409 l -6.36396,6.363961 2.12132,2.12132 c 0.857013,0.857014 1.115814,2.151019 0.651245,3.268955 -0.468812,1.122178 -1.563413,1.851913 -2.774687,1.854034 l -8.485281,0 z M 23.731181,37.269272 c 0.827315,0 1.578262,0.335168 2.12132,0.878226 0.543058,0.543058 0.878227,1.294006 0.878227,2.121321 l 0,8.485281 c 0,1.213395 -0.733977,2.307997 -1.854034,2.774687 -1.117936,0.464569 -2.411941,0.205768 -3.268955,-0.651245 l -2.12132,-2.121321 -6.363961,6.36396 c -1.17309,1.173091 -3.069551,1.173091 -4.2426407,0 -1.17309,-1.173089 -1.17309,-3.069549 0,-4.242639 l 6.3639607,-6.363961 -2.12132,-2.121321 c -0.857013,-0.857013 -1.115815,-2.151018 -0.651245,-3.268954 0.468811,-1.122179 1.563413,-1.851913 2.774687,-1.854034 l 8.485281,0 z" />
                         </svg>
-                    </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -139,6 +138,13 @@
                 </div>
                 <div class="row">
                     <div class="group horizontal">
+                        <div class="button" title="Settings" ng-class="{'active': showSettings}" ng-click="settings()">
+                            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
+                                <path d="m 53,29 -3,0 c -0.105,0 -0.192,0.051 -0.297,0.06 -0.456,-2.769 -1.527,-5.316 -3.093,-7.506 0.075,-0.063 0.168,-0.087 0.24,-0.159 l 2.121,-2.121 c 1.173,-1.173 1.173,-3.069 0,-4.242 -1.173,-1.173 -3.072,-1.173 -4.245,0 l -2.121,2.118 c -0.069,0.069 -0.096,0.165 -0.159,0.24 C 40.259,15.821 37.709,14.753 34.94,14.297 34.949,14.192 35,14.105 35,14 l 0,-3 C 35,9.344 33.659,8 32,8 30.341,8 29,9.344 29,11 l 0,3 c 0,0.105 0.051,0.192 0.06,0.297 -2.769,0.456 -5.319,1.524 -7.506,3.093 -0.063,-0.075 -0.09,-0.168 -0.159,-0.24 l -2.121,-2.121 c -1.173,-1.173 -3.072,-1.173 -4.245,0 -1.17,1.173 -1.17,3.069 0,4.242 l 2.124,2.121 c 0.069,0.072 0.159,0.099 0.237,0.162 -1.569,2.19 -2.637,4.737 -3.093,7.506 C 14.192,29.051 14.105,29 14,29 l -3,0 c -1.659,0 -3,1.344 -3,3 0,1.656 1.341,3 3,3 l 3,0 c 0.105,0 0.192,-0.048 0.297,-0.06 0.456,2.769 1.527,5.316 3.093,7.506 -0.075,0.063 -0.168,0.087 -0.237,0.159 l -2.124,2.121 c -1.17,1.173 -1.17,3.072 0,4.242 1.173,1.173 3.072,1.173 4.245,0 l 2.121,-2.121 c 0.069,-0.069 0.096,-0.165 0.159,-0.24 2.187,1.569 4.737,2.637 7.506,3.096 C 29.051,49.808 29,49.895 29,50 l 0,3 c 0,1.659 1.341,3 3,3 1.659,0 3,-1.341 3,-3 l 0,-3 c 0,-0.105 -0.051,-0.192 -0.06,-0.297 2.769,-0.459 5.316,-1.527 7.506,-3.096 0.063,0.075 0.087,0.171 0.159,0.24 l 2.121,2.121 c 1.173,1.173 3.072,1.173 4.245,0 1.173,-1.17 1.173,-3.069 0,-4.242 L 46.85,42.605 c -0.072,-0.069 -0.165,-0.093 -0.24,-0.159 1.566,-2.19 2.637,-4.737 3.093,-7.506 C 49.808,34.952 49.895,35 50,35 l 3,0 c 1.659,0 3,-1.344 3,-3 0,-1.656 -1.341,-3 -3,-3 z M 32,41 c -4.971,0 -9,-4.032 -9,-9 0,-4.971 4.029,-9 9,-9 4.971,0 9,4.029 9,9 0,4.968 -4.029,9 -9,9 z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="group horizontal">
                         <div class="button trigger" title="Capture Drawing" ng-click="loadImage()">
                             <bnd-hotkey meta="isMac" ctrl="!isMac" key="a" action="loadImage()">
                                 <!-- <input type="button"  value="refresh"> -->
@@ -147,8 +153,6 @@
                                 <path d="m 53,17 -6,0 c -1.659,0 -3,-1.344 -3,-3 0,-1.656 -1.341,-3 -3,-3 l -18,0 c -1.659,0 -3,1.344 -3,3 0,1.656 -1.341,3 -3,3 l -6,0 c -1.659,0 -3,1.344 -3,3 l 0,30 c 0,1.659 1.341,3 3,3 l 42,0 c 1.659,0 3,-1.341 3,-3 l 0,-30 c 0,-1.656 -1.341,-3 -3,-3 z M 32,47 c -8.286,0 -15,-6.714 -15,-15 0,-8.283 6.714,-15 15,-15 8.286,0 15,6.717 15,15 0,8.286 -6.714,15 -15,15 z m 0,-24 c -4.971,0 -9,4.029 -9,9 0,4.968 4.029,9 9,9 4.971,0 9,-4.032 9,-9 0,-4.971 -4.029,-9 -9,-9 z"/>
                             </svg>
                         </div>
-                    </div>
-                    <div class="group horizontal">
                         <div class="button trigger" title="Full Screen" ng-click="fullscreen()">
                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
                                 <path d="M 10.999547,56 C 10.172232,56 9.4212847,55.664832 8.8782267,55.121774 8.3351687,54.578716 8,53.827768 8,53.000453 L 8,44.515172 C 8,43.301777 8.7339768,42.207175 9.8540339,41.740485 10.97197,41.275916 12.265975,41.534717 13.122989,42.39173 l 2.12132,2.121321 6.363961,-6.363961 c 1.17309,-1.173091 3.069551,-1.173091 4.242641,0 1.17309,1.17309 1.17309,3.06955 0,4.24264 l -6.363961,6.363961 2.12132,2.121321 c 0.857013,0.857013 1.115815,2.151018 0.651245,3.268954 C 21.790704,55.268145 20.696102,55.997879 19.484828,56 l -8.485281,0 z M 53.000453,8 c 0.827315,0 1.578262,0.335169 2.12132,0.878227 C 55.664831,9.421284 56,10.172232 56,10.999547 l 0,8.485281 c 0,1.213395 -0.733977,2.307997 -1.854034,2.774687 -1.117936,0.464569 -2.411941,0.205768 -3.268955,-0.651245 l -2.12132,-2.121321 -6.363961,6.363961 c -1.17309,1.173091 -3.069551,1.173091 -4.242641,1e-6 -1.17309,-1.17309 -1.17309,-3.069551 0,-4.242641 l 6.363961,-6.363961 -2.12132,-2.12132 C 41.534717,12.265975 41.275916,10.97197 41.740485,9.854034 42.209297,8.731856 43.303898,8.002121 44.515172,8 l 8.485281,0 z"/>
@@ -157,7 +161,29 @@
                     </div>
                 </div>
             </div>
-            <div id="settings" class="row" ng-controller="SettingController" ng-hide="true"></div>
+            <div ng-show="show" id="settings" ng-controller="SettingController">
+                <div class="row">
+                    <div class="group horizontal text" id="format">
+                        <label ng-class="{'active': $storage.format == 'png'}" class="button">
+                            <input type="radio" name="format" ng-model="$storage.format" value="png">PNG
+                        </label>
+                        <label ng-class="{'active': $storage.format == 'jpg'}" class="button">
+                            <input type="radio" name="format" ng-model="$storage.format" value="jpg">JPG
+                        </label>
+                    </div>
+                </div>
+                <div class="row" id="size">
+                    <div class="group horizontal">
+                        <input type="number" min="1" step="1" ng-model="$storage.width">
+                    </div>
+                    <div class="group horizontal text">
+                        <b>&#x00D7;</b>
+                    </div>
+                    <div class="group horizontal">
+                        <input type="number" min="1" step="1" ng-model="$storage.height">
+                    </div>
+                </div>
+            </div>
         </div>
         <div ng-controller="MapController" id="map_wrapper">
             <div id="map_canvas" ui-map="map" ui-options="options" ui-event="{'map-click': 'map_click($params)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'map_idle()'}">
@@ -193,7 +219,7 @@
                     </div>
                     <div class="button" title="Satellite Map" ng-click="setMapTypeId('hybrid')" ng-class="{'active': getMapTypeId() == 'hybrid'}">
                         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
-                            <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
+                            <path d="M 31.718873,8.0260826 C 31.265332,8.1136604 30.860197,8.4234367 30.656838,8.838141 L 8.1666791,53.813653 c -0.4703506,0.912294 0.3166938,2.193393 1.3431622,2.186311 l 44.9803177,0 c 1.026468,0.0071 1.813513,-1.274017 1.343162,-2.186311 L 33.343163,8.838141 C 33.056419,8.2546173 32.357788,7.9053392 31.718873,8.0260826 z M 32,28.702309 l 2.748797,4.122758 c 0.544397,0.820354 1.95451,0.820354 2.498907,0 l 2.717561,-4.060292 12.08846,24.23682 -40.10745,0 12.088461,-24.23682 2.717561,4.060292 c 0.544397,0.820353 1.954509,0.820353 2.498906,0 z" />
                         </svg>
                     </div>
                 </div>
@@ -257,19 +283,27 @@
             <div class="row">
                 <div id="zoom" class="group vertical">
                     <div class="button trigger" title="Fit Drawing" ng-click="fitDrawings()">
-                        <!-- <input type="checkbox"> -->
                         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
                             <path d="m 19.843966,18.503115 a 1.5001231,1.5000133 0 0 0 -1.343726,1.499863 l 0,23.997814 a 1.5001231,1.5000133 0 0 0 1.499974,1.499865 l 23.999571,0 a 1.5001231,1.5000133 0 0 0 1.499973,-1.499865 l 0,-23.997814 a 1.5001231,1.5000133 0 0 0 -1.499973,-1.499863 l -23.999571,0 a 1.5001231,1.5000133 0 0 0 -0.156248,0 z m 1.656221,2.999727 20.999625,0 0,20.998087 -20.999625,0 0,-20.998087 z M 10.68788,8.004071 a 3.0002464,3.0000268 0 0 0 -2.6874519,2.999727 l 0,8.99918 a 3.0002464,3.0000268 0 1 0 5.9998929,0 l 0,-5.999453 5.999893,0 a 3.0002464,3.0000268 0 1 0 0,-5.999454 l -8.99984,0 a 3.0002464,3.0000268 0 0 0 -0.312494,0 z m 41.968,32.965747 a 3.0002464,3.0000268 0 0 0 -2.656202,3.030974 l 0,5.999454 -5.999893,0 a 3.0002464,3.0000268 0 1 0 0,5.999454 l 8.999839,0 a 3.0002464,3.0000268 0 0 0 2.999947,-2.999726 l 0,-8.999182 A 3.0002464,3.0000268 0 0 0 52.65588,40.969818 z M 43.687291,8.004071 a 3.0040128,3.0037929 0 1 0 0.312494,5.999454 l 5.999893,0 0,5.999453 a 3.0002464,3.0000268 0 1 0 5.999893,0 l 0,-8.99918 A 3.0002464,3.0000268 0 0 0 52.999624,8.004071 l -8.999839,0 a 3.0002464,3.0000268 0 0 0 -0.312494,0 z m -33.03066,32.965747 a 3.0002464,3.0000268 0 0 0 -2.6562029,3.030974 l 0,8.999182 A 3.0002464,3.0000268 0 0 0 11.000374,55.9997 l 8.99984,0 a 3.0002464,3.0000268 0 1 0 0,-5.999454 l -5.999893,0 0,-5.999454 a 3.0002464,3.0000268 0 0 0 -3.34369,-3.030974 z" />
                         </svg>
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="group vertical">
+                    <div class="button trigger" title="Current Location" ng-click="currentLocation()">
+                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
+                            <path d="m 32,7.99999 c -13.219299,0 -24,10.78072 -24,24.00002 0,13.2193 10.780704,24 24,24 13.219297,0 24,-10.7807 24,-24 C 56,18.78071 45.2193,7.99999 32,7.99999 z m -3,6.28122 0,6.7188 a 3.0003,3.0003 0 1 0 6,0 l 0,-6.7188 c 7.548874,1.2664 13.431257,7.1664 14.6875,14.7188 l -6.6875,0 a 3.0003,3.0003 0 1 0 0,6 l 6.6875,0 C 48.422402,42.54031 42.540309,48.42241 35,49.68751 l 0,-6.6875 a 3.0003,3.0003 0 1 0 -6,0 l 0,6.6875 c -7.540309,-1.2651 -13.422401,-7.1472 -14.6875,-14.6875 l 6.6875,0 a 3.0003,3.0003 0 1 0 0,-6 l -6.6875,0 C 15.568743,21.44761 21.451127,15.54761 29,14.28121 z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
         </div>
         <script src="http://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-touch.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-route.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular-animate.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular-touch.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular-route.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular-animate.js"></script>
         <script src="plugins/event.js"></script>
         <script src="plugins/ui-map.js"></script>
         <script src="plugins/ngStorage.min.js"></script>
