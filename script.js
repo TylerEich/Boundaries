@@ -71,6 +71,7 @@ boundaries.service('utilityService', ['$rootScope', '$localStorage', '$q', '$htt
 
 // Register all controllers
 // Every controller that needs to communicate gets $rootScope
+boundaries.controller('DescriptionController', ['$scope', '$sce', DescriptionController]);
 boundaries.controller('SettingController', ['$scope', '$localStorage', 'utilityService', SettingController]);
 boundaries.controller('ColorController', ['$scope', '$localStorage', 'utilityService', ColorController]);
 boundaries.controller('ModeController', ['$scope', '$localStorage', ModeController]);
@@ -110,6 +111,7 @@ boundaries.config(function($locationProvider, $routeProvider) {
 function utilityService($rootScope, $localStorage, $q, $http) {
     var directions = new google.maps.DirectionsService();
     var autocomplete = new google.maps.places.AutocompleteService();
+    var geocoder = new google.maps.Geocoder();
     var placeService;
     var map;
     $rootScope.$storage = $localStorage;
@@ -148,6 +150,21 @@ function utilityService($rootScope, $localStorage, $q, $http) {
         }
     };
     this.map = {
+        geocode: function(request) {
+            function load(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    deferred.resolve(results);
+                } else {
+                    deferred.reject();
+                }
+                $rootScope.$apply();
+            }
+            
+            var deferred = $q.defer();
+            geocoder.geocode(request, load);
+            
+            return deferred.promise;
+        },
         suggestions: function(input) {
             function load(suggestions, status) {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
@@ -256,6 +273,60 @@ function utilityService($rootScope, $localStorage, $q, $http) {
 }
 
 // Controllers
+function DescriptionController($scope, $sce) {
+    var location = [];
+    $scope.title = function() {
+        if (location.length > 0) {
+            return $sce.trustAsHtml(location.join(', ') + ' | Boundaries');
+        }
+        return $sce.trustAsHtml('Boundaries');
+    };
+    $scope.locality = function() {
+        return $sce.trustAsHtml(location.join(', '));
+    };
+    $scope.$on('geocode.result', function($event, $param) {
+        // If $param is empty
+        if (!$param) {
+            location = ['Unknown Locality'];
+        }
+        
+        var city, locality; // 'state' can be any area larger than city
+        var localityCheck = 0;
+        var i, j;
+        
+        var components = $param[0].address_components;
+        for (i = 0; i < components.length; i++) {
+            // If this is locality (city)
+            if (components[i].types.indexOf('locality') > -1) {
+                city = components[i].long_name;
+                break;
+            }
+        }
+        
+        var localityOptions = [
+        'administrative_area_level_1',
+        'administrative_area_level_2',
+        'administrative_area_level_3',
+        'country'
+        ];
+        for (i = 0; i < 4; i++) {
+            console.log(components);
+            // Get any available adminstrative area
+            for (j = 0; j < components.length; j++) {
+                // console.log(localityCheck === i, j);
+                // console.log(components[j], localityOptions[j]);
+                if (components[j].types.indexOf(localityOptions[i]) > -1) {
+                    locality = components[j].short_name;
+                }
+                if (locality) break;
+            }
+            if (locality) break;
+        }
+        
+        location = [city, locality];
+    });
+}
+
 function SettingController($scope, $localStorage, utilityService) {
     $scope.$storage = $localStorage.$default({
         activeColor: 1,
@@ -362,11 +433,15 @@ function SettingController($scope, $localStorage, utilityService) {
                 "visibility": "off"
             }]
         }],
-
         width: 5
     });
-
+    
+    $scope.show = false;
     $scope.pxSize = utilityService.image.pxSize;
+    $scope.$on('settings', function() {
+        $scope.show = !$scope.show;
+        // $scope.$apply();
+    });
 }
 
 function ColorController($scope, $localStorage, utilityService) {
@@ -433,6 +508,8 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
             if ('zoom' in $location.search()) $scope.map.setZoom(Number($location.search().zoom));
         }
     }
+    
+    var useExact;
     function panToCurrentLocation() {
         var location;
         if (useExact === undefined || useExact === false) {
@@ -476,7 +553,11 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
             });
         }
     }
-
+    $scope.$on('map.currentLocation', function() {
+        useExact = true;
+        panToCurrentLocation();
+    });
+    
     // Event binders
     $scope.$storage = $localStorage;
     
@@ -484,6 +565,7 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         $scope.$broadcast('map.click', $param);
     };
     $scope.map_idle = function() {
+        // Update URL
         var center = $scope.map.getCenter();
         
         $scope.$storage.lat = center.lat();
@@ -493,6 +575,16 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         $location.search('lat', $scope.$storage.lat);
         $location.search('lng', $scope.$storage.lng);
         $location.search('zoom', $scope.$storage.zoom);
+        
+        // Update City
+        utilityService.map.geocode({
+            location: $scope.map.getCenter()
+        })
+        .then(function(results) {
+            $rootScope.$broadcast('geocode.result', results);
+        }, function() {
+            $rootScope.$broadcast('geocode.result');
+        });
     };
     
     // Map controls
@@ -506,7 +598,6 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
     };
 
     // Variables
-    var useExact;
     $scope.location = $location;
     $scope.options = {
         center: new google.maps.LatLng($scope.$storage.lat || 0, $scope.$storage.lng || 0),
@@ -532,8 +623,9 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
             style: google.maps.ZoomControlStyle.SMALL
         }
     };
-    $scope.flash = false;
     
+    // Flash animation
+    $scope.flash = false;
     function flash() {
         // Use timeouts to allow digest cycles
         $timeout(function() {
@@ -590,12 +682,10 @@ function MapControlsController($scope, $rootScope, $localStorage) {
     // Zoom functions
     $scope.zoomIn = function() {
         if (!map) return;
-        console.log('zoom in');
         map.setZoom(++$scope.$storage.zoom);
     };
     $scope.zoomOut = function() {
         if (!map) return;
-        console.log('zoom out');
         map.setZoom(--$scope.$storage.zoom);
     };
     
@@ -617,6 +707,11 @@ function MapControlsController($scope, $rootScope, $localStorage) {
             map.fitBounds(bounds);
         }
     };
+    
+    // Current location
+    $scope.currentLocation = function() {
+        $rootScope.$broadcast('map.currentLocation');
+    }
 }
 
 function DrawingController($scope, $rootScope, $location, $localStorage, $q, utilityService) {
@@ -716,21 +811,22 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         else return makePolyline(drawing);
     }
     function makePath(start, end, rigid) {
-        var deferred;
+        // Queued operations are vital on slow networks
+        
         if (rigid) {
             path = [start, end];
         } else {
             // Get the directions path, use it
-            utilityService.map.directions(start, end).then(function(resultPath) {
+            utilityService.map.directions(start, end)
+            // TODO: Use $q.all() to keep line operations synchronous
+            .then(function(resultPath) {
                 // Success
                 path = resultPath;
-                console.log('makePath success:', path);
             }, function(status) {
                 // Failure
                 console.error('The directions request failed. Status:', status);
             });
         }
-        console.log('makePath:', path);
         return path;
     }
 
@@ -1093,6 +1189,10 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
     $scope.fullscreen = function() {
         $scope.$storage.fullscreen = true;
         $scope.loadImage();
+    }
+    $scope.settings = function() {
+        $rootScope.$broadcast('settings');
+        $scope.showSettings = !$scope.showSettings;
     }
     
     var drawings;
