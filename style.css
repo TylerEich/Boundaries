@@ -55,17 +55,18 @@ body, html {
 
 body {
 	display: flex;
+    color: #fff;
 }
 
 * {
 	transition: all 0.25s ease;
 	box-sizing: border-box;
     tap-highlight-color: transparent;
-    color: #fff;
 	font-smoothing: antialiased;
     user-select: none;
     appearance: none;
 }
+
 
 .ng-cloak {
     display: none !important;
@@ -464,7 +465,7 @@ svg :not(circle) {
     background: transparent;
 }
 .no-touch #lightbox .button:hover {
-    background: #7F7F7F;
+    background: #5F5F5F;
 }
 #lightbox .image_wrapper {
     padding: 0.5em 0.5em 0 0.5em;
