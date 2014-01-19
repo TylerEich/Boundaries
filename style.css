@@ -374,13 +374,20 @@ svg :not(circle) {
 	fill: #fff;
 }
 
-svg * {
+.button span {
+    float: none !important;
+    display: inline-block;
+}
+.button svg,
+.button span {
 	opacity: 0.625;
 	/*fill-opacity: 0.625;
 	stroke-opacity: 0.625;*/
 }
-.button:active svg *,
-.button.active svg * {
+.button:active svg,
+.button.active svg,
+.button:active span,
+.button.active span {
 	opacity: 1;
 	/*fill-opacity: 1;
 	stroke-opacity: 1;*/
