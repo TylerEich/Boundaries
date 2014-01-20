@@ -716,6 +716,7 @@ function MapControlsController($scope, $rootScope, $localStorage) {
 
 function DrawingController($scope, $rootScope, $location, $localStorage, $q, utilityService) {
     $scope.$storage = $localStorage;
+    var pathPromises = [];
 
     function makeHexColor(drawing, alpha) {
         var color = $scope.$storage.colors[drawing.activeColor];
@@ -811,8 +812,11 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         else return makePolyline(drawing);
     }
     function makePath(start, end, rigid) {
-        // Queued operations are vital on slow networks
-        
+        /*
+        TODO: Queued operations.
+        This will allow loading of drawings from localStorage
+        and prevent glitches on slow networks
+        */
         if (rigid) {
             path = [start, end];
         } else {
@@ -849,8 +853,6 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         for (var i = 0; i < newPath.length; i++) {
             path.insertAt(index + i, newPath[i]);
         }
-        
-        //$scope.drawings[drawingIndex]._poly.setPath(path);
     }
     function spliceNode(drawingIndex, nodeIndex, removeLength, newNode) {
         if (drawingIndex > $scope.drawings.length) {
