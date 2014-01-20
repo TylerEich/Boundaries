@@ -188,14 +188,21 @@
             </div>
         </div>
         <div ng-controller="MapController" id="map_wrapper">
-            <div id="map_canvas" ui-map="map" ui-options="options" ui-event="{'map-click': 'map_click($params)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'map_idle()', 'map-maptypeid_changed': 'map_maptypeid_changed()'}">
-                <div class="throbber" ng-controller="ThrobController" ng-hide="$storage.mapThrobCounter === 0">
+            <!-- <div class="throbber" ng-controller="ThrobController" ng-hide="$storage.mapThrobCounter == 0">
+                <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
+                    <circle cy="32" cx="32" r="16"/>
+                    <circle cy="32" cx="80" r="16"/>
+                    <circle cy="32" cx="128" r="16"/>
+                </svg>
+            </div> -->
+                <div class="throbber" ng-hide="true">
                     <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 160 64">
                         <circle cy="32" cx="32" r="16"/>
                         <circle cy="32" cx="80" r="16"/>
                         <circle cy="32" cx="128" r="16"/>
                     </svg>
                 </div>
+            <div id="map_canvas" ui-map="map" ui-options="options" ui-event="{'map-click': 'map_click($params)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'map_idle()', 'map-maptypeid_changed': 'map_maptypeid_changed()'}">
             </div>
             <div ng-controller="DrawingController">
                 <div ng-repeat="drawing in drawings">
@@ -302,10 +309,10 @@
             </div>
         </div>
         <script src="http://maps.googleapis.com/maps/api/js?v=3.exp&amp;libraries=geometry,places&amp;sensor=true"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular-touch.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular-route.js"></script>
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular-animate.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular-touch.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular-route.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.9/angular-animate.js"></script>
         <script src="plugins/event.js"></script>
         <script src="plugins/ui-map.js"></script>
         <script src="plugins/ngStorage.min.js"></script>

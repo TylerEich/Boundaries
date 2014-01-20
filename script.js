@@ -123,11 +123,12 @@ function utilityService($rootScope, $localStorage, $q, $http) {
     
     this.throb = {
         on: function() {
-            $rootScope.$broadcast('throb', true);
+            $rootScope.$storage.mapThrobCounter++;
+            // $rootScope.$apply();
         },
         off: function() {
             if ($rootScope.$storage.mapThrobCounter <= 0) return;
-            $rootScope.$broadcast('throb', false);
+            $rootScope.$storage.mapThrobCounter--;
         }
     };
     this.color = {
@@ -514,7 +515,7 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
     function panToCurrentLocation() {
         var location;
         if (useExact === undefined || useExact === false) {
-            utilityService.throb.on();
+            $scope.throbCount++;
             utilityService.location.approximate().then(function(position) {
                 if (!position) return;
                 if (position.data) {
@@ -527,11 +528,11 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
                 }
             }).
             finally(function() {
-                utilityService.throb.off();
+                $scope.throbCount--;
             });
         }
         if (useExact === undefined || useExact === true) {
-            utilityService.throb.on();
+            $scope.throbCount++;
             utilityService.location.exact().then(function(position) {
                 useExact = true;
                 if (!position) return;
@@ -549,7 +550,7 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
                 $localStorage.settings.search.show = true;
             }).
             finally(function() {
-                utilityService.throb.off();
+                $scope.throbCount--;
             });
         }
     }
@@ -558,6 +559,16 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         panToCurrentLocation();
     });
     
+    $scope.$watch('throbCount', function() {
+        console.log('ThrobCount: ', $scope.throbCount);
+    });
+    $scope.throbCount = 0;
+    $scope.throb = function(increment) {
+        console.log('Throb called!');
+        if (!increment) return Boolean($scope.throbCount);
+        $scope.throbCount += increment;
+        if ($scope.throbCount < 0) $scope.throbCount = 0;
+    }
     // Event binders
     $scope.$storage = $localStorage;
     
@@ -722,7 +733,10 @@ function MapControlsController($scope, $rootScope, $localStorage) {
 function DrawingController($scope, $rootScope, $location, $localStorage, $q, utilityService) {
     $scope.$storage = $localStorage;
     var pathPromises = [];
-
+    
+    // $scope.$watch('throb()', function(newVal) {
+//         console.log('Throb:', newVal);
+//     });
     function makeHexColor(drawing, alpha) {
         var color = $scope.$storage.colors[drawing.activeColor];
         return utilityService.color.toHex(color.rgba, alpha);
@@ -880,7 +894,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         // If there are at least two points...
         if (drawing.nodes.length > 1) {
             // Let user know something's going on
-            utilityService.throb.on();
+            $scope.throbCount++;
             
             // Generate polyline, act when resolved
             utilityService.map.makePath(makeLatLng(drawing.nodes[nodeIndex - 1]), makeLatLng(drawing.nodes[nodeIndex]), drawing.nodes[nodeIndex].rigid)
@@ -905,7 +919,9 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
                     updateNodeLatLng(drawingIndex, 0, path[0]);
                 }
             })
-            .finally(utilityService.throb.off);
+            .finally(function() {
+                $scope.throbCount--;
+            });
         } else { // Otherwise, put a inital index of 0
             drawing.nodes[nodeIndex].index = 0;
         }
@@ -945,7 +961,6 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     }
     function pushNode(newNode) {
         var drawingIndex = $scope.drawings.length;
-        console.log($scope.$storage.new);
         if ($scope.$storage.new) {
             // Add a new drawing
             var drawing = {
@@ -1332,9 +1347,10 @@ function ThrobController($scope, $localStorage) {
     $scope.$storage = $localStorage;
     
     $scope.$storage.mapThrobCounter = 0;
-    $scope.$on('throb', function(event, count) {
-        if (count === true) $scope.$storage.mapThrobCounter++;
-        if (count === false) $scope.$storage.mapThrobCounter--;
+    
+    $scope.$on('mapThrobber')
+    $scope.$watch('$storage.mapThrobCounter', function() {
+        console.log('mapThrobController changed');
     });
 }
 
