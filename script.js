@@ -365,6 +365,7 @@ function SettingController($scope, $localStorage, utilityService) {
         new: true,
         polygon: false,
         rigid: false,
+        mapTypeId: 'custom',
         style: [{
             "stylers": [{
                 "visibility": "off"
@@ -542,7 +543,6 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
             }, function(error) {
                 switch (error.code) {
                     case error.PERMISSION_DENIED:
-                    case error.POSITION_UNAVAILABLE:
                         useExact = false;
                         break;
                 }
@@ -586,6 +586,9 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
             $rootScope.$broadcast('geocode.result');
         });
     };
+    $scope.map_maptypeid_changed = function() {
+        $scope.$storage.mapTypeId = $scope.map.getMapTypeId();
+    }
     
     // Map controls
     $scope.zoom_in = function() {
@@ -646,7 +649,9 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         });
         $rootScope.$broadcast('map', $scope.map);
         updateStyle();
-
+        
+        $scope.map.setMapTypeId($scope.$storage.mapTypeId);
+        
         $scope.$watch('location.url()', syncUrl);
         syncUrl();
 
