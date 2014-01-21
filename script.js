@@ -515,7 +515,8 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
     function panToCurrentLocation() {
         var location;
         if (useExact === undefined || useExact === false) {
-            $scope.throbCount++;
+            $rootScope.$broadcast('map.throb', true);
+            $rootScope.$broadcast('currentLocation.throb', true);
             utilityService.location.approximate().then(function(position) {
                 if (!position) return;
                 if (position.data) {
@@ -528,11 +529,13 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
                 }
             }).
             finally(function() {
-                $scope.throbCount--;
+                $rootScope.$broadcast('map.throb', false);
+                $rootScope.$broadcast('currentLocation.throb', false);
             });
         }
         if (useExact === undefined || useExact === true) {
-            $scope.throbCount++;
+            $rootScope.$broadcast('map.throb', true);
+            $rootScope.$broadcast('currentLocation.throb', true);
             utilityService.location.exact().then(function(position) {
                 useExact = true;
                 if (!position) return;
@@ -550,7 +553,8 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
                 $localStorage.settings.search.show = true;
             }).
             finally(function() {
-                $scope.throbCount--;
+                $rootScope.$broadcast('map.throb', false);
+                $rootScope.$broadcast('currentLocation.throb', false);
             });
         }
     }
@@ -559,16 +563,14 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         panToCurrentLocation();
     });
     
+    $scope.$on('map.throb', function($event, $param) {
+        if ($param) $scope.throbCount++;
+        if (!$param && $scope.throbCount > 0) $scope.throbCount--;
+    });
     $scope.$watch('throbCount', function() {
         console.log('ThrobCount: ', $scope.throbCount);
     });
-    $scope.throbCount = 0;
-    $scope.throb = function(increment) {
-        console.log('Throb called!');
-        if (!increment) return Boolean($scope.throbCount);
-        $scope.throbCount += increment;
-        if ($scope.throbCount < 0) $scope.throbCount = 0;
-    }
+    
     // Event binders
     $scope.$storage = $localStorage;
     
@@ -687,6 +689,10 @@ function MapControlsController($scope, $rootScope, $localStorage) {
         unbindDrawings();
     });
     
+    $scope.$on('currentLocation.throb', function($event, $param) {
+        $scope.locationThrob = $param;
+    });
+    
     $scope.getMapTypeId = function() {
         if (!map) return;
         return map.getMapTypeId();
@@ -734,9 +740,6 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     $scope.$storage = $localStorage;
     var pathPromises = [];
     
-    // $scope.$watch('throb()', function(newVal) {
-//         console.log('Throb:', newVal);
-//     });
     function makeHexColor(drawing, alpha) {
         var color = $scope.$storage.colors[drawing.activeColor];
         return utilityService.color.toHex(color.rgba, alpha);
@@ -894,7 +897,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         // If there are at least two points...
         if (drawing.nodes.length > 1) {
             // Let user know something's going on
-            $scope.throbCount++;
+            $rootScope.$broadcast('map.throb', true);
             
             // Generate polyline, act when resolved
             utilityService.map.makePath(makeLatLng(drawing.nodes[nodeIndex - 1]), makeLatLng(drawing.nodes[nodeIndex]), drawing.nodes[nodeIndex].rigid)
@@ -920,7 +923,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
                 }
             })
             .finally(function() {
-                $scope.throbCount--;
+                $rootScope.$broadcast('map.throb', false);
             });
         } else { // Otherwise, put a inital index of 0
             drawing.nodes[nodeIndex].index = 0;
