@@ -44,27 +44,60 @@ boundaries.directive('bndLoad', ['$parse', function($parse) {
         }
     };
 }]);
-boundaries.directive('bndHotkey', function() {
+boundaries.directive('bndHotkey', ['$document', '$rootScope', function($document, $rootScope) {
     return {
         restrict: 'E',
         scope: {
-            key: '@',
-            keycode: '@',
+            keycode: '&',
             
-            ctrl: '&',
-            alt: '&',
-            meta: '&',
-            shift: '&',
+            local: '&',
+            
+            ctrlKey: '&ctrl',
+            altKey: '&alt',
+            metaKey: '&meta',
+            shiftKey: '&shift',
             
             action: '&'
         },
         link: function(scope, element, attr) {
-            var isMac = (navigator.platform.lastIndexOf('Mac') === 0);
-            element.on('keypress');
-            // console.log(scope.key.charCodeAt(0));
+            // console.log('Linking hotkey');
+            function handleKeydown($event) {
+                if (!'keycode' in scope) {
+                    console.error('Missing "keycode" attribute for', element);
+                    return;
+                }
+                if (scope.keycode() != $event.which) return;
+                
+                var matchCtrl = ($event.ctrlKey == Boolean(scope.ctrlKey()));
+                var matchAlt = ($event.altKey == Boolean(scope.altKey()));
+                var matchMeta = ($event.metaKey == Boolean(scope.metaKey()));
+                var matchShift = ($event.shiftKey == Boolean(scope.shiftKey()));
+                
+                var matchKeycode = ($event.keyCode == scope.keycode());
+                
+                // console.log(
+                //     "matchCtrl:", matchCtrl,
+                //     "matchAlt:", matchAlt,
+                //     "matchMeta:", matchMeta,
+                //     "matchShift:", matchShift,
+                //     "matchKeycode", matchKeycode
+                // );
+                if (matchCtrl && matchAlt && matchMeta && matchShift && matchKeycode) {
+                    console.log('Activated action', $event);
+                    $event.stopPropagation();
+                    $event.preventDefault();
+                    scope.$apply(scope.action);
+                }
+            }
+            
+            if (scope.local()) {
+                element.on('keydown', handleKeydown);
+            } else {
+                $document.on('keydown', handleKeydown);
+            }
         }
     }
-});
+}]);
 
 // Register all services
 boundaries.service('utilityService', ['$rootScope', '$localStorage', '$q', '$http', utilityService]);
@@ -72,6 +105,7 @@ boundaries.service('utilityService', ['$rootScope', '$localStorage', '$q', '$htt
 // Register all controllers
 // Every controller that needs to communicate gets $rootScope
 boundaries.controller('DescriptionController', ['$scope', '$sce', DescriptionController]);
+boundaries.controller('HotkeyController', ['$scope', HotkeyController]);
 boundaries.controller('SettingController', ['$scope', '$localStorage', 'utilityService', SettingController]);
 boundaries.controller('ColorController', ['$scope', '$localStorage', 'utilityService', ColorController]);
 boundaries.controller('ModeController', ['$scope', '$localStorage', ModeController]);
@@ -274,6 +308,22 @@ function utilityService($rootScope, $localStorage, $q, $http) {
 }
 
 // Controllers
+function HotkeyController($scope) {
+    $scope.isMac = (navigator.platform.lastIndexOf('Mac') === 0);
+    
+    if ($scope.isMac) {
+        $scope.metaString = "⌘";
+        $scope.altString = "⌥";
+        $scope.ctrlString = "⌃";
+        $scope.shiftString = "⇧";
+    } else {
+        $scope.metaString = "Win+";
+        $scope.altString = "Alt+";
+        $scope.ctrlString = "Ctrl+";
+        $scope.shiftString = "Shift+";
+    }
+}
+
 function DescriptionController($scope, $sce) {
     var location = [];
     $scope.title = function() {
@@ -311,7 +361,6 @@ function DescriptionController($scope, $sce) {
         'country'
         ];
         for (i = 0; i < 4; i++) {
-            console.log(components);
             // Get any available adminstrative area
             for (j = 0; j < components.length; j++) {
                 // console.log(localityCheck === i, j);
@@ -566,9 +615,6 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
     $scope.$on('map.throb', function($event, $param) {
         if ($param) $scope.throbCount++;
         if (!$param && $scope.throbCount > 0) $scope.throbCount--;
-    });
-    $scope.$watch('throbCount', function() {
-        console.log('ThrobCount: ', $scope.throbCount);
     });
     
     // Event binders
@@ -887,7 +933,10 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         drawing.nodes.splice(nodeIndex, removeLength, newNode);
         
         // Add the new node to the existing nodes
-        if (typeof newNode !== 'object') console.error('newNode is not an object');
+        if (typeof newNode !== 'object') {
+            console.error('newNode is not an object');
+            return;
+        }
 
         var path = [];
         
@@ -925,7 +974,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             .finally(function() {
                 $rootScope.$broadcast('map.throb', false);
             });
-        } else { // Otherwise, put a inital index of 0
+        } else { // Otherwise, inital index of 0
             drawing.nodes[nodeIndex].index = 0;
         }
     }
@@ -1152,7 +1201,6 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     }
     var unbindDrawings = $scope.$watch('drawings', function() {
         if ($scope.drawings === undefined) return;
-        console.log('drawings created');
         $rootScope.$broadcast('drawings', $scope.drawings);
         unbindDrawings();
     });
@@ -1215,6 +1263,10 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
         $scope.$storage.fullscreen = true;
         $scope.loadImage();
     }
+    $scope.hotkeyFullscreen = function() {
+        $scope.$storage.fullscreen = !$scope.$storage.fullscreen;
+        if ($scope.$storage.fullscreen) $scope.loadImage();
+    }
     $scope.settings = function() {
         $rootScope.$broadcast('settings');
         $scope.showSettings = !$scope.showSettings;
@@ -1222,7 +1274,6 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
     
     var drawings;
     $scope.$on('drawings', function($event, $param) {
-        console.log('drawing');
         drawings = $param;
         $scope.loadImage();
     });
