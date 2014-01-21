@@ -44,6 +44,14 @@
         opacity: 1;
     }
 }
+@keyframes throb_button {
+    0% {
+        background: #3F3F3F;
+    }
+    100% {
+        background: #7F7F7F;
+    }
+}
 
 body, html {
 	height: 100%;
@@ -96,12 +104,14 @@ body {
 	padding: 0.5em;
 	background: #606060;
 	width: 12em;
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
 }
 .suggestion span {
+    display: inline-block;
+    width: 100%;
 	opacity: 0.75;
+	overflow: hidden;
+	white-space: pre;
+	text-overflow: ellipsis;
 }
 .suggestion.error {
 	text-align: center;
@@ -391,6 +401,13 @@ svg :not(circle) {
 	opacity: 1;
 	/*fill-opacity: 1;
 	stroke-opacity: 1;*/
+}
+
+.button.throb {
+    animation: throb_button 0.5s ease infinite alternate both;
+}
+.button.throb svg * {
+    opacity: 1;
 }
 
 #footer {
