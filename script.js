@@ -1200,29 +1200,6 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             // Sync node marker
             markNode(drawingIndex, nodeIndex);
         }
-        
-        /*var drawing = $scope.drawings[$scope.drawings.length - 1];
-        if ($scope.$storage.override &&
-            $scope.$storage.activeColor === drawing.activeColor) {
-                if (drawingsLength === undefined) {
-                    drawingsLength = $scope.drawings.length;
-                    $scope.$storage.new = true;
-                }
-                if (drawingsLength !== $scope.drawings.length) {
-                    $scope.$storage.override = false;
-                    drawingsLength = undefined;
-                }
-            }
-        
-        if (!$scope.$storage.override) $scope.$storage.new = ($scope.drawings.length === 0 ||
-            $scope.$storage.activeColor !== drawing.activeColor ||
-            drawing.nodes.length === 0);
-        
-        if ($scope.$storage.new) markNode(null, null, true);
-        else {
-            
-            markNode(drawingIndex, nodeIndex);
-        }*/
     }
     var unbindDrawings = $scope.$watch('drawings', function() {
         if ($scope.drawings === undefined) return;
@@ -1250,6 +1227,8 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         var location = $scope.drawings[drawingIndex].nodes[nodeIndex]._marker.getPosition();
         
         splicePolyPath(drawingIndex, nodeIndex, 1, [location]);
+        
+        updateNodeLatLng(drawingIndex, nodeIndex, location);
     }
     $scope.marker_dragend = function(drawingIndex, nodeIndex) {
         // If line is flexible
