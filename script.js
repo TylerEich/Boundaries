@@ -83,7 +83,6 @@ boundaries.directive('bndHotkey', ['$document', '$rootScope', function($document
                 //     "matchKeycode", matchKeycode
                 // );
                 if (matchCtrl && matchAlt && matchMeta && matchShift && matchKeycode) {
-                    console.log('Activated action', $event);
                     $event.stopPropagation();
                     $event.preventDefault();
                     scope.$apply(scope.action);
@@ -242,14 +241,30 @@ function utilityService($rootScope, $localStorage, $q, $http) {
                 reference: reference
             }, revealOnMap);
         },
-        makePath: function(start, end, rigid) {
+        makePath: function(locations, rigid) {
             var deferred = $q.defer();
             if (rigid) {
-                deferred.resolve([start, end]);
+                deferred.resolve(locations);
             } else {
+                if (locations.length >= 2 && locations.length <= 10) {
+                    var start = locations.shift();
+                    var end = locations.pop();
+                    
+                    for (var i; i < locations.length; i++) {
+                        // Put remaining locations in waypoint format
+                        locations[i] = {
+                            location: locations[i]
+                        };
+                    }
+                } else {
+                    console.error('Length of locations is not between 2 and 10');
+                    deferred.reject();
+                    return deferred.promise;
+                }
                 directions.route({
                     origin: start,
                     destination: end,
+                    waypoints: locations,
                     travelMode: google.maps.TravelMode.DRIVING
                 }, function(result, status) {
                     if (status == google.maps.DirectionsStatus.OK) {
@@ -279,7 +294,6 @@ function utilityService($rootScope, $localStorage, $q, $http) {
     // Interface for the HTML5 Geolocation API
     this.location = {
         exact: function() {
-            console.log('Exact location requested...');
             var deferred = $q.defer();
             if ('geolocation' in navigator) {
                 navigator.geolocation.getCurrentPosition(function(position) {
@@ -828,7 +842,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         } else {
             clickable = true;
             cursor = 'pointer';
-            draggable = false;
+            draggable = $scope.$storage.rigid;
         }
         
         return {
@@ -901,7 +915,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         }
         return path;
     }
-
+    
     function spliceDrawing(drawingIndex, removeLength, newDrawing) {
         if (newDrawing !== undefined) $scope.drawings.splice(drawingIndex, removeLength, newDrawing);
         else $scope.drawings.splice(drawingIndex, removeLength);
@@ -911,7 +925,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         
         var path = $scope.drawings[drawingIndex]._poly.getPath();
         var index = $scope.drawings[drawingIndex].nodes[nodeIndex].index;
-
+        
         // Remove all elements between index and index + removeLength
         for (var i = 0; i < removeLength; i++) { // TODO: < or <=
             path.removeAt(index + i);
@@ -949,18 +963,29 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
             $rootScope.$broadcast('map.throb', true);
             
             // Generate polyline, act when resolved
-            utilityService.map.makePath(makeLatLng(drawing.nodes[nodeIndex - 1]), makeLatLng(drawing.nodes[nodeIndex]), drawing.nodes[nodeIndex].rigid)
+            utilityService.map.makePath([
+                makeLatLng(drawing.nodes[nodeIndex - 1]),
+                makeLatLng(drawing.nodes[nodeIndex])
+                ], drawing.nodes[nodeIndex].rigid)
             .then(function(path) {
-                // Add all previous indicies to find current index
-                var pathIndex = 0;
-                for (var i = 0; i < nodeIndex; i++) {
-                    pathIndex += drawing.nodes[i].index;
+                // Add length of new path to index
+                if (nodeIndex === 0) {
+                    var pathIndex = 0;
+                } else {
+                    var pathIndex = drawing.nodes[nodeIndex - 1].index + path.length - 1;
+                }
+                drawing.nodes[nodeIndex].index = pathIndex;
+                
+                // Prevent duplicate points
+                if ('_poly' in drawing && drawing._poly.getPath().getLength() > 0 && path.length > 0) {                    
+                    var prevPathPoint = drawing._poly.getPath().getAt(drawing.nodes[nodeIndex - 1].index);
+                    var pathPoint = path[0];
+                                        
+                    if (prevPathPoint.lat() == pathPoint.lat() && prevPathPoint.lng() == pathPoint.lng()) {
+                        path.shift();
+                    }
                 }
                 
-                // Add length of new path to index
-                pathIndex += path.length;
-                drawing.nodes[nodeIndex].index = pathIndex;
-        
                 // Update the poly
                 splicePolyPath(drawingIndex, nodeIndex, 0, path);
                 
@@ -1216,16 +1241,21 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     });
     
     $scope.marker_dragstart = function(drawingIndex, nodeIndex) {
-        console.log('dragstart:', drawingIndex, nodeIndex);
-
-        // Watch the position of the marker, update the path
-        $scope.drawings[drawingIndex].nodes[nodeIndex]._unbind = $scope.$watch('drawings[' + drawingIndex + '].nodes[' + nodeIndex + ']._marker.getPosition()', function(oldVal, newVal) {
-            
-        });
+        // If line is flexible
+        if (!$scope.drawings[drawingIndex].nodes[nodeIndex].rigid) {
+            // TODO: Broadcast 'map.wait'; tells user something will happen soon
+        }
     };
+    $scope.marker_drag = function(drawingIndex, nodeIndex) {
+        var location = $scope.drawings[drawingIndex].nodes[nodeIndex]._marker.getPosition();
+        
+        splicePolyPath(drawingIndex, nodeIndex, 1, [location]);
+    }
     $scope.marker_dragend = function(drawingIndex, nodeIndex) {
-        $scope.drawings[drawingIndex].nodes[nodeIndex]._unbind();
-        delete $scope.drawings[drawingIndex].nodes[nodeIndex]._unbind;
+        // If line is flexible
+        if (!$scope.drawings[drawingIndex].nodes[nodeIndex].rigid) {
+            // TODO: Update path
+        }
     };
 }
 
@@ -1388,8 +1418,14 @@ function ImageController($scope, $rootScope, $localStorage, $timeout, utilitySer
     }
     
     $scope.$watch(stripDrawings, function() {
-        var url = createUrl();
-        if (!url) return;
+        // console.log(drawings);
+        if (drawings && drawings.length > 0) {
+            var path = drawings[0]._poly.getPath().getArray();
+            
+            for (var i = 0; i < path.length; i++) {
+                // console.log()
+            }
+        }
     });
 }
 
@@ -1401,11 +1437,6 @@ function ThrobController($scope, $localStorage) {
     $scope.$storage = $localStorage;
     
     $scope.$storage.mapThrobCounter = 0;
-    
-    $scope.$on('mapThrobber')
-    $scope.$watch('$storage.mapThrobCounter', function() {
-        console.log('mapThrobController changed');
-    });
 }
 
 function SearchController($scope, $sce, $timeout, utilityService) {
@@ -1453,7 +1484,6 @@ function SearchController($scope, $sce, $timeout, utilityService) {
     function formatSuggestions(suggestions) {
         for (var i = 0; i < suggestions.length; i++) {
             var desc = suggestions[i].description;
-            console.log(angular.copy(suggestions[i]));
             suggestions[i].description = '';
             var index = 0;
             for (var j = 0; j < suggestions[i].matched_substrings.length; j++) {

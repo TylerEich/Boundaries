@@ -78,6 +78,29 @@
                         </div>
                     </div>
                 </div>
+                <div class="row" ng-controller="ModeController">
+                    <div class="group horizontal">
+                        <div class="button" title="Polygon ({{ altString }}P)" ng-click="$storage.polygon = !$storage.polygon" ng-class="{active: $storage.polygon}">
+                            <bnd-hotkey alt="true" keycode="80" action="$storage.polygon = !$storage.polygon"></bnd-hotkey>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewbox="0,0  64,64">
+                                <path d="M 31.71875,8 A 3.0003,3.0003 0 0 0 29.3125,9.65625 l -21,42 A 3.0003,3.0003 0 0 0 11,56 l 42,0 a 3.0003,3.0003 0 0 0 2.6875,-4.34375 l -21,-42 A 3.0003,3.0003 0 0 0 31.71875,8 z M 32,17.71875 48.125,50 15.875,50 32,17.71875 z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="group horizontal">
+                        <div class="button" title="Flexible Line ({{ altString }}L)" ng-click="$storage.rigid = false" ng-class="{active: !$storage.rigid}">
+                            <bnd-hotkey alt="true" keycode="76" action="$storage.rigid = !$storage.rigid"></bnd-hotkey>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+                                <path d="m 11.54626,8.5035224 a 3.1944173,3.2077906 0 1 0 0.299148,6.4085436 c 0,0 9.914644,0.103318 16.685819,2.369826 3.385589,1.133254 5.474107,2.772783 5.883247,4.005341 0.204569,0.616278 0.232099,1.336454 -0.365626,2.736982 -0.597724,1.400529 -1.916437,3.359708 -4.254551,5.70761 -2.714166,2.725529 -4.557282,5.226463 -5.617337,7.71028 -1.060055,2.483817 -1.241314,5.07222 -0.498581,7.309745 1.485466,4.475053 5.712296,6.640597 9.905128,8.044059 8.385664,2.806923 18.680139,2.703605 18.680139,2.703605 a 3.1912326,3.2045926 0 1 0 0,-6.408545 c 0,0 -9.914643,-0.103316 -16.685818,-2.369826 -3.385587,-1.133254 -5.440869,-2.772782 -5.850008,-4.00534 -0.20457,-0.616279 -0.265337,-1.369832 0.332387,-2.77036 0.597724,-1.400529 1.916438,-3.326332 4.254551,-5.674232 2.714166,-2.725529 4.557282,-5.226463 5.617337,-7.71028 1.060055,-2.483818 1.274552,-5.07222 0.531819,-7.309746 C 38.97845,14.776132 34.71838,12.610587 30.525549,11.207126 22.139884,8.4002034 11.845408,8.5035224 11.845408,8.5035224 a 3.1912326,3.2045926 0 0 0 -0.299148,0 z" />
+                            </svg>
+                        </div>
+                        <div class="button" title="Rigid Line ({{ altString }}L)" ng-click="$storage.rigid = true" ng-class="{active: $storage.rigid}">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewbox="0,0  64,64">
+                              <path d="M 11.442085,8.5001863 A 2.9350292,2.9355008 0 0 0 9.3938829,13.545074 L 50.480184,54.637975 a 2.9398264,2.9402987 0 1 0 4.157543,-4.158209 L 13.551426,9.3868635 A 2.9350292,2.9355008 0 0 0 11.442085,8.5001863 z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
                 <div class="row" ng-controller="ActionController">
                     <div class="group horizontal">
                         <div ng-click="clear()" class="button trigger" title="Clear ({{ altString }}K)">
@@ -100,29 +123,6 @@
                             <bnd-hotkey keycode="69" action="$storage.override = !$storage.override"></bnd-hotkey>
                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 16 16">
                                 <path d="M 32,56 C 18.746,56 8,45.254 8,32 8,18.746 18.746,8 32,8 45.254,8 56,18.746 56,32 56,45.254 45.254,56 32,56 z m 0,-42 c -9.939,0 -18,8.061 -18,18 0,9.939 8.061,18 18,18 9.939,0 18,-8.061 18,-18 0,-9.939 -8.061,-18 -18,-18 z m 9,21 -6,0 0,6 c 0,1.659 -1.341,3 -3,3 -1.656,0 -3,-1.341 -3,-3 l 0,-6 -6,0 c -1.656,0 -3,-1.341 -3,-3 0,-1.656 1.344,-3 3,-3 l 6,0 0,-6 c 0,-1.656 1.344,-3 3,-3 1.659,0 3,1.344 3,3 l 0,6 6,0 c 1.659,0 3,1.344 3,3 0,1.659 -1.341,3 -3,3 z" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                <div class="row" ng-controller="ModeController">
-                    <div class="group horizontal">
-                        <div class="button" title="Polygon ({{ altString }}P)" ng-click="$storage.polygon = !$storage.polygon" ng-class="{active: $storage.polygon}">
-                            <bnd-hotkey alt="true" keycode="80" action="$storage.polygon = !$storage.polygon"></bnd-hotkey>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewbox="0,0  64,64">
-                                <path d="M 31.71875,8 A 3.0003,3.0003 0 0 0 29.3125,9.65625 l -21,42 A 3.0003,3.0003 0 0 0 11,56 l 42,0 a 3.0003,3.0003 0 0 0 2.6875,-4.34375 l -21,-42 A 3.0003,3.0003 0 0 0 31.71875,8 z M 32,17.71875 48.125,50 15.875,50 32,17.71875 z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="group horizontal">
-                        <div class="button" title="Flexible Line ({{ altString }}L)" ng-click="$storage.rigid = false" ng-class="{active: !$storage.rigid}">
-                            <bnd-hotkey alt="true" keycode="76" action="$storage.rigid = !$storage.rigid"></bnd-hotkey>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-                                <path d="m 11.54626,8.5035224 a 3.1944173,3.2077906 0 1 0 0.299148,6.4085436 c 0,0 9.914644,0.103318 16.685819,2.369826 3.385589,1.133254 5.474107,2.772783 5.883247,4.005341 0.204569,0.616278 0.232099,1.336454 -0.365626,2.736982 -0.597724,1.400529 -1.916437,3.359708 -4.254551,5.70761 -2.714166,2.725529 -4.557282,5.226463 -5.617337,7.71028 -1.060055,2.483817 -1.241314,5.07222 -0.498581,7.309745 1.485466,4.475053 5.712296,6.640597 9.905128,8.044059 8.385664,2.806923 18.680139,2.703605 18.680139,2.703605 a 3.1912326,3.2045926 0 1 0 0,-6.408545 c 0,0 -9.914643,-0.103316 -16.685818,-2.369826 -3.385587,-1.133254 -5.440869,-2.772782 -5.850008,-4.00534 -0.20457,-0.616279 -0.265337,-1.369832 0.332387,-2.77036 0.597724,-1.400529 1.916438,-3.326332 4.254551,-5.674232 2.714166,-2.725529 4.557282,-5.226463 5.617337,-7.71028 1.060055,-2.483818 1.274552,-5.07222 0.531819,-7.309746 C 38.97845,14.776132 34.71838,12.610587 30.525549,11.207126 22.139884,8.4002034 11.845408,8.5035224 11.845408,8.5035224 a 3.1912326,3.2045926 0 0 0 -0.299148,0 z" />
-                            </svg>
-                        </div>
-                        <div class="button" title="Rigid Line ({{ altString }}L)" ng-click="$storage.rigid = true" ng-class="{active: $storage.rigid}">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewbox="0,0  64,64">
-                              <path d="M 11.442085,8.5001863 A 2.9350292,2.9355008 0 0 0 9.3938829,13.545074 L 50.480184,54.637975 a 2.9398264,2.9402987 0 1 0 4.157543,-4.158209 L 13.551426,9.3868635 A 2.9350292,2.9355008 0 0 0 11.442085,8.5001863 z"/>
                             </svg>
                         </div>
                     </div>
@@ -212,7 +212,7 @@
                 <div ng-repeat="drawing in drawings">
                     <div ui-map-polyline="drawing._poly" ui-event="{ 'map-click': 'polyline_click($params)' }"></div>
                 
-                    <div ng-repeat="node in drawing.nodes" ui-map-marker="node._marker" ui-event="{ 'map-click': 'marker_click($parent.$index, $index)', 'map-rightclick': 'marker_rightclick($parent.$index, $index)', 'map-dragstart': 'marker_dragstart($parent.$index, $index)', 'map-dragend': 'marker_dragend($parent.$index, $index)' }"></div>
+                    <div ng-repeat="node in drawing.nodes" ui-map-marker="node._marker" ui-event="{ 'map-click': 'marker_click($parent.$index, $index)', 'map-rightclick': 'marker_rightclick($parent.$index, $index)', 'map-dragstart': 'marker_dragstart($parent.$index, $index)', 'map-drag': 'marker_drag($parent.$index, $index)', 'map-dragend': 'marker_dragend($parent.$index, $index)' }"></div>
                 </div>
             </div>
             <div id="flash" class="ng-cloak" ng-show="flash"></div>
