@@ -14,10 +14,10 @@
 }
 @keyframes throb {
 	0% {
-		fill-opacity: 1;
+		opacity: 1;
 	}
 	100% {
-		fill-opacity: 0.25;
+		opacity: 0;
 	}
 }
 @keyframes flash {
@@ -149,24 +149,6 @@ body {
     animation: flash 1s ease-out;
 }
 
-#bezel {
-	z-index: 10;
-	position: fixed;
-	top: 50%;
-	right: 50%;
-	bottom: 50%;
-	left: 50%;
-	width: 10em;
-	margin: -5em;
-	height: 10em;
-	background: rgba(0,0,0,.75);
-	border-radius: 1em;
-	box-shadow: 0 .5em 2em #000;
-	opacity: 0;
-	pointer-events: none;
-	animation: bezel 1s ease-out;
-}
-
 .throbber {
 	pointer-events: none;
 }
@@ -193,17 +175,37 @@ body {
 .throbber svg circle {
 	fill: #fff;
 	transition: none;
-	animation: throb 0.25s ease alternate infinite;
+    animation-name: throb;
+    animation-duration: 0.25s;
+    animation-timing-function: ease;
+    animation-direction: alternate;
+    animation-iteration-count: infinite;
+/*    animation: throb 0.25s ease alternate infinite;*/
 }
 .throbber svg circle:nth-of-type(1) {
-	animation-delay: -0.25s;
+	animation-delay: -0.125s;
 }
 .throbber svg circle:nth-of-type(2) {
-	animation-delay: -0.125s;
+	animation-delay: -0.0625s;
 }
 .throbber svg circle:nth-of-type(3) {
 	animation-delay: 0s;
 }
+
+.throbber.wait svg circle {
+    animation-name: fade;
+    animation-duration: 1s;
+}
+.throbber.wait svg circle:nth-of-type(1) {
+	animation-delay: 0s;
+}
+.throbber.wait svg circle:nth-of-type(2) {
+	animation-delay: 0s;
+}
+.throbber.wait svg circle:nth-of-type(3) {
+	animation-delay: 0s;
+}
+
 #map_wrapper .throbber {
 	height: 2em;
 	width: 5em;

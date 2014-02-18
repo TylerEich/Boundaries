@@ -630,6 +630,9 @@ function MapController($scope, $rootScope, $location, $localStorage, $timeout, u
         if ($param) $scope.throbCount++;
         if (!$param && $scope.throbCount > 0) $scope.throbCount--;
     });
+    $scope.$on('map.throb.wait', function($event, $param) {
+        $scope.throbWait = $param;
+    });
     
     // Event binders
     $scope.$storage = $localStorage;
@@ -842,7 +845,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         } else {
             clickable = true;
             cursor = 'pointer';
-            draggable = $scope.$storage.rigid;
+            draggable = true;
         }
         
         return {
@@ -864,7 +867,7 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         return {
             clickable: true,
             draggable: false,
-            editable: false,
+            editable: true,
             strokeColor: '#' + makeHexColor(drawing, false),
             strokeOpacity: color.rgba.a,
             strokeWeight: color.weight,
@@ -893,47 +896,144 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         if (drawing.polygon) return makePolygon(drawing);
         else return makePolyline(drawing);
     }
-    function makePath(start, end, rigid) {
-        /*
-        TODO: Queued operations.
-        This will allow loading of drawings from localStorage
-        and prevent glitches on slow networks
-        */
-        if (rigid) {
-            path = [start, end];
-        } else {
-            // Get the directions path, use it
-            utilityService.map.directions(start, end)
-            // TODO: Use $q.all() to keep line operations synchronous
-            .then(function(resultPath) {
-                // Success
-                path = resultPath;
-            }, function(status) {
-                // Failure
-                console.error('The directions request failed. Status:', status);
-            });
-        }
-        return path;
-    }
     
+    // function trimPathEnd(drawingIndex, nodeIndex, path) {
+    //     var drawing = $scope.drawings[drawingIndex];
+    //     var polyPath = drawing._poly.getPath();
+    //     var index = drawing.nodes[nodeIndex + 1].index;
+    //     
+    //     return path;
+    // }
+    function isSameLatLng(latLng1, latLng2) {
+        return (latLng1.lat() == latLng2.lat() && latLng1.lng() == latLng2.lng());
+    }
     function spliceDrawing(drawingIndex, removeLength, newDrawing) {
         if (newDrawing !== undefined) $scope.drawings.splice(drawingIndex, removeLength, newDrawing);
         else $scope.drawings.splice(drawingIndex, removeLength);
     }
-    function splicePolyPath(drawingIndex, nodeIndex, removeLength, newPath) {
-        if (nodeIndex == -1) nodeIndex = $scope.drawings[drawingIndex].nodes.length - 1;
+    function splicePolyPath(drawingIndex, nodeIndex, newPath) {
+        // if (!removeLength) removeLength = 0;
         
-        var path = $scope.drawings[drawingIndex]._poly.getPath();
-        var index = $scope.drawings[drawingIndex].nodes[nodeIndex].index;
+        var drawing = $scope.drawings[drawingIndex];
+        var path = drawing._poly.getPath().getArray();
+        var index = drawing.nodes[nodeIndex].index;
         
-        // Remove all elements between index and index + removeLength
-        for (var i = 0; i < removeLength; i++) { // TODO: < or <=
-            path.removeAt(index + i);
+        console.log('nodeIndex:', nodeIndex);
+        if (isNaN(index)) {
+            if (path.length == 0) index = 0;
+            else index = path.length - 1;
         }
+        
+        var i, latLng1, latLng2;
+        
+        // If not first node
+        // if (nodeIndex > 0) {
+//             // Get index of previous node
+//             var nextIndex = drawing.nodes[nodeIndex - 1].index;
+//             // console.log(nextIndex);
+//             
+//             // If no index, default start of path
+//             if (isNaN(nextIndex)) {
+//                 nextIndex = 0;
+//             }
+//             console.log('Previous Node:', nextIndex);
+//             
+//             // Assign latLng values
+//             latLng1 = newPath[0];
+//             latLng2 = path[nextIndex];
+//             
+//             if (isSameLatLng(latLng1, latLng2)) {
+//                 newPath.splice(0, 1);
+//                 // removeLength--;
+//             }
+//         }
+        
+        for (i = 0; i < newPath.length - 1; i++) {
+            latLng1 = newPath[i];
+            latLng2 = newPath[i + 1];
+            
+            if (isSameLatLng(latLng1, latLng2)) {
+                // Remove the second point
+                newPath.splice(i, 1);
+                
+                // Decrement removeLength
+                // removeLength--;
+            }
+        }
+        
+        // If not last node
+        if (nodeIndex < drawing.nodes.length - 1) {
+            // Get index of next node
+            var nextIndex = drawing.nodes[nodeIndex + 1].index;
+            
+            // If no index, default end of path
+            if (isNaN(nextIndex)) {
+                if (path.length == 0) nextIndex = 0;
+                else nextIndex = path.length - 1;
+            }
+            console.log('Next Node:', nextIndex);
+            
+            // Assign latLng values
+            latLng1 = newPath[i]; // No +1: i already incremented by for loop above
+            latLng2 = path[nextIndex];
+            
+            if (isSameLatLng(latLng1, latLng2)) {
+                newPath.splice(i, 1);
+                // removeLength--;
+            }
+        }
+        
+        var removeLength;
+        if (nodeIndex < drawing.nodes.length - 1) {
+            removeLength = drawing.nodes[nodeIndex + 1].index - drawing.nodes[nodeIndex].index;
+        } else {
+            removeLength = 1;
+        }
+        
+        // If not first node
+        // if (nodeIndex > 0) {
+        //     // Get index of previous node
+        //     var nextIndex = drawing.nodes[nodeIndex - 1].index;
+        //     
+        //     // If no index, default start of path
+        // 
+        //     console.log('Previous Node:', nextIndex);
+        //     
+        //     // Assign latLng values
+        //     latLng1 = newPath[0];
+        //     latLng2 = path[nextIndex];
+        //     
+        //     if (isSameLatLng(latLng1, latLng2)) {
+        //         removeLength++;
+        //         // removeLength--;
+        //     }
+        // }
 
-        // Insert all elements from newPath into path
-        for (var i = 0; i < newPath.length; i++) {
-            path.insertAt(index + i, newPath[i]);
+        console.log('newPath:', newPath);
+        
+        console.log('Before removal:', path);
+        // Remove specified items
+        path.splice(index, removeLength);
+        console.log('After removal:', path);
+        
+        // Inject newPath
+        for (i = 0; i < newPath.length; i++) {
+            path.splice(index + i, 0, newPath[i]);
+        }
+        console.log('After injection:', path);
+        
+        // Put manipulated path into poly
+        drawing._poly.setPath(path);
+        
+        // Update indicies of nodes
+        for (i = nodeIndex; i < drawing.nodes.length; i++) {
+            // If no index, set to last index
+            if (isNaN(drawing.nodes[i].index)) {
+                if (path.length == 0) drawing.nodes[i].index = 0;
+                else drawing.nodes[i].index = path.length - 1;
+            } else {
+                drawing.nodes[i].index += newPath.length;
+            }
         }
     }
     function spliceNode(drawingIndex, nodeIndex, removeLength, newNode) {
@@ -945,63 +1045,13 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
         var drawing = $scope.drawings[drawingIndex];
         
         drawing.nodes.splice(nodeIndex, removeLength, newNode);
-        
-        // Add the new node to the existing nodes
-        if (typeof newNode !== 'object') {
-            console.error('newNode is not an object');
-            return;
-        }
 
         var path = [];
         
         // Create a marker at the specified location
-        if (!drawing.nodes[nodeIndex]._marker) drawing.nodes[nodeIndex]._marker = makeMarker(drawing, newNode);
+        if (!('_marker' in drawing.nodes[nodeIndex])) drawing.nodes[nodeIndex]._marker = makeMarker(drawing, newNode);
         
-        // If there are at least two points...
-        if (drawing.nodes.length > 1) {
-            // Let user know something's going on
-            $rootScope.$broadcast('map.throb', true);
-            
-            // Generate polyline, act when resolved
-            utilityService.map.makePath([
-                makeLatLng(drawing.nodes[nodeIndex - 1]),
-                makeLatLng(drawing.nodes[nodeIndex])
-                ], drawing.nodes[nodeIndex].rigid)
-            .then(function(path) {
-                // Add length of new path to index
-                if (nodeIndex === 0) {
-                    var pathIndex = 0;
-                } else {
-                    var pathIndex = drawing.nodes[nodeIndex - 1].index + path.length - 1;
-                }
-                drawing.nodes[nodeIndex].index = pathIndex;
-                
-                // Prevent duplicate points
-                if ('_poly' in drawing && drawing._poly.getPath().getLength() > 0 && path.length > 0) {                    
-                    var prevPathPoint = drawing._poly.getPath().getAt(drawing.nodes[nodeIndex - 1].index);
-                    var pathPoint = path[0];
-                                        
-                    if (prevPathPoint.lat() == pathPoint.lat() && prevPathPoint.lng() == pathPoint.lng()) {
-                        path.shift();
-                    }
-                }
-                
-                // Update the poly
-                splicePolyPath(drawingIndex, nodeIndex, 0, path);
-                
-                // Move marker to end of poly; keeps on shape. Also mark using last argument 'true'
-                updateNodeLatLng(drawingIndex, nodeIndex, path[path.length - 1], true);
-                
-                if (drawing.nodes.length == 2) {
-                    updateNodeLatLng(drawingIndex, 0, path[0]);
-                }
-            })
-            .finally(function() {
-                $rootScope.$broadcast('map.throb', false);
-            });
-        } else { // Otherwise, inital index of 0
-            drawing.nodes[nodeIndex].index = 0;
-        }
+        updateNodePath(drawingIndex, nodeIndex);
     }
     
     function updateDrawingPoly(drawingIndex, isPolygon) {
@@ -1029,12 +1079,59 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     }
     function updateNodeLatLng(drawingIndex, nodeIndex, latLng, mark) {
         var node = $scope.drawings[drawingIndex].nodes[nodeIndex];
-        
+        // console.log(node, $scope.drawings);
         node._marker.setPosition(latLng);
         node.lat = latLng.lat();
         node.lng = latLng.lng();
         
         if (mark) markNode(drawingIndex, nodeIndex);
+    }
+    function updateNodePath(drawingIndex, nodeIndex) {
+        var drawing = $scope.drawings[drawingIndex];
+        var node1 = drawing.nodes[nodeIndex - 1];
+        var node2 = drawing.nodes[nodeIndex];
+        
+        if (!node1 && node2) {
+            node1 = node2;
+        }
+        if (!node2) {
+            console.error('node2 is incorrect');
+            return;
+        }
+        
+        // console.log(node1, node2);
+        // Capture index
+        // var index1 = node1.index;
+        // var index2 = node2.index;
+        
+        // Create array of locations
+        var locations = [];
+        
+        locations.push(node1._marker.getPosition());
+        locations.push(node2._marker.getPosition());
+        
+        // Let user know something's going on
+        if (!node2.rigid) $rootScope.$broadcast('map.throb', true);
+        
+        // Make path
+        utilityService.map.makePath(locations, node2.rigid)
+        .then(function(path) {
+            console.log('makePath:', path);
+            
+            if (!drawing || !node1 || !node2) return;
+            
+            var isLatestNode = isNaN(node2.index);
+            
+            splicePolyPath(drawingIndex, nodeIndex, path);
+            
+            updateNodeLatLng(drawingIndex, nodeIndex, path[0]);
+            console.log('Drawing Path:', drawing._poly.getPath().getLength(), drawing._poly.getPath().getArray());
+            console.log('Drawing Nodes:', drawing.nodes[drawing.nodes.length - 1].index, drawing.nodes);
+            if (isLatestNode && drawing.nodes.length > 1) updateNodeLatLng(drawingIndex, nodeIndex, path[path.length - 1]);
+        })
+        .finally(function() {
+            if (!node2.rigid) $rootScope.$broadcast('map.throb', false);
+        });
     }
     function pushNode(newNode) {
         var drawingIndex = $scope.drawings.length;
@@ -1218,22 +1315,25 @@ function DrawingController($scope, $rootScope, $location, $localStorage, $q, uti
     });
     
     $scope.marker_dragstart = function(drawingIndex, nodeIndex) {
+        console.log('Drag Start:', drawingIndex, nodeIndex);
         // If line is flexible
         if (!$scope.drawings[drawingIndex].nodes[nodeIndex].rigid) {
-            // TODO: Broadcast 'map.wait'; tells user something will happen soon
+            $rootScope.$broadcast('map.throb.wait', true);
         }
     };
     $scope.marker_drag = function(drawingIndex, nodeIndex) {
         var location = $scope.drawings[drawingIndex].nodes[nodeIndex]._marker.getPosition();
-        
-        splicePolyPath(drawingIndex, nodeIndex, 1, [location]);
-        
         updateNodeLatLng(drawingIndex, nodeIndex, location);
+        
+        if ($scope.drawings[drawingIndex].nodes[nodeIndex].rigid) updateNodePath(drawingIndex, nodeIndex);
     }
     $scope.marker_dragend = function(drawingIndex, nodeIndex) {
+        console.log('Drag End:', drawingIndex, nodeIndex);
         // If line is flexible
         if (!$scope.drawings[drawingIndex].nodes[nodeIndex].rigid) {
-            // TODO: Update path
+            // console.log('Is Flexible');
+            $rootScope.$broadcast('map.throb.wait', false);
+            updateNodePath(drawingIndex, nodeIndex);
         }
     };
 }
