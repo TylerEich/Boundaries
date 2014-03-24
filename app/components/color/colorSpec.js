@@ -15,7 +15,7 @@ describe('Color', function() {
             }
         });
     });
-    describe('Conversions', function() {
+    describe('conversions', function() {
         function conversions(ColorService) {
             var data = {
                 rgba: {
