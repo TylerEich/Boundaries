@@ -211,7 +211,7 @@
             <div ng-controller="DrawingController">
                 <div ng-repeat="drawing in drawings">
                     <div ui-map-polyline="drawing._poly" ui-event="{ 'map-click': 'polyline_click($params)' }"></div>
-                
+
                     <div ng-repeat="node in drawing.nodes" ui-map-marker="node._marker" ui-event="{ 'map-click': 'marker_click($parent.$index, $index)', 'map-rightclick': 'marker_rightclick($parent.$index, $index)', 'map-dragstart': 'marker_dragstart($parent.$index, $index)', 'map-drag': 'marker_drag($parent.$index, $index)', 'map-dragend': 'marker_dragend($parent.$index, $index)' }"></div>
                 </div>
             </div>
