@@ -44,6 +44,7 @@ angular.module('boundaries.drawing', [])
         return deferred.promise;
     }
 }])
+// .service('OrientationService')
 .service('DrawingService', ['$q', 'DirectionsService', function($q, DirectionsService) {
     function isSameLatLng(latLng1, latLng2) {
         return (latLng1.lat() == latLng2.lat() && latLng1.lng() == latLng2.lng());
@@ -66,8 +67,5 @@ angular.module('boundaries.drawing', [])
         args.unshift(index, removeLength);
         
         originalPath.splice.apply(this, args);
-        // for (var i = 0; i < path.length; i++) {
-        //     originalPath.splice.apply
-        // }
     };
 }]);
