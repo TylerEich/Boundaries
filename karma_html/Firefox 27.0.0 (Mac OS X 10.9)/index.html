@@ -57,16 +57,17 @@ body { background-color: #eeeeee; padding: 0; margin: 5px; overflow-y: scroll; }
  </script>
 </head>
 
-<body id="HTMLReporter" class="html-reporter">
+<body id="HTMLReporter" class="html-reporter showDetails">
 <h1>Firefox 27.0.0 (Mac OS X 10.9)</h1>
 
 <div class="alert">
 
 
+<span class="failingAlert bar">Failed 1 specs</span>
+<span class="resultsMenu bar">
+<a class="summaryMenuItem" href="#">22 specs<a>|<a class="detailsMenuItem" href="#">1 failing</a>
+</span>
 
-	
-	<span class="passingAlert bar">Passing 20 specs</span>
-	
 
 
 </div>
@@ -75,97 +76,11 @@ body { background-color: #eeeeee; padding: 0; margin: 5px; overflow-y: scroll; }
 
 
 	
-		<div class="suite passed">
-			<span class="description">Color Conversions</span>
+		<div class="suite failed">
+			<span class="description">Image</span>
 		
-			<div class="specSummary passed">
-			<span class="description">Converts rgba to rgba</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts rgba to hsla</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts rgba to hex24</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts rgba to hex32</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hsla to rgba</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hsla to hsla</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hsla to hex24</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hsla to hex32</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hex24 to rgba</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hex24 to hsla</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hex24 to hex24</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hex24 to hex32</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hex32 to rgba</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hex32 to hsla</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hex32 to hex24</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">Converts hex32 to hex32</span>
-			</div>
-		
-		</div>
-	
-		<div class="suite passed">
-			<span class="description">Drawing Service</span>
-		
-			<div class="specSummary passed">
-			<span class="description">makes rigid paths</span>
-			</div>
-		
-		</div>
-	
-		<div class="suite passed">
-			<span class="description">Drawing Service splice tests</span>
-		
-			<div class="specSummary passed">
-			<span class="description">prepends one path to another</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">splices one path midway of another</span>
-			</div>
-		
-			<div class="specSummary passed">
-			<span class="description">appends one path to another</span>
+			<div class="specSummary failed">
+			<span class="description">generates valid URLs</span>
 			</div>
 		
 		</div>
@@ -173,6 +88,33 @@ body { background-color: #eeeeee; padding: 0; margin: 5px; overflow-y: scroll; }
 </div>
 
 <div id="details">
+	
+	
+	<div class="specDetail failed">
+		<span class="description">Image generates valid URLs</span>
+		<div class="stackTrace">
+			<div class="resultMessage">minErr/&lt;@http://localhost:9876/base/bower_components/angular/angular.js?499918fc9f275bd11238750f6e0143c6629d0a61:78
+loadModules/&lt;@http://localhost:9876/base/bower_components/angular/angular.js?499918fc9f275bd11238750f6e0143c6629d0a61:3746
+forEach@http://localhost:9876/base/bower_components/angular/angular.js?499918fc9f275bd11238750f6e0143c6629d0a61:323
+loadModules@http://localhost:9876/base/bower_components/angular/angular.js?499918fc9f275bd11238750f6e0143c6629d0a61:3711
+createInjector@http://localhost:9876/base/bower_components/angular/angular.js?499918fc9f275bd11238750f6e0143c6629d0a61:3651
+workFn@http://localhost:9876/base/bower_components/angular-mocks/angular-mocks.js?29ee0baef3e302a723b05279935d0749f0a63db9:2138
+angular.mock.inject@http://localhost:9876/base/bower_components/angular-mocks/angular-mocks.js?29ee0baef3e302a723b05279935d0749f0a63db9:2129
+@http://localhost:9876/base/app/components/image/imageSpec.js?d02603a17b8690cd7d3221a6c9189959ca78231d:6
+env.executeFiltered@http://localhost:9876/base/node_modules/karma-jasmine/lib/boot.js?a673f666b22b904e87980aab4f31696488a5a2bd:115
+createStartFn/&lt;@http://localhost:9876/base/node_modules/karma-jasmine/lib/adapter.js?7ee59a2c0ba91fffef258ef34e4953cc4ca2a6c0:171
+[2]&lt;/Karma/this.loaded@http://localhost:9876/karma.js:189
+@http://localhost:9876/context.html:67
+,Expected undefined to be truthy.
+@http://localhost:9876/base/app/components/image/imageSpec.js?d02603a17b8690cd7d3221a6c9189959ca78231d:12
+env.executeFiltered@http://localhost:9876/base/node_modules/karma-jasmine/lib/boot.js?a673f666b22b904e87980aab4f31696488a5a2bd:115
+createStartFn/&lt;@http://localhost:9876/base/node_modules/karma-jasmine/lib/adapter.js?7ee59a2c0ba91fffef258ef34e4953cc4ca2a6c0:171
+[2]&lt;/Karma/this.loaded@http://localhost:9876/karma.js:189
+@http://localhost:9876/context.html:67
+</div>
+		</div>
+	</div>
+	
 	
 </div>
 </body>
