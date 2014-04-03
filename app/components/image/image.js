@@ -22,8 +22,8 @@ angular.module('boundaries.image', ['ngStorage', 'boundaries.drawing'])
         // Generate style from map styling and drawings
         var i, j;
         var rule, urlRule, styler, key, value;
-        for (i = 0; i < $scope.$storage.style.length; i++) {
-            rule = $scope.$storage.style[i];
+        for (i = 0; i < $localStorage.style.length; i++) {
+            rule = $localStorage.style[i];
             urlRule = [];
             
             // Add selectors to urlRule
@@ -54,18 +54,16 @@ angular.module('boundaries.image', ['ngStorage', 'boundaries.drawing'])
         // Generate paths from drawings
         var drawing, urlPath, polyPath, encodedPath, color, hex;
         var bounds = new google.maps.LatLngBounds();
-        for (i = 0; i < drawings.length; i++) {
+        for (i = 0; i < DrawingService.drawings.length; i++) {
             urlPath = [];
-            drawing = drawings[i];
+            drawing = DrawingService.drawings[i];
             polyPath = drawing._poly.getPath().getArray();
     
-            for (j = 0; j < polyPath.length; j++) {
-                bounds.extend(polyPath[j]);
-            }
+            for (j = 0; j < polyPath.length; j++) bounds.extend(polyPath[j]);
     
             encodedPath = google.maps.geometry.encoding.encodePath(polyPath);
             color = $scope.$storage.colors[drawing.activeColor];
-            hex = '0x' + utilityService.color.toHex(color.rgba);
+            hex = '0x' + ColorService.convert.hex24().toHex(color.rgba);
     
             // If drawing is polygon, use 'fillcolor'
             if (drawing.polygon) {
