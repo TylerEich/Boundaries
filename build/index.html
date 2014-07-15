@@ -1,0 +1,55 @@
+<!doctype html>
+  <head ng-app="boundaries">
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- inject:css -->
+    <!-- endinject -->
+  </head>
+  <body>
+      <header>
+          <div ui-view="header" class="slide" ng-class="{left: top && bottom, right: !top && !bottom}"></div>
+      </header>
+      <main ng-controller="MapCtrl">
+        <div id="map_canvas"
+        ui-map="map"
+        ui-options="options"
+        ui-event="{'map-click': 'map_click($params)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'map_idle()', 'map-maptypeid_changed': 'map_maptypeid_changed()'}"></div>
+      </main>
+      <footer>
+          <div ui-view="footer" class="slide" ng-class="{left: top && bottom, right: !top && !bottom}"></div>
+      </footer>
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
+     <script>
+       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+       })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-49860512-1');
+       ga('send', 'pageview');
+    </script>
+
+    <!-- bower:js -->
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-resource/angular-resource.js"></script>
+    <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script src="bower_components/angular-route/angular-route.js"></script>
+    <!-- endbower -->
+
+        <!-- inject:js -->
+        <script src="app/scripts/app.js"></script>
+        <script src="app/scripts/ng-modules.js"></script>
+        <script src="app/scripts/color/color.js"></script>
+        <script src="app/scripts/drawing/drawing.js"></script>
+        <script src="app/scripts/geo/geo.js"></script>
+        <script src="app/scripts/image/image.js"></script>
+        <script src="app/scripts/map/map.js"></script>
+        <script src="app/scripts/mode/mode.js"></script>
+        <script src="app/scripts/search/search.js"></script>
+        <!-- endinject -->
+</body>
+</html>

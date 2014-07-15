@@ -1,0 +1,509 @@
+$font-stack: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+$text-color: #FFF;
+$text-shade-color: darken($text-color, 13%);
+
+$transition: all 0.20s ease;
+
+$navbar-size: 4rem;
+$navbar-color: #000;
+$navbar-padding: 0.5rem;
+
+$border-radius: 0.25rem;
+
+$button-size: $navbar-size - 1rem;
+$button-padding: 0.5rem;
+$button-color: #808080;
+$button-highlight-color: darken($button-color, 13%);
+$button-active-color: darken($button-highlight-color, 12%);
+$button-border: 1px solid $button-highlight-color;
+
+$accent-color: #2090FF;
+$accent-highlight-color: darken($accent-color, 13%);
+
+$input-background: #FFF;
+$input-border: 1px solid #E0E0E0;
+$input-text-color: #000;
+
+@keyframes scale-fade {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    display: block;
+  }
+  99% {
+    transform: scale(1.6);
+    opacity: 0;
+    display: block;
+    pointer-events: none;
+  }
+}
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(60deg);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  font-family: "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+}
+
+::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  
+  display: flex;
+  flex-direction: column;
+//  flex-wrap: wrap;
+  
+  @media (min-aspect-ratio: 1/1) {
+    flex-direction: row;
+  }
+}
+
+header, footer {
+  position: relative;
+
+  min-height: $navbar-size;
+  max-width: 100%;
+  background: $navbar-color;
+  
+  display: flex;
+  flex-wrap: wrap;
+  
+  @media (min-aspect-ratio: 1/1) {
+    max-height: 100%;
+    min-width: $button-size;
+  }
+}
+
+#splash {
+  opacity: 0;
+  display: none;
+  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
+//  padding-top: 40%;
+  background: $navbar-color;
+
+  font-size: 3rem;
+  text-align: center;
+  
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  color: $text-color;
+
+  z-index: 10;
+  pointer-events: none;
+  
+  animation-name: scale-fade;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  
+  svg {
+    fill: $text-color;
+    display: block;
+    padding: 1rem;
+    width: 100%;
+  }
+  
+  #logo {
+    max-height: 6rem;
+  }
+  
+  #throbber {
+    max-height: 9rem;
+    animation: rotate 0.25s linear infinite;
+  }
+  
+  &.loading {
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+    animation: none;
+    pointer-events: auto;
+  }
+}
+
+.loader {
+  color: $text-color;
+  font-size: 2rem;
+}
+
+footer {
+  #logo {
+    margin: auto;
+    height: $navbar-size - 1rem;
+    img {
+      max-height: 100%;
+    }
+  }
+  #text {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+#search {
+  display: flex;
+  flex-direction: column;
+  
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  
+  padding: $navbar-padding ($navbar-padding / 2);
+  background: $navbar-color;
+  
+//  margin-left: calc((-100% + #{$navbar-size * 2}) / 2);
+//  margin-top: $navbar-padding;
+  z-index: 1;
+  
+  input[type="text"],
+  input[type="search"] {
+    font-size: inherit;
+    display: block;
+    height: 3rem;
+    border-radius: $border-radius;
+    border: $button-border;
+    outline: none;
+    padding: $button-padding;
+    margin: 0 ($button-padding / 2);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+  }
+  
+  #suggestions {
+    margin: $button-padding ($button-padding / 2);
+    margin-bottom: 0;
+    
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    
+    .suggestion {
+      color: $text-color;
+      cursor: pointer;
+      padding: $button-padding;
+      
+      background: $button-color;
+      border: $button-border;
+//        border-bottom: none;
+      border-radius: 0;
+      
+      display: flex;
+      
+      flex-grow: 1;
+      
+      transition: $transition;
+      
+      &.first {
+        border-top-left-radius: $border-radius !important;
+        border-top-right-radius: $border-radius !important;
+      }
+      &.last {
+        border-bottom-right-radius: $border-radius !important;
+        border-bottom-left-radius: $border-radius !important;
+//          border-bottom: $button-border;
+      }
+      
+      &.ng-animate {
+        transition: none;
+      }
+      
+      span {
+        display: inline-block;
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        margin: auto;
+      }
+
+      &.error {
+        text-align: center;
+        pointer-events: none;
+        color: $text-shade-color;
+        background: $button-highlight-color;
+      }
+
+      &:active,
+      &.active,
+      &:hover {
+        background: $button-highlight-color;
+      }
+    }
+  }
+}
+nav {
+  display: flex;
+  flex-grow: 1;
+  justify-content: space-between;
+  
+  @media (min-aspect-ratio: 1/1) {
+    flex-direction: column;
+  }
+}
+
+[ui-view] {
+  margin: 0;
+  
+  display: flex;
+  flex-wrap: wrap;
+  
+  @media (max-aspect-ratio: 1/1) {
+    padding: $navbar-padding ($navbar-padding / 2);
+    padding-bottom: 0;
+    
+    width: 100%;
+  }
+  @media (min-aspect-ratio: 1/1) {
+    padding: ($navbar-padding / 2) $navbar-padding;
+    padding-right: 0;
+  }
+    
+  nav {
+    padding-bottom: $navbar-padding;
+    
+    @media (min-aspect-ratio: 1/1) {
+      padding-bottom: 0;
+      padding-right: $navbar-padding;
+    }
+  }
+  nav {
+    button {
+      font-size: 1rem;
+      font-weight: bold;
+      
+      flex-grow: 1;
+      
+      color: $text-color;
+      
+      height: $button-size;
+      min-width: $button-size;
+      
+      padding: 0;
+      margin: 0 ($button-padding / 2);
+      
+      border-radius: $border-radius;
+      border: $button-border;
+      
+      background: $button-color;
+      
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      
+      transition: $transition;
+      
+      outline: none;
+      
+      @media (min-aspect-ratio: 1/1) {
+        width: $button-size;
+        min-height: $button-size;
+        
+        margin: ($button-padding / 2) 0;
+      }
+      
+      svg {
+//        fill: $text-shade-color;
+//        stroke: $text-shade-color;
+fill: $text-color;
+stroke: $text-color;
+        
+        width: 3rem;
+        
+        * {
+          transition: $transition;
+        }
+      }      
+      &:hover svg {
+        fill: $text-color;
+        stroke: $text-color;
+      }
+      &.active, &.active:hover {
+        background: $button-active-color;
+        border: 1px solid $button-active-color;
+        svg {
+          fill: $text-color;
+          stroke: $text-color;
+        }
+      }
+      
+      &.group {
+        border-radius: 0;
+        margin: 0;
+        &.first {
+          @media (max-aspect-ratio: 1/1) {
+            margin-left: $button-padding / 2;
+            
+            border-top-left-radius: $border-radius;
+            border-bottom-left-radius: $border-radius;
+          }
+          
+          @media (min-aspect-ratio: 1/1) {
+            margin-top: $button-padding / 2;
+            
+            border-top-left-radius: $border-radius;
+            border-top-right-radius: $border-radius;
+          }
+        }
+        &.last {
+          @media (max-aspect-ratio: 1/1) {
+            margin-right: $button-padding / 2;
+            
+            border-top-right-radius: $border-radius;
+            border-bottom-right-radius: $border-radius;
+          }
+          
+          @media (min-aspect-ratio: 1/1) {
+            margin-bottom: $button-padding / 2;
+            
+            border-bottom-right-radius: $border-radius;
+            border-bottom-left-radius: $border-radius;
+          }
+        }
+      }
+      
+      &:hover {
+        background: $button-highlight-color;
+        cursor: pointer;
+      }
+      
+      &.accent {
+        background: $accent-color;
+        border: 1px solid $accent-highlight-color;
+        svg {
+          fill: $text-color;
+        }
+        
+        &:hover {
+          background: $accent-highlight-color;
+        }
+      }
+    }
+    
+    hr {
+      width: 1px;
+      height: $navbar-size / 2;
+      
+      background: transparentize(white, 0.75);
+      
+      flex-grow: 0;
+      flex-shrink: 1;
+      
+      border: none;
+      
+      margin: $button-padding ($button-padding / 2);
+      
+      @media (min-aspect-ratio: 1/1) {
+        width: $navbar-size / 2;
+        height: 1px;
+        
+        margin: ($button-padding / 2) $button-padding;
+      }
+    }
+  }
+}
+
+main {
+  flex: 1;
+  height: 100%;
+  position: relative;
+  #map_canvas {
+    height: 100%;
+    width: 100%;
+    position: absolute !important;
+  }
+  #status {
+    color: $text-color;
+    text-align: center;
+    line-height: 1;
+    padding: $button-padding;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: $navbar-size / 2;
+    background: transparentize($navbar-color, 0.25);
+    z-index: 1;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    status-bar {
+      display: block;
+      position: absolute;
+      appearance: none;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: 0.25rem;
+      div {
+        background: $accent-color;
+        transition: $transition;
+        border: 1px solid $accent-highlight-color;
+      }
+    }
+  }
+}
+
+.slide {
+  transition: all 0.5s ease;
+  &.ng-enter, &.ng-leave {
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+  &.ng-enter {
+    transform: translateX(100%);
+  }
+  &.ng-enter-active {
+    transform: translateX(0%);
+  }
+  &.ng-leave {
+    transform: translateX(0%);
+  }
+  &.ng-leave-active {
+    transform: translateX(100%);
+  }
+  &.left {
+    &.ng-enter {
+      transform: translateX(-100%);
+    }
+    &.ng-enter-active {
+      transform: translateX(0%);
+    }
+    &.ng-leave {
+      transform: translateX(0%);
+    }
+    &.ng-leave-active {
+      transform: translateX(-100%);
+    }
+  }
+}
