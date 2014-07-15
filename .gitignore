@@ -1,7 +1,5 @@
-.DS_Store
-app.yaml
-index.yaml
-main.py
-main.pyc
-googleaad324ad93139c4f.html
-private.json
+node_modules
+dist
+.tmp
+.sass-cache
+app/bower_components
