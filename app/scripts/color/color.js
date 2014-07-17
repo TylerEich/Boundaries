@@ -14,25 +14,6 @@ Supported formats: rgba, hsla, hex24, hex32
   var _rgba = {};
   var self = this;
 
-  function hue2rgb(p, q, t) {
-    if (t < 0) {
-      t += 360;
-    }
-    if (t > 360) {
-      t -= 360;
-    }
-    if (t < 60) {
-      return p + (q - p) * 6 * (t);
-    }
-    if (t < 180) {
-      return q;
-    }
-    if (t < 240) {
-      return p + (q - p) * (240 - t) * 6;
-    }
-    return p;
-  }
-
   this.convert = {
     rgba: function(rgba) {
       var r = Math.round(rgba.r * 255),
@@ -52,6 +33,7 @@ Supported formats: rgba, hsla, hex24, hex32
       `>>> 0` converts to unsigned 32-bit int
       */
       _rgba = (((r << 24) | (g << 16) | (b << 8) | (a)) >>> 0);
+      
       return self;
     },
     hsla: function(hsla) {
@@ -94,15 +76,6 @@ Supported formats: rgba, hsla, hex24, hex32
       r += m;
       g += m;
       b += m;
-      // if (s === 0) {
-      //         r = g = b = l; // achromatic
-      //       } else {
-      //         var q = (l < 50) ? (l * (100 + s)) : (l + s - l * s);
-      //         var p = 2 * l - q;
-      //         r = hue2rgb(p, q, h + 120);
-      //         g = hue2rgb(p, q, h);
-      //         b = hue2rgb(p, q, h - 120);
-      //       }
 
       self.convert.rgba({
         r: r / 100,
