@@ -53,7 +53,7 @@ var karmaConf = {
   browsers: ['PhantomJS'],
   frameworks: ['jasmine'],
   reporters: ['osx'],
-  logLevel: 'WARN',
+  logLevel: 'INFO',
   files: karmaConfFiles
 };
 
