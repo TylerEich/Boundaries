@@ -13,87 +13,134 @@ Supported formats: rgba, hsla, hex24, hex32
 .service('ColorSvc', function() {
   var _rgba = {};
   var self = this;
-  
+
+  function hue2rgb(p, q, t) {
+    if (t < 0) {
+      t += 360;
+    }
+    if (t > 360) {
+      t -= 360;
+    }
+    if (t < 60) {
+      return p + (q - p) * 6 * (t);
+    }
+    if (t < 180) {
+      return q;
+    }
+    if (t < 240) {
+      return p + (q - p) * (240 - t) * 6;
+    }
+    return p;
+  }
+
   this.convert = {
     rgba: function(rgba) {
-      _rgba = rgba;
+      var r = Math.round(rgba.r * 255),
+        g = Math.round(rgba.g * 255),
+        b = Math.round(rgba.b * 255),
+        a = Math.round(rgba.a * 255);
+
+      /*
+      Bitwise black magic (given r = 0x12, g = 0x34, b = 56, a = 78):
+      (r << 24) => 0x12000000
+      (g << 16) => 0x00340000
+      (b << 8)  => 0x00005600
+      (a)       => 0x00000078
+      
+      All OR'ed => 0x12345678
+      
+      `>>> 0` converts to unsigned 32-bit int
+      */
+      _rgba = (((r << 24) | (g << 16) | (b << 8) | (a)) >>> 0);
       return self;
     },
     hsla: function(hsla) {
-      function hue2rgb(p, q, t) {
-        if (t < 0) {
-          t += 1;
-        }
-        if (t > 1) {
-          t -= 1;
-        }
-        if (t < 1 / 6) {
-          return p + (q - p) * 6 * t;
-        }
-        if (t < 1 / 2) {
-          return q;
-        }
-        if (t < 2 / 3) {
-          return p + (q - p) * (2 / 3 - t) * 6;
-        }
-        return p;
-      }
-
       var r, g, b;
 
-      var h = hsla.h,
-        s = hsla.s,
-        l = hsla.l,
+      var h = Math.round(hsla.h * 360),
+        s = Math.round(hsla.s * 100),
+        l = Math.round(hsla.l * 100),
         a = hsla.a;
 
-      if (s === 0) {
-        r = g = b = l; // achromatic
-      } else {
-        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-        var p = 2 * l - q;
-        r = hue2rgb(p, q, h + 1 / 3);
-        g = hue2rgb(p, q, h);
-        b = hue2rgb(p, q, h - 1 / 3);
-      }
+      var c = (100 - Math.abs(2 * l - 1)) * s;
+      var x = c * (1 - Math.abs((h / 60 % 2) - 1));
 
-      _rgba = {
-        r: parseFloat(r.toFixed(3)),
-        g: parseFloat(g.toFixed(3)),
-        b: parseFloat(b.toFixed(3)),
-        a: parseFloat(a.toFixed(3))
-      };
+      if (0 <= h && h < 1) {
+        r = c;
+        g = x;
+        b = 0;
+      } else if (60 <= h && h < 120) {
+        r = x;
+        g = c;
+        b = 0;
+      } else if (120 <= h && h < 180) {
+        r = 0;
+        g = c;
+        b = x;
+      } else if (180 <= h && h < 240) {
+        r = 0;
+        g = x;
+        b = c;
+      } else if (240 <= h && h < 300) {
+        r = x;
+        g = 0;
+        b = c;
+      } else if (300 <= h && h < 360) {
+        r = c;
+        g = 0;
+        b = x;
+      }
+      var m = l - c / 2;
+      r += m;
+      g += m;
+      b += m;
+      // if (s === 0) {
+      //         r = g = b = l; // achromatic
+      //       } else {
+      //         var q = (l < 50) ? (l * (100 + s)) : (l + s - l * s);
+      //         var p = 2 * l - q;
+      //         r = hue2rgb(p, q, h + 120);
+      //         g = hue2rgb(p, q, h);
+      //         b = hue2rgb(p, q, h - 120);
+      //       }
+
+      self.convert.rgba({
+        r: r / 100,
+        g: g / 100,
+        b: b / 100,
+        a: a
+      });
       return self;
     },
     hex24: function(hex24) {
-      var rgba = parseInt(hex24, 16);
+      self.convert.hex32(hex24 + 'FF');
 
-      _rgba = {
-        r: parseFloat((((rgba >> 16) & 255) / 255).toFixed(3)),
-        g: parseFloat((((rgba >> 8) & 255) / 255).toFixed(3)),
-        b: parseFloat(((rgba & 255) / 255).toFixed(3)),
-        a: 1
-      };
       return self;
     },
     hex32: function(hex32) {
-      // Load RGB values, overwrite a later
-      self.convert.hex24(hex32.substring(0, 6));
-
-      var a = parseInt(hex32.substring(6, 8), 16);
-      _rgba.a = parseFloat(((a & 255) / 255).toFixed(3));
+      _rgba = parseInt(hex32, 16) >>> 0; // `>>> 0` => unsigned 32-bit int
 
       return self;
     }
   };
   this.to = {
     rgba: function() {
-      var rgba = _rgba;
-      _rgba = {};
-      return rgba;
+      var r = (_rgba >> 24 & 0xFF) / 0xFF,
+        g = (_rgba >> 16 & 0xFF) / 0xFF,
+        b = (_rgba >> 8 & 0xFF) / 0xFF,
+        a = (_rgba & 0xFF) / 0xFF;
+
+      _rgba = 0;
+
+      return {
+        r: r,
+        g: g,
+        b: b,
+        a: a
+      };
     },
     hsla: function() {
-      var rgba = _rgba;
-      _rgba = {};
+      var rgba = self.to.rgba();
 
       var r = rgba.r,
         g = rgba.g,
@@ -124,6 +171,7 @@ Supported formats: rgba, hsla, hex24, hex32
         }
         h /= 6;
       }
+
       return {
         h: h,
         s: s,
@@ -132,56 +180,42 @@ Supported formats: rgba, hsla, hex24, hex32
       };
     },
     hex24: function() {
-      var rgba = _rgba;
-      _rgba = {};
-      
-      var rgba255 = {};
-      var keys = Object.keys(rgba);
-
-      for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
-        rgba255[key] = Math.round(rgba[key] * 255);
-      }
-
-      return ((1 << 24) | (rgba255.r << 16) | (rgba255.g << 8) | rgba255.b).toString(16).substring(1);
+      return self.to.hex32().substring(0, 6);
     },
     hex32: function() {
-      var rgba = _rgba;
+      var hex = _rgba.toString(16);
+      _rgba = 0;
 
-      // hex24 will clear _rgba
-      var hex24 = self.to.hex24();
-      var a = Math.round(rgba.a * 255);
-
-      return hex24 + ((1 << 8) | a).toString(16).substring(1);
+      return ((hex.length > 7) ? '' : '0') + hex; // Pad output with leading zero
     }
   };
 })
-.controller('ColorCtrl', function($scope, $localStorage, ColorSvc) {
-  $scope.$storage = $localStorage.$default({
-    colors: [{
-      r: 1,
-      g: 0,
-      b: 0,
-      a: 0.125,
-      weight: 10
-    }, {
-      r: 0,
-      g: 1,
-      b: 0,
-      a: 0.125,
-      weight: 10
-    }, {
-      r: 0,
-      g: 0,
-      b: 1,
-      a: 0.125,
-      weight: 10
-    }],
-    activeColor: 1
+  .controller('ColorCtrl', function($scope, $localStorage, ColorSvc) {
+    $scope.$storage = $localStorage.$default({
+      colors: [{
+        r: 1,
+        g: 0,
+        b: 0,
+        a: 0.125,
+        weight: 10
+      }, {
+        r: 0,
+        g: 1,
+        b: 0,
+        a: 0.125,
+        weight: 10
+      }, {
+        r: 0,
+        g: 0,
+        b: 1,
+        a: 0.125,
+        weight: 10
+      }],
+      activeColor: 1
+    });
+
+    $scope.fillColor = function(index) {
+      var color = $scope.$storage.colors[index];
+      return '#' + ColorSvc.convert.rgba(color).to.hex24();
+    };
   });
-  
-  $scope.fillColor = function(index) {
-    var color = $scope.$storage.colors[index];
-    return '#' + ColorSvc.convert.rgba(color).to.hex24();
-  };
-});

@@ -10,7 +10,7 @@ var unitTestFiles = [
 
   // App files
   jsAppFiles = [
-    '!app/scripts/*/**/*Spec.js',
+    'app/scripts/*/**/*!(Spec).js',
     'app/scripts/*/**/*.js',
     'app/scripts/app.js'
   ],
@@ -39,34 +39,37 @@ var unitTestFiles = [
   styleBuildFiles = [
     'build/styles/**/*.min.css'
   ];
+  
+var karmaConfFiles = [
+  'app/bower_components/angular/angular.js',
+  'app/bower_components/angular-mocks/angular-mocks.js',
+  'app/bower_components/angular-resource/angular-resource.js',
+  'app/bower_components/angular-sanitize/angular-sanitize.js',
+  'app/bower_components/angular-route/angular-route.js',
+  'app/bower_components/ngstorage/ngStorage.js'
+].concat(jsAppFiles, unitTestFiles);
 
+var karmaConf = {
+  browsers: ['PhantomJS'],
+  frameworks: ['jasmine'],
+  reporters: ['osx'],
+  logLevel: 'WARN',
+  files: karmaConfFiles
+};
 
 
 // Tests
-gulp.task('test', function() {
-  var karma = require('gulp-karma');
+gulp.task('test', function(done) {
+  var karma = require('karma').server;
 
-  return gulp.src(jsAppFiles.concat(unitTestFiles))
-    .pipe(karma({
-      configFile: 'karma.conf.js',
-      action: 'watch'
-    }))
-    .on('error', function(err) {
-      throw err;
-    });
+  karma.start(karmaConf, done);
 });
 
-gulp.task('test:once', function() {
-  var karma = require('gulp-karma');
+gulp.task('test:once', function(done) {
+  var karma = require('karma').server;
 
-  return gulp.src(jsAppFiles.concat(unitTestFiles))
-    .pipe(karma({
-      configFile: 'karma.conf.js',
-      action: 'run'
-    }))
-    .on('error', function(err) {
-      throw err;
-    });
+  karmaConf.singleRun = true;
+  karma.start(karmaConf, done);
 });
 
 // Build tasks
@@ -189,7 +192,7 @@ gulp.task('server', ['build:html'], function() {
     root: [__dirname],
     livereload: true
   });
-  
+
   gulp.src('app/index.html')
     .pipe(openUrl('', {
       url: 'http://localhost:8080/app',
