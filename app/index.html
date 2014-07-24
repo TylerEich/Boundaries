@@ -26,15 +26,16 @@
     <script defer src="bower_components/ngstorage/ngStorage.min.js"></script>
 
     <!-- inject:js -->
-    <script defer src="scripts/drawing/drawing.js"></script>
-    <script defer src="scripts/color/color.js"></script>
-    <script defer src="scripts/geo/geo.js"></script>
-    <script defer src="scripts/image/image.js"></script>
-    <script defer src="scripts/map/map.js"></script>
-    <script defer src="scripts/mode/mode.js"></script>
-    <script defer src="scripts/search/search.js"></script>
-    <script defer src="scripts/status/status.js"></script>
-    <script defer src="scripts/app.js"></script>
+    <script defer src="../app/bower_components/traceur-runtime/traceur-runtime.js"></script>
+    <script defer src="../build/scripts/color/color.js"></script>
+    <script defer src="../build/scripts/drawing/drawing.js"></script>
+    <script defer src="../build/scripts/geo/geo.js"></script>
+    <script defer src="../build/scripts/image/image.js"></script>
+    <script defer src="../build/scripts/map/map.js"></script>
+    <script defer src="../build/scripts/mode/mode.js"></script>
+    <script defer src="../build/scripts/search/search.js"></script>
+    <script defer src="../build/scripts/status/status.js"></script>
+    <script defer src="../build/scripts/app.js"></script>
     <!-- endinject -->
   </head>
   <body ng-controller="MasterCtrl">
@@ -45,8 +46,6 @@
       </svg>
       <svg id="throbber" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
         <g>
-          <!-- <animateTransform attributeType="xml" attributeName="transform" type="rotate" from="0 32 32" to="60 32 32" dur="0.25s" repeatCount="indefinite"/> -->
-    
           <circle cx="32" cy="51.5" r="4.5" />
           <circle cx="48.868" cy="41.75" r="4.5" />
           <circle cx="48.868" cy="22.25" r="4.5" />
@@ -57,7 +56,7 @@
       </svg>
     </div>
     <header no-scroll>
-      <div ui-view="header" class="slide" ng-class="{left: top && bottom, right: !top && !bottom}">
+      <div ui-view="header" ng-controller="ModeCtrl" class="slide" ng-class="{left: top && bottom, right: !top && !bottom}">
         <nav>
           <button ng-click="setShowHeader('search')" ng-class="{ active: show.header === 'search' }">
             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
@@ -67,8 +66,6 @@
           <hr>
           <button ng-click="setShowHeader('color')" ng-class="{ active: show.header === 'color' }" class="group first">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <!-- <rect x="7" y="7" width="50" height="50" fill="transparent" stroke="black" stroke-width="1"/> -->
-              
               <circle ng-attr-fill="{{ fillColorWithOffset(1) }}" stroke-width="3" r="9" cx="18.5" cy="45.5" />
               <circle ng-attr-fill="{{ fillColorWithOffset(2) }}" stroke-width="3" r="9" cx="45.5" cy="45.5" />
               <circle ng-attr-fill="{{ fillColorWithOffset(0) }}" stroke-width="6" r="17" cy="28" cx="32" />

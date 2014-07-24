@@ -10,8 +10,8 @@ var unitTestFiles = [
 
   // App files
   jsAppFiles = [
-    'app/scripts/*/**/*!(Spec).js',
-    'app/scripts/*/**/*.js',
+    'app/scripts/*/**.js',
+    '!app/scripts/*/**Spec.js',
     'app/scripts/app.js'
   ],
   htmlAppFiles = [
@@ -27,7 +27,13 @@ var unitTestFiles = [
 
   // Build files
   jsBuildFiles = [
-    'build/scripts/**/*.min.js'
+    'app/bower_components/traceur-runtime/traceur-runtime.js',
+    'build/scripts/*/**.js',
+    '!build/scripts/*/**Spec.js',
+    'build/scripts/app.js'
+  ],
+  unitTestBuildFiles = [
+    'build/scripts/*/**/*Spec.js'
   ],
   // htmlBuildFiles = [
   //   'build/*.html',
@@ -39,7 +45,7 @@ var unitTestFiles = [
   styleBuildFiles = [
     'build/styles/**/*.min.css'
   ];
-  
+
 var karmaConfFiles = [
   'app/bower_components/angular/angular.js',
   'app/bower_components/angular-mocks/angular-mocks.js',
@@ -47,144 +53,152 @@ var karmaConfFiles = [
   'app/bower_components/angular-sanitize/angular-sanitize.js',
   'app/bower_components/angular-route/angular-route.js',
   'app/bower_components/ngstorage/ngStorage.js'
-].concat(jsAppFiles, unitTestFiles);
+];
 
 var karmaConf = {
-  browsers: ['PhantomJS'],
+  browsers: ['Firefox', 'Chrome'],
   frameworks: ['jasmine'],
-  reporters: ['osx'],
+  reporters: ['osx', 'dots'],
   logLevel: 'INFO',
   files: karmaConfFiles
 };
 
 
 // Tests
-gulp.task('test', function(done) {
-  var karma = require('karma').server;
 
-  karma.start(karmaConf, done);
-});
+function test(watch, files, done) {
+  watch = Boolean(watch);
 
-gulp.task('test:once', function(done) {
-  var karma = require('karma').server;
+  var karmaServer = require('karma').server;
 
-  karmaConf.singleRun = true;
-  karma.start(karmaConf, done);
-});
+  karmaConf.files = files;
+  // karmaConf.autoWatch = watch;
+  karmaConf.singleRun = !watch;
+
+  karmaServer.start(karmaConf, done);
+}
+
+function clean(glob) {
+  console.log(glob);
+
+  var gulpClean = require('gulp-clean');
+
+  gulp.src(glob, {
+    read: false
+  })
+    .pipe(gulpClean());
+}
+var tasks = {
+  'test': test.bind(null, false, karmaConfFiles.concat(jsBuildFiles, unitTestBuildFiles)),
+  'test:dist': test.bind(null, false, karmaConfFiles.concat('dist/script.min.js', unitTestBuildFiles)),
+  'build:js': function() {
+    var changed = require('gulp-changed'),
+      gulpPrint = require('gulp-print'),
+      traceur = require('gulp-traceur');
+
+    return gulp.src(jsBuildFiles, unitTestFiles)
+      .pipe(gulpPrint())
+      .pipe(changed('build/scripts'))
+      .pipe(traceur())
+      .pipe(gulp.dest('build/scripts'));
+  },
+  'build:css': function() {
+    var changed = require('gulp-changed'),
+      sass = require('gulp-sass'),
+      prefix = require('gulp-autoprefixer'),
+      rename = require('gulp-rename');
+
+    return gulp.src(styleAppFiles)
+      .pipe(changed('build/styles', {
+        extension: '.min.css'
+      }))
+      .pipe(sass({
+        outputStyle: 'compressed',
+        errLogToConsole: true
+      }))
+      .pipe(prefix('last 2 versions'))
+      .pipe(rename({
+        suffix: '.min'
+      }))
+      .pipe(gulp.dest('build/styles'));
+  },
+  'build:html': function() {
+    var changed = require('gulp-changed'),
+      htmlmin = require('gulp-htmlmin'),
+      filesize = require('gulp-filesize'),
+      replace = require('gulp-replace');
+
+    var inject = require('gulp-inject');
+
+    return gulp.src('./app/index.html')
+      .pipe(inject(gulp.src(jsBuildFiles, {
+        read: false
+      }), {
+        addRootSlash: false,
+        addPrefix: '..'
+      }))
+      .pipe(inject(gulp.src(styleBuildFiles, {
+        read: false,
+      }), {
+        addRootSlash: false,
+        addPrefix: '..'
+      }))
+      .pipe(gulp.dest('./app'));
+  },
+  'clean:css': clean.bind(null, 'build/styles/*'),
+  'clean:js': clean.bind(null, 'build/scripts/**/*'),
+  'dist:css': function() {
+    var concat = require('gulp-concat');
+
+    return gulp.src(styleBuildFiles)
+      .pipe(concat('style.min.css'))
+      .pipe(gulp.dest('dist'));
+  },
+  'dist:js': function() {
+    var util = require('util'),
+      uglify = require('gulp-uglify'),
+      filesize = require('gulp-filesize'),
+      concat = require('gulp-concat'),
+      insert = require('gulp-insert');
+
+    var pkg = require('./package.json'),
+      copyright = util.format('/*\n %s v%s\n (c) 2013-%s %s %s\n License: %s\n*/\n',
+        pkg.name,
+        pkg.version,
+        new Date().getFullYear(),
+        pkg.author,
+        pkg.homepage,
+        pkg.license);
+
+    return gulp.src(jsBuildFiles)
+      .pipe(concat('script.min.js'))
+      .pipe(uglify())
+      .pipe(insert.prepend(copyright))
+      .pipe(gulp.dest('dist'))
+      .pipe(filesize());
+  }
+};
+
+gulp.task('test', tasks['test']);
+gulp.task('test:dist', ['dist:js'], tasks['test:dist']);
 
 // Build tasks
-gulp.task('build', ['clean', 'test:once', 'build:css']);
-
-gulp.task('build:css', function() {
-  var changed = require('gulp-changed'),
-    sass = require('gulp-sass'),
-    prefix = require('gulp-autoprefixer'),
-    rename = require('gulp-rename');
-
-  return gulp.src(styleAppFiles)
-    .pipe(changed('build/styles', {
-      extension: '.min.css'
-    }))
-    .pipe(sass({
-      outputStyle: 'compressed',
-      errLogToConsole: true
-    }))
-    .pipe(prefix('last 2 versions'))
-    .pipe(rename({
-      suffix: '.min'
-    }))
-    .pipe(gulp.dest('build/styles'));
-});
-
-gulp.task('build:html', ['build:css'], function() {
-  var changed = require('gulp-changed'),
-    htmlmin = require('gulp-htmlmin'),
-    filesize = require('gulp-filesize'),
-    replace = require('gulp-replace');
-
-  var inject = require('gulp-inject');
-
-  return gulp.src('./app/index.html')
-    .pipe(inject(gulp.src(jsAppFiles, {
-      read: false
-    }), {
-      addRootSlash: false,
-      ignorePath: 'app/'
-    }))
-    .pipe(inject(gulp.src(styleBuildFiles, {
-      read: false,
-    }), {
-      addRootSlash: false,
-      addPrefix: '..'
-    }))
-    .pipe(gulp.dest('./app'));
-});
+gulp.task('build', ['build:css', 'build:js', 'test']);
+gulp.task('build:js', tasks['build:js']);
+gulp.task('build:css', tasks['build:css']);
+gulp.task('build:html', ['build:js', 'build:css'], tasks['build:html']);
 
 // Clean tasks
 gulp.task('clean', ['clean:css', 'clean:js']);
-
-gulp.task('clean:css', function() {
-  var clean = require('gulp-clean');
-
-  gulp.src('build/styles/*', {
-    read: false
-  })
-    .pipe(clean());
-});
-
-gulp.task('clean:js', function() {
-  var clean = require('gulp-clean');
-
-  gulp.src('build/scripts/*', {
-    read: false
-  })
-    .pipe(clean());
-});
+gulp.task('clean:css', tasks['clean:css']);
+gulp.task('clean:js', tasks['clean:js']);
 
 // Distribution tasks
 gulp.task('dist', ['dist:css', 'dist:js']);
+gulp.task('dist:css', ['clean:css', 'build:css'], tasks['dist:css']);
+gulp.task('dist:js', ['clean:js', 'build:js'], tasks['dist:js']);
 
-gulp.task('dist:css', ['clean:css', 'build:css'], function() {
-  var concat = require('gulp-concat');
-
-  return gulp.src(styleBuildFiles)
-    .pipe(concat('style.min.css'))
-    .pipe(gulp.dest('dist'));
-});
-
-gulp.task('dist:js', ['clean:js', 'build:js'], function() {
-  var util = require('util'),
-    filesize = require('gulp-filesize'),
-    concat = require('gulp-concat'),
-    insert = require('gulp-insert');
-
-  var pkg = require('./package.json'),
-    copyright = util.format('/*\n %s v%s\n (c) 2013-%s %s %s\n License: %s\n*/\n',
-      pkg.name,
-      pkg.version,
-      new Date().getFullYear(),
-      pkg.author,
-      pkg.homepage,
-      pkg.license);
-
-  return gulp.src(jsBuildFiles)
-    .pipe(concat('script.min.js'))
-    .pipe(insert.prepend(copyright))
-    .pipe(filesize())
-    .pipe(gulp.dest('dist'));
-});
-
-// Watch task
-// gulp.task('server', function(next) {
-//   var connect = require('connect'),
-//     server = connect(),
-//     http = require('http');
-// 
-//   server.use(connect.static('build'));
-//   http.createServer(server).listen(process.env.PORT || 80, next);
-// });
-
-
+// Server
 gulp.task('server', ['build:html'], function() {
   var openUrl = require('gulp-open');
 
@@ -197,14 +211,19 @@ gulp.task('server', ['build:html'], function() {
     .pipe(openUrl('', {
       url: 'http://localhost:8080/app',
       app: 'Google Chrome'
+    }))
+    .pipe(openUrl('', {
+      url: 'http://localhost:8080/app',
+      app: 'Firefox'
     }));
 });
 
+// Default
 gulp.task('default', ['server'], function() {
   gulp.watch('app/**/*.scss', ['build:css']);
+  gulp.watch('app/**/*.js', ['build:js']);
 
   gulp.watch('app/**').on('change', function(file) {
-    // console.log(file.path + ' Reloaded');
     gulp.src(file.path)
       .pipe(connect.reload());
   });
