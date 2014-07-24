@@ -5,20 +5,20 @@ var converts, tos;
 beforeEach(module('boundaries.color'));
 
 describe('ColorSvc', function() {
-  beforeEach(function() {
-    jasmine.addMatchers({
-      toAlmostEqual: function() {
-        return {
-          compare: function(actual, expected) {
-            return {
-              pass: (actual >= expected - 0.003921569 && expected + 0.003921569 >= actual),
-              message: 'Expected ' + actual + ' to be within 0.003921569 of ' + expected + '.'
-            };
-          }
-        };
-      }
-    });
-  });
+  // beforeEach(function() {
+//     jasmine.addMatchers({
+//       toAlmostEqual: function() {
+//         return {
+//           compare: function(actual, expected) {
+//             return {
+//               pass: (actual >= expected - 0.003921569 && expected + 0.003921569 >= actual),
+//               message: 'Expected ' + actual + ' to be within 0.003921569 of ' + expected + '.'
+//             };
+//           }
+//         };
+//       }
+//     });
+//   });
   beforeEach(inject(function(_ColorSvc_) {
     ColorSvc = _ColorSvc_;
   }));
@@ -53,10 +53,10 @@ describe('ColorSvc', function() {
         if (typeof expectedValue === 'object') {
           for (var key in expectedValue) {
             expect(actualValue[key])
-              .toAlmostEqual(expectedValue[key]);
+              .toBeCloseTo(expectedValue[key], 1/256);
           }
         } else {
-          expect(actualValue).toEqual(expectedValue);
+          expect(actualValue).toEqual(expectedValue, 1/256);
         }
       });
     }

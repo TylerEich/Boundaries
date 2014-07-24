@@ -1,7 +1,5 @@
 /* jshint bitwise: false */
 
-'use strict';
-
 angular.module('boundaries.color', [])
 
 /*
@@ -14,75 +12,77 @@ Supported formats: rgba, hsla, hex24, hex32
   var _rgba = {};
   var self = this;
 
+  function min() {
+    for (var i = 1, m = 0, len = arguments.length; i < len; i++) {
+      if (arguments[m] > arguments[i]) {
+        m = i;
+      }
+    }
+    return arguments[m];
+  }
+
+  function max() {
+    for (var i = 1, m = 0, len = arguments.length; i < len; i++) {
+      if (arguments[i] > arguments[m]) {
+        m = i;
+      }
+    }
+    return arguments[m];
+  }
+
+  function rgbaToInt(r, g, b, a) {
+    r = Math.round(r * 255);
+    g = Math.round(g * 255);
+    b = Math.round(b * 255);
+    a = Math.round(a * 255);
+
+    /*
+    Bitwise black magic (given r = 0x12, g = 0x34, b = 56, a = 78):
+    (r << 24) => 0x12000000
+    (g << 16) => 0x00340000
+    (b << 8)  => 0x00005600
+    (a)       => 0x00000078
+    
+    All OR'ed => 0x12345678
+    
+    `>>> 0` converts to unsigned 32-bit int
+    */
+    return ((r << 24) | (g << 16) | (b << 8) | (a)) >>> 0;
+  }
+
   this.convert = {
     rgba: function(rgba) {
-      var r = Math.round(rgba.r * 255),
-        g = Math.round(rgba.g * 255),
-        b = Math.round(rgba.b * 255),
-        a = Math.round(rgba.a * 255);
+      _rgba = rgbaToInt(rgba.r,
+        rgba.g,
+        rgba.b,
+        rgba.a);
 
-      /*
-      Bitwise black magic (given r = 0x12, g = 0x34, b = 56, a = 78):
-      (r << 24) => 0x12000000
-      (g << 16) => 0x00340000
-      (b << 8)  => 0x00005600
-      (a)       => 0x00000078
-      
-      All OR'ed => 0x12345678
-      
-      `>>> 0` converts to unsigned 32-bit int
-      */
-      _rgba = (((r << 24) | (g << 16) | (b << 8) | (a)) >>> 0);
-      
       return self;
     },
     hsla: function(hsla) {
-      var r, g, b;
+      // !!! Highly optimized, not legible !!!
+      var { h, s, l, a } = hsla,
+        vals;
 
-      var h = Math.round(hsla.h * 360),
-        s = Math.round(hsla.s * 100),
-        l = Math.round(hsla.l * 100),
-        a = hsla.a;
+      h *= 6;
+      vals = [
+        l += s *= l < 0.5 ?
+        l :
+        1 - l,
+        l - h % 1 * s * 2,
+        l -= s *= 2,
+        l,
+        l + h % 1 * s,
+        l + s
+      ];
 
-      var c = (100 - Math.abs(2 * l - 1)) * s;
-      var x = c * (1 - Math.abs((h / 60 % 2) - 1));
+      _rgba = rgbaToInt(
+        vals[~~h % 6], // red
+        vals[(h | 16) % 6], // green
+        vals[(h | 8) % 6], // blue
+        a
+      );
 
-      if (0 <= h && h < 1) {
-        r = c;
-        g = x;
-        b = 0;
-      } else if (60 <= h && h < 120) {
-        r = x;
-        g = c;
-        b = 0;
-      } else if (120 <= h && h < 180) {
-        r = 0;
-        g = c;
-        b = x;
-      } else if (180 <= h && h < 240) {
-        r = 0;
-        g = x;
-        b = c;
-      } else if (240 <= h && h < 300) {
-        r = x;
-        g = 0;
-        b = c;
-      } else if (300 <= h && h < 360) {
-        r = c;
-        g = 0;
-        b = x;
-      }
-      var m = l - c / 2;
-      r += m;
-      g += m;
-      b += m;
-
-      self.convert.rgba({
-        r: r / 100,
-        g: g / 100,
-        b: b / 100,
-        a: a
-      });
       return self;
     },
     hex24: function(hex24) {
@@ -105,52 +105,33 @@ Supported formats: rgba, hsla, hex24, hex32
 
       _rgba = 0;
 
-      return {
-        r: r,
-        g: g,
-        b: b,
-        a: a
-      };
+      return {r,g,b,a};
     },
     hsla: function() {
       var rgba = self.to.rgba();
 
-      var r = rgba.r,
-        g = rgba.g,
-        b = rgba.b,
-        a = rgba.a;
+      var {r, g, b, a} = rgba;
 
-      var min = Math.min(r, g, b),
-        max = Math.max(r, g, b);
+      var m = min(r, g, b),
+        M = max(r, g, b);
 
-      var h, s, l, d; // d means delta
-      h = s = l = (max + min) / 2;
-
-      if (max === min) {
+      var h, s, l, d = M - m; // d means delta
+      h = s = l = (M + m) / 2;
+      
+      if (M === m) {
         h = s = 0;
       } else {
-        d = max - min;
-        s = (l > 0.5) ? d / (2 - max - min) : d / (max + min);
-        switch (max) {
-          case r:
-            h = (g - b) / d + (g < b ? 6 : 0);
-            break;
-          case g:
-            h = (b - r) / d + 2;
-            break;
-          case b:
-            h = (r - g) / d + 4;
-            break;
+        if (r === M) {
+          h = (g - b) / d % 6;
+        } else if (g === M) {
+          h = (b - r) / d + 2;
+        } else {
+          h = (r - g) / d + 4;
         }
         h /= 6;
       }
 
-      return {
-        h: h,
-        s: s,
-        l: l,
-        a: a
-      };
+      return {h,s,l,a};
     },
     hex24: function() {
       return self.to.hex32().substring(0, 6);

@@ -21,9 +21,11 @@
     "gulp-karma": "0.0.4",
     "gulp-ngmin": "~0.2.0",
     "gulp-open": "~0.2.8",
+    "gulp-print": "^1.1.0",
     "gulp-rename": "~1.2.0",
     "gulp-replace": "~0.3.0",
     "gulp-sass": "~0.7.1",
+    "gulp-traceur": "^0.8.0",
     "gulp-uglify": "~0.2.1",
     "jshint-stylish": "~0.1.3",
     "karma": "~0.12.5",
@@ -33,7 +35,8 @@
     "karma-jasmine": "~0.2.2",
     "karma-ng-scenario": "~0.1.0",
     "karma-osx-reporter": "^0.1.0",
-    "karma-phantomjs-launcher": "~0.1.4"
+    "karma-phantomjs-launcher": "~0.1.4",
+    "traceur-runtime": "0.0.43"
   },
   "engines": {
     "node": ">=0.10.0"
