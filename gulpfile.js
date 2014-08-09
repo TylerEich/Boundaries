@@ -203,12 +203,12 @@ var tasks = {
       .pipe(inject(gulp.src('dist/script.min.js', {
         read: false
       }), {
-        addRootSlash: true
+        addRootSlash: false
       }))
       .pipe(inject(gulp.src('dist/style.min.css', {
         read: false,
       }), {
-        addRootSlash: true
+        addRootSlash: false
       }))
       .pipe(googleCdn(require('./bower.json'), {
         componentsPath: '/app/bower_components',
