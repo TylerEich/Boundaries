@@ -181,6 +181,14 @@ var tasks = {
       .pipe(insert.prepend(copyright))
       .pipe(gulp.dest('dist'))
       .pipe(filesize());
+  },
+  'dist:html': function() {
+    var googleCdn = require('gulp-google-cdn'),
+      extend = require('util')._extend;
+    
+    return gulp.src('app/index.html')
+      .pipe(googleCdn(require('./bower.json'), extend(require('cdnjs-cdn-data'), require('google-cdn-data'))))
+      .pipe(gulp.dest('.'));
   }
 };
 
@@ -199,7 +207,8 @@ gulp.task('clean:css', tasks['clean:css']);
 gulp.task('clean:js', tasks['clean:js']);
 
 // Distribution tasks
-gulp.task('dist', ['dist:css', 'dist:js']);
+gulp.task('dist', ['dist:html']);
+gulp.task('dist:html', ['dist:css', 'dist:js'], tasks['dist:html']);
 gulp.task('dist:css', ['clean:css', 'build:css'], tasks['dist:css']);
 gulp.task('dist:js', ['clean:js', 'build:js'], tasks['dist:js']);
 

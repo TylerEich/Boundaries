@@ -8,33 +8,33 @@
     
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     <!-- inject:css -->
-    <link rel="stylesheet" href="./build/styles/main.min.css">
+    <link rel="stylesheet" href="../build/styles/main.min.css">
     <!-- endinject -->
     <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script> -->
     
     <script src="//maps.googleapis.com/maps/api/js?libraries=geometry,places&sensor=false"></script>
     
     <script defer src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.0/fastclick.min.js"></script>
-    <!--script defer src="bower_components/angular/angular.min.js"></script-->
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.10/angular.js"></script>
-    <script defer src="./app/bower_components/angular-resource/angular-resource.min.js"></script>
-    <script defer src="./app/bower_components/angular-sanitize/angular-sanitize.js"></script>
-    <script defer src="./app/bower_components/angular-animate/angular-animate.min.js"></script>
-    <script defer src="./app/bower_components/angular-route/angular-route.js"></script>
-    <script defer src="./app/bower_components/angular-ui-utils/ui-utils.min.js"></script>
-    <script defer src="./app/bower_components/angular-ui-map/ui-map.min.js"></script>
-    <script defer src="./app/bower_components/ngstorage/ngStorage.min.js"></script>
+        <!--script defer src="bower_components/angular/angular.min.js"></script-->
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.10/angular.js"></script>
+        <script defer src="/bower_components/angular-resource/angular-resource.min.js"></script>
+        <script defer src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular-sanitize.min.js"></script>
+        <script defer src="/bower_components/angular-animate/angular-animate.min.js"></script>
+        <script defer src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular-route.min.js"></script>
+        <script defer src="/bower_components/angular-ui-utils/ui-utils.min.js"></script>
+        <script defer src="/bower_components/angular-ui-map/ui-map.min.js"></script>
+        <script defer src="/bower_components/ngstorage/ngStorage.min.js"></script>
 
     <!-- inject:js -->
-    <script defer src="./build/scripts/color/color.js"></script>
-    <script defer src="./build/scripts/drawing/drawing.js"></script>
-    <script defer src="./build/scripts/geo/geo.js"></script>
-    <script defer src="./build/scripts/image/image.js"></script>
-    <script defer src="./build/scripts/map/map.js"></script>
-    <script defer src="./build/scripts/mode/mode.js"></script>
-    <script defer src="./build/scripts/search/search.js"></script>
-    <script defer src="./build/scripts/status/status.js"></script>
-    <script defer src="./build/scripts/app.js"></script>
+    <script defer src="../build/scripts/color/color.js"></script>
+    <script defer src="../build/scripts/drawing/drawing.js"></script>
+    <script defer src="../build/scripts/geo/geo.js"></script>
+    <script defer src="../build/scripts/image/image.js"></script>
+    <script defer src="../build/scripts/map/map.js"></script>
+    <script defer src="../build/scripts/mode/mode.js"></script>
+    <script defer src="../build/scripts/search/search.js"></script>
+    <script defer src="../build/scripts/status/status.js"></script>
+    <script defer src="../build/scripts/app.js"></script>
     <!-- endinject -->
   </head>
   <body ng-controller="MasterCtrl">
@@ -115,10 +115,11 @@
       <div ng-controller="DrawingCtrl">
         <div ng-repeat="drawing in drawings track by $index"
           ui-map-polygon="drawing._poly"
-          ui-event="{'map-click': poly.click($param)}">
+          ui-event="{'map-click': 'poly.click($params)'}">
           <div ng-repeat="node in drawing.nodes track by $index"
             ui-map-marker="node._marker"
-            ui-event="{'map-click': marker.click($params)}"></div>
+            ui-event="{'map-click': 'marker.click($params)',
+              'map-dragend': 'marker.dragend($params, $parent.$index, $index)'}"></div>
         </div>
       </div>
       <!-- <div id="map_canvas"

@@ -8,6 +8,8 @@
   "README": "A web app for creating territories quickly and easily",
   "dependencies": {},
   "devDependencies": {
+    "cdnjs-cdn-data": "^0.1.1",
+    "google-cdn-data": "^0.1.6",
     "growly": "^1.1.1",
     "gulp": "~3.6.1",
     "gulp-changed": "~0.3.0",
@@ -15,6 +17,7 @@
     "gulp-concat": "~2.2.0",
     "gulp-connect": "~2.0.5",
     "gulp-filesize": "0.0.6",
+    "gulp-google-cdn": "^0.4.1",
     "gulp-htmlmin": "~0.1.2",
     "gulp-inject": "~0.4.1",
     "gulp-insert": "~0.3.0",
