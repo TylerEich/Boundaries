@@ -5,20 +5,6 @@ var converts, tos;
 beforeEach(module('boundaries.color'));
 
 describe('ColorSvc', function() {
-  // beforeEach(function() {
-//     jasmine.addMatchers({
-//       toAlmostEqual: function() {
-//         return {
-//           compare: function(actual, expected) {
-//             return {
-//               pass: (actual >= expected - 0.003921569 && expected + 0.003921569 >= actual),
-//               message: 'Expected ' + actual + ' to be within 0.003921569 of ' + expected + '.'
-//             };
-//           }
-//         };
-//       }
-//     });
-//   });
   beforeEach(inject(function(_ColorSvc_) {
     ColorSvc = _ColorSvc_;
   }));
@@ -26,22 +12,20 @@ describe('ColorSvc', function() {
   describe('converts', function() {
     var data = {
       rgba: {
-        r: 0.5,
-        g: 0.25,
-        b: 0.75,
+        r: 0,
+        g: 0,
+        b: 1,
         a: 1
       },
       hsla: {
-        h: 0.75,
-        s: 0.50,
-        l: 0.50,
+        h: 2/3,
+        s: 1.0,
+        l: 0.5,
         a: 1
       },
-      hex24: '8040bf',
-      hex32: '8040bfff'
+      hex24: '0000ff',
+      hex32: '0000ffff'
     };
-    // var converts = ColorSvc.convert;
-    // var tos = ColorSvc.to;
 
     function convertTo(convert, to) {
       it(convert + ' to ' + to, function() {
@@ -53,10 +37,10 @@ describe('ColorSvc', function() {
         if (typeof expectedValue === 'object') {
           for (var key in expectedValue) {
             expect(actualValue[key])
-              .toBeCloseTo(expectedValue[key], 1/256);
+              .toBeCloseTo(expectedValue[key], 1/255);
           }
         } else {
-          expect(actualValue).toEqual(expectedValue, 1/256);
+          expect(actualValue).toEqual(expectedValue);
         }
       });
     }
