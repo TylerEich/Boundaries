@@ -140,7 +140,7 @@ Supported formats: rgba, hsla, hex24, hex32
       var hex = _rgba.toString(16);
       _rgba = 0;
 
-      return ((hex.length > 7) ? '' : '0') + hex; // Pad output with leading zero
+      return ('00000000' + hex).slice(-8); // Pad output with leading zero
     }
   };
 })

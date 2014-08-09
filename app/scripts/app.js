@@ -7,7 +7,8 @@ angular
     'ngStorage',
     'ui.map',
     'ngAnimate',
-
+    
+    'boundaries.action',
     'boundaries.color',
     'boundaries.drawing',
     'boundaries.geo',
