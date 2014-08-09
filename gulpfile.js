@@ -96,7 +96,7 @@ var tasks = {
     return gulp.src(jsAppFiles, unitTestFiles)
       .pipe(gulpPrint())
       .pipe(changed('build/scripts'))
-      .pipe(traceur())
+      .pipe(traceur({sourceMap: true}))
       .pipe(gulp.dest('build/scripts'));
   },
   'build:css': function() {
@@ -127,7 +127,7 @@ var tasks = {
 
     var inject = require('gulp-inject');
 
-    return gulp.src('./index.html')
+    return gulp.src('app/index.html')
       .pipe(inject(gulp.src(traceurRuntime, {
         read: false
       }), {
@@ -146,7 +146,7 @@ var tasks = {
         addRootSlash: false,
         addPrefix: '..'
       }))
-      .pipe(gulp.dest('.'));
+      .pipe(gulp.dest('build'));
   },
   'clean:css': clean.bind(null, 'build/styles/*'),
   'clean:js': clean.bind(null, 'build/scripts/**/*'),
@@ -186,7 +186,7 @@ var tasks = {
     var googleCdn = require('gulp-google-cdn'),
       extend = require('util')._extend;
     
-    return gulp.src('app/index.html')
+    return gulp.src('build/index.html')
       .pipe(googleCdn(require('./bower.json'), extend(require('cdnjs-cdn-data'), require('google-cdn-data'))))
       .pipe(gulp.dest('.'));
   }
@@ -221,13 +221,13 @@ gulp.task('server', ['build:html'], function() {
     livereload: true
   });
 
-  gulp.src('index.html')
+  gulp.src('build/index.html')
     .pipe(openUrl('', {
-      url: 'http://localhost:8080/',
+      url: 'http://localhost:8080/build/',
       app: 'Google Chrome'
     }))
     .pipe(openUrl('', {
-      url: 'http://localhost:8080/',
+      url: 'http://localhost:8080/build/',
       app: 'Firefox'
     }));
 });

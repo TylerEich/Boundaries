@@ -108,7 +108,7 @@ angular.module('boundaries.color', []).service('ColorSvc', function() {
     hex32: function() {
       var hex = _rgba.toString(16);
       _rgba = 0;
-      return ((hex.length > 7) ? '' : '0') + hex;
+      return ('00000000' + hex).slice(-8);
     }
   };
 }).controller('ColorCtrl', function($scope, $localStorage, ColorSvc) {
