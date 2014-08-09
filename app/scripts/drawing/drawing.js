@@ -5,7 +5,7 @@
 angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries.color'])
   .service('DirectionsSvc', function($q, MapSvc) {
     var self = this;
-    
+
     var directions = new MapSvc.DirectionsService();
 
     self.route = function(locations) {
@@ -61,11 +61,11 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
   })
   .service('DrawingSvc', function($rootScope, $q, $localStorage, DirectionsSvc, MapSvc, ColorSvc) {
     var self = this;
-    
+
     function rgbaColorToString(rgba) {
-      return `rgba(${rgba.r * 100}%,${rgba.g * 100}%,${rgba.b * 100}%,${rgba.a})`;
+      return `rgba(${rgba.r*100}%,${rgba.g*100}%,${rgba.b*100}%,${rgba.a})`;
     }
-    
+
     function makeIcon(color) {
       return {
         path: MapSvc.SymbolPath.CIRCLE,
@@ -91,9 +91,9 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
 
     function makePolyOptions(color, fill) {
       var value = {
-        clickable: false,
+        clickable: true,
         draggable: false,
-        editable: false,
+        editable: true,
         map: MapSvc.map
       };
 
@@ -131,7 +131,7 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     self.makeNode = function(colorIndex, latLng) {
       var color = $localStorage.colors[colorIndex];
       var marker = new MapSvc.Marker(makeMarkerOptions(color, latLng));
-      
+
       return {
         lat: latLng.lat(),
         lng: latLng.lng(),
@@ -147,8 +147,10 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
       var drawing = self.drawings[drawingIndex];
 
       // Update paths of drawing
-      var nodeBefore, nodeAfter;
+      var nodeBefore, nodeAtIndex, nodeAfter;
 
+      nodeAtIndex = drawing.nodes[nodeIndex];
+      
       if (nodeIndex >= 1 && nodeIndex - 1 < drawing.nodes.length) {
         nodeBefore = drawing.nodes[nodeIndex - 1];
       }
@@ -158,7 +160,6 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
       }
 
       var removed = drawing.nodes.splice(nodeIndex, removeLength, newNode);
-      var pathRemoveLength = 0;
 
       // Remove obselete markers from map
       for (var i in removed) {
@@ -169,7 +170,7 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
         promise;
       var newNodeLocation = new MapSvc.LatLng(newNode.lat, newNode.lng);
       console.log(newNodeLocation);
-      
+
       var nodeBeforeLocation, nodeAfterLocation;
 
       if (nodeBefore) {
@@ -185,30 +186,52 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
         nodeAfterLocation = new MapSvc.LatLng(nodeAfter.lat, nodeAfter.lng);
         promises.push(self.makePath([newNodeLocation, nodeAfterLocation], drawing.rigid));
       }
+      if (!nodeBefore && !nodeAfter) {
+        // Special case for first node; snaps to road if flexible
+        promises.push(self.makePath([newNodeLocation, newNodeLocation], drawing.rigid));
+      }
 
       $q.all(promises).then(function(paths) {
         var newPath = Array.prototype.concat.apply([], paths);
         var path = drawing._poly.getPath().getArray();
         var spliceIndex = 0;
-        
-        if (!nodeBefore && !nodeAfter) {
-          newPath = [newNodeLocation]; // Special case for the first node
-        }
+        var newNodeMarkerPosition;
+        var pathRemoveLength = 1;
+
         if (nodeBefore) { // paths[0] will reference path behind current node
           var pathBefore = paths.shift(); // Gets and removes path[0]
-          pathRemoveLength += pathBefore.length;
           newNode.index = nodeBefore.index + pathBefore.length;
+          
+          if (nodeAtIndex) {
+            pathRemoveLength += nodeAtIndex.index - nodeBefore.index;
+          }
+          
           spliceIndex = nodeBefore.index;
+
+          console.log('pathRemoveLength', pathRemoveLength);
+          newNodeMarkerPosition = pathBefore[pathBefore.length - 1];
         } else {
           newNode.index = 0;
         }
+        if (nodeAfter) { // At this point, paths[0] will always reference path ahead of current node
+          var pathAfter = paths[0];
+          
+          if (nodeAtIndex) {
+            pathRemoveLength += nodeAfter.index - nodeAtIndex.index;
+          }
+          // pathRemoveLength += nodeAfter.index - newNode.index;
+          nodeAfter.index = newNode.index + pathAfter.length;
 
-        if (nodeAfter) { // At self point, paths[0] will always reference path ahead of current node
-          nodeAfter.index = newNode.index + paths[0].length;
+          newNodeMarkerPosition = pathAfter[0];
+        }
+        if (!nodeBefore && !nodeAfter) { // Special case for first node
+          newNodeMarkerPosition = paths[0][0];
         }
 
         self.splicePath(path, spliceIndex, pathRemoveLength, newPath); // Will alter path; no need to assign result to variable
-        console.log(drawing.nodes, path);
+
+        console.log('newNodeMarkerPosition:', newNodeMarkerPosition, pathAfter);
+        newNode._marker.setPosition(newNodeMarkerPosition);
         drawing._poly.setPath(path);
       });
     };
@@ -288,8 +311,7 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     activeColor: 1
   });
 
-  $scope.drawings = DrawingSvc.drawings;
-  $scope.$on('map:click', function(event, param) {
+  function addNode(event, param) {
     var lastDrawingIndex = DrawingSvc.drawings.length - 1;
     var colorIndex = $scope.$storage.activeColor;
 
@@ -306,19 +328,29 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     var newNodeIndex = DrawingSvc.drawings[lastDrawingIndex].nodes.length;
 
     DrawingSvc.spliceNode(lastDrawingIndex, newNodeIndex, 0, DrawingSvc.makeNode(colorIndex, param.latLng));
-  });
+  }
+  $scope.drawings = DrawingSvc.drawings;
+  $scope.$on('map:click', addNode);
   $scope.$on('action:clear', function() {
     DrawingSvc.spliceDrawing(0, Number.MAX_VALUE);
   });
 
   $scope.marker = {
-    click: function($event) {
-
+    click: function($params) {
+      addNode(undefined, $params);
+    }.deb(),
+    dragend: function($params, drawingIndex, nodeIndex) {
+      var event = $params[0];
+      console.log(arguments, DrawingSvc.drawings);
+      var colorIndex = DrawingSvc.drawings[drawingIndex].colorIndex;
+      var newNode = DrawingSvc.makeNode(colorIndex, event.latLng);
+      
+      DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, newNode);
     }
   };
   $scope.poly = {
-    click: function($event) {
+    click: function($params) {
 
-    }
+    }.deb()
   };
 });
