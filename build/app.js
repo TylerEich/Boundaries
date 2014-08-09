@@ -11,8 +11,8 @@ angular.module('boundaries', ['ngStorage', 'ui.map', 'ngAnimate', 'boundaries.co
   };
 }).controller('MasterCtrl', function($scope, $localStorage, ColorSvc) {
   $scope.$storage = $localStorage;
-  $scope.fillColorWithOffset = function(offset) {
-    var index = ($localStorage.activeColor + offset) % 3;
+  $scope.fillActiveColor = function() {
+    var index = $localStorage.activeColor;
     var color = $scope.$storage.colors[index];
     return '#' + ColorSvc.convert.rgba(color).to.hex24();
   };

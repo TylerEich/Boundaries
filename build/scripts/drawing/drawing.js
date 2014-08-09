@@ -1,71 +1,48 @@
 "use strict";
 'use strict';
 angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries.color']).service('DirectionsSvc', function($q, MapSvc) {
+  var self = this;
   var directions = new MapSvc.DirectionsService();
-  this.route = function(locations) {
-    var requests = [];
-    var chunkLength = 10;
-    var i,
-        j,
-        chunk,
-        start,
-        end,
-        waypoints;
-    for (i = 0; i < locations.length; i += chunkLength) {
-      if ((locations.length - i - chunkLength) === 1) {
-        chunkLength--;
-      }
-      chunk = locations.slice(i, i + chunkLength);
-      start = chunk.shift();
-      end = chunk.pop();
-      waypoints = [];
-      for (j = 0; j < chunk.length; j++) {
-        waypoints.push({location: chunk[i]});
-      }
-      requests.push({
-        origin: start,
-        destination: end,
-        waypoints: waypoints,
-        travelMode: MapSvc.TravelMode.DRIVING
-      });
+  self.route = function(locations) {
+    if (locations.length !== 2) {
+      console.error('Requires exactly 2 locations.');
+      return false;
     }
-    var deferreds = [],
-        promises = [];
-    function processRequest(i, tries) {
-      directions.route(requests[i], function(result, status) {
+    var request = {
+      origin: locations[0],
+      destination: locations[1],
+      travelMode: MapSvc.TravelMode.DRIVING
+    };
+    var deferred = $q.defer();
+    function processRequest(tries) {
+      directions.route(request, function(result, status) {
         if (status === MapSvc.DirectionsStatus.OK) {
           var overviewPath = result.routes[0].overview_path;
-          overviewPath.shift();
-          deferreds[i].resolve(overviewPath);
+          deferred.resolve(overviewPath);
         } else if (status === MapSvc.DirectionsStatus.UNKNOWN_ERROR && tries < 3) {
           tries++;
-          processRequest(i, tries);
+          processRequest(tries);
         } else {
-          deferreds[i].reject();
+          deferred.reject();
         }
       }, function() {
         if (tries < 3) {
           tries++;
-          processRequest(i, tries);
+          processRequest(tries);
         } else {
-          deferreds[i].reject();
+          deferred.reject();
         }
       });
     }
-    for (i = 0; i < requests.length; i++) {
-      deferreds.push($q.deferred());
-      promises.push(deferreds[deferreds.length - 1].promise);
-      (processRequest)(i, 0);
-    }
-    var finalPromise = $q.all(promises).then(function(paths) {
-      var combinedPaths = Array.prototype.concat.apply(paths[0], paths.slice(1));
-      return combinedPaths;
-    });
-    return finalPromise;
+    processRequest(0);
+    return deferred.promise;
   };
-}).service('DrawingSvc', function($q, $localStorage, DirectionsSvc, MapSvc, ColorSvc) {
+}).service('DrawingSvc', function($rootScope, $q, $localStorage, DirectionsSvc, MapSvc, ColorSvc) {
+  var self = this;
+  function rgbaColorToString(rgba) {
+    return ("rgba(" + rgba.r * 100 + "%," + rgba.g * 100 + "%," + rgba.b * 100 + "%," + rgba.a + ")");
+  }
   function makeIcon(color) {
-    console.log(color);
     return {
       path: MapSvc.SymbolPath.CIRCLE,
       scale: 10,
@@ -75,9 +52,8 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     };
   }
   function makeMarkerOptions(color, latLng) {
-    console.log(color);
     return {
-      clickable: false,
+      clickable: true,
       crossOnDrag: false,
       cursor: 'pointer',
       draggable: true,
@@ -91,21 +67,20 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     var value = {
       clickable: false,
       draggable: false,
-      editable: true,
+      editable: false,
       map: MapSvc.map
     };
-    var hex = '#' + ColorSvc.convert.rgba(color).to.hex24(),
-        a = color.a;
     if (fill) {
-      value.fillColor = hex;
-      value.fillOpacity = a;
+      value.fillColor = rgbaColorToString(color);
+      value.strokeWeight = 0;
     } else {
-      value.strokeColor = hex;
-      value.strokeOpacity = a;
+      value.strokeColor = rgbaColorToString(color);
+      value.strokeWeight = color.weight;
     }
+    console.log(value);
     return value;
   }
-  this.makePath = function(locations, rigid) {
+  self.makePath = function(locations, rigid) {
     var deferred = $q.defer();
     if (rigid) {
       deferred.resolve(locations);
@@ -114,70 +89,88 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     }
     return deferred.promise;
   };
-  this.splicePath = function(originalPath, index, removeLength, path) {
+  self.splicePath = function(originalPath, index, removeLength, path) {
     var args = [index, removeLength].concat(path);
     Array.prototype.splice.apply(originalPath, args);
   };
-  this.makeNode = function(colorIndex, latLng) {
+  self.makeNode = function(colorIndex, latLng) {
     var color = $localStorage.colors[colorIndex];
     var marker = new MapSvc.Marker(makeMarkerOptions(color, latLng));
     return {
       lat: latLng.lat(),
       lng: latLng.lng(),
-      index: -1,
+      index: null,
       _marker: marker
     };
   };
-  this.spliceNode = function(drawingIndex, nodeIndex, removeLength, newNodes) {
+  self.spliceNode = function(drawingIndex, nodeIndex, removeLength, newNode) {
     if (removeLength === undefined) {
-      removeLength = this.drawings[drawingIndex].nodes.length;
+      removeLength = self.drawings[drawingIndex].nodes.length;
     }
-    if (newNodes === undefined) {
-      newNodes = [];
+    var drawing = self.drawings[drawingIndex];
+    var nodeBefore,
+        nodeAfter;
+    if (nodeIndex >= 1 && nodeIndex - 1 < drawing.nodes.length) {
+      nodeBefore = drawing.nodes[nodeIndex - 1];
     }
-    var args = [nodeIndex, removeLength].concat(newNodes);
-    var removed = Array.prototype.splice.apply(this.drawings[drawingIndex], args);
+    if (nodeIndex >= 0 && nodeIndex + 1 < drawing.nodes.length) {
+      nodeAfter = drawing.nodes[nodeIndex + 1];
+    }
+    var removed = drawing.nodes.splice(nodeIndex, removeLength, newNode);
+    var pathRemoveLength = 0;
     for (var i in removed) {
       removed[i]._marker.setMap(null);
     }
-    var drawing = this.drawings[drawingIndex];
-    var promises = [];
-    var start,
-        end;
-    if (nodeIndex === 0) {
-      start = 0;
-    } else if (nodeIndex < drawing.nodes.length) {
-      start = nodeIndex - 1;
+    var promises = [],
+        promise;
+    var newNodeLocation = new MapSvc.LatLng(newNode.lat, newNode.lng);
+    console.log(newNodeLocation);
+    var nodeBeforeLocation,
+        nodeAfterLocation;
+    if (nodeBefore) {
+      nodeBeforeLocation = new MapSvc.LatLng(nodeBefore.lat, nodeBefore.lng);
+      promise = self.makePath([nodeBeforeLocation, newNodeLocation], drawing.rigid).then(function(path) {
+        newNode.index = nodeBefore.index + path.length;
+        return path;
+      });
+      promises.push(promise);
     }
-    end = start + newNodes.length;
-    var changedNodes = this.drawings.slice(start, end);
-    var locations = [];
-    var rigid;
-    for (i = 0; i < changedNodes.length; i++) {
-      var node = changedNodes[i];
-      if (i <= 1) {
-        rigid = node.rigid;
-      } else if (rigid !== node.rigid) {
-        promises.push(this.makePath(locations));
-        locations = locations.slice(-1);
-      }
-      locations.push(new MapSvc.LatLng(node.lat, node.lng));
-      if (i === changedNodes.length - 1) {
-        promises.push(this.makePath(locations));
-      }
+    if (nodeAfter) {
+      nodeAfterLocation = new MapSvc.LatLng(nodeAfter.lat, nodeAfter.lng);
+      promises.push(self.makePath([newNodeLocation, nodeAfterLocation], drawing.rigid));
     }
-    $q.all(promises).then(function(resolves) {
-      var newPath = [].concat(resolves);
+    $q.all(promises).then(function(paths) {
+      var newPath = Array.prototype.concat.apply([], paths);
+      var path = drawing._poly.getPath().getArray();
+      var spliceIndex = 0;
+      if (!nodeBefore && !nodeAfter) {
+        newPath = [newNodeLocation];
+      }
+      if (nodeBefore) {
+        var pathBefore = paths.shift();
+        pathRemoveLength += pathBefore.length;
+        newNode.index = nodeBefore.index + pathBefore.length;
+        spliceIndex = nodeBefore.index;
+      } else {
+        newNode.index = 0;
+      }
+      if (nodeAfter) {
+        nodeAfter.index = newNode.index + paths[0].length;
+      }
+      self.splicePath(path, spliceIndex, pathRemoveLength, newPath);
+      console.log(drawing.nodes, path);
+      drawing._poly.setPath(path);
     });
   };
-  this.makeDrawing = function(colorIndex, rigid, fill) {
+  self.makeDrawing = function(colorIndex, rigid, fill) {
     console.log('makeDrawing:', arguments);
     var poly;
     var color = $localStorage.colors[colorIndex];
+    console.log(color);
     if (fill) {
-      poly = new MapSvc.Polygon(makePolyOptions(color, true));
+      poly = new MapSvc.Polygon(makePolyOptions(color, fill));
     } else {
-      poly = new MapSvc.Polyline(makePolyOptions(color, true));
+      poly = new MapSvc.Polyline(makePolyOptions(color, fill));
     }
     return {
       colorIndex: colorIndex,
@@ -187,24 +180,25 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
       nodes: []
     };
   };
-  this.spliceDrawing = function(drawingIndex, removeLength, newDrawings) {
-    console.log('spliceDrawing:', arguments, 'drawings:', this.drawings);
+  self.spliceDrawing = function(drawingIndex, removeLength, newDrawings) {
+    console.log('spliceDrawing:', arguments, 'drawings:', self.drawings);
     if (removeLength === undefined) {
-      removeLength = this.drawings.length;
+      removeLength = self.drawings.length;
     }
     if (newDrawings === undefined) {
       newDrawings = [];
     }
     var args = [drawingIndex, removeLength].concat(newDrawings);
-    var removed = Array.prototype.splice.apply(this.drawings, args);
+    var removed = Array.prototype.splice.apply(self.drawings, args);
     for (var i in removed) {
       removed[i].poly.setMap(null);
-      this.spliceNode(i, 0);
+      self.spliceNode(i, 0);
     }
   };
-  this.drawings = [];
+  self.drawings = [];
 }).controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc) {
   $scope.$storage = $localStorage.$default({
+    rigid: false,
     colors: [{
       r: 1,
       g: 0,
@@ -226,10 +220,11 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     }],
     activeColor: 1
   });
+  $scope.drawings = DrawingSvc.drawings;
   $scope.$on('map:click', function(event, param) {
     var lastDrawingIndex = DrawingSvc.drawings.length - 1;
     var colorIndex = $scope.$storage.activeColor;
-    var rigid = true,
+    var rigid = false,
         fill = false;
     if (lastDrawingIndex === -1) {
       var newDrawing = DrawingSvc.makeDrawing(colorIndex, rigid, fill);
@@ -238,7 +233,9 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     }
     var newNodeIndex = DrawingSvc.drawings[lastDrawingIndex].nodes.length;
     DrawingSvc.spliceNode(lastDrawingIndex, newNodeIndex, 0, DrawingSvc.makeNode(colorIndex, param.latLng));
-    console.log(param.latLng.lat(), param.latLng.lng());
+  });
+  $scope.$on('action:clear', function() {
+    DrawingSvc.spliceDrawing(0, Number.MAX_VALUE);
   });
   $scope.marker = {click: function($event) {}};
   $scope.poly = {click: function($event) {}};

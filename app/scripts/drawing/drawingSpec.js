@@ -274,7 +274,7 @@ describe('DrawingSvc', function() {
     DrawingSvc = _DrawingSvc_;
   }));
 
-  it('Makes rigid paths', function() {
+  it('Makes rigid paths', function(done) {
     var start = makeLatLng(0, 40),
       end = makeLatLng(40, 0),
       path;
@@ -287,15 +287,14 @@ describe('DrawingSvc', function() {
       expect(path.length).toEqual(2);
       expect(path[0]).toEqual(start);
       expect(path[1]).toEqual(end);
-    });
-
-    $timeout.flush();
+    })
+    .finally(done);
   });
 
   describe('splice tests', function() {
     var points = [makeLatLng(0, 10), makeLatLng(0, 20), makeLatLng(0, 30)];
 
-    it('Prepends one path to another', function() {
+    it('Prepends one path to another', function(done) {
       DrawingSvc.makePath(points, false)
         .then(function(path) {
           var pathLength = path.length;
@@ -304,28 +303,26 @@ describe('DrawingSvc', function() {
           expect(path).toBe(path);
 
           expect(path.length).toBe(pathLength + points.length);
-        });
-      $timeout.flush();
+        })
+        .finally(done);
     });
-    it('Splices one path midway of another', function() {
+    it('Splices one path midway of another', function(done) {
       DrawingSvc.makePath(points, false).then(function(path) {
         DrawingSvc.makePath(points, false).then(function(newPath) {
           var pathLength = path.length;
           DrawingSvc.splicePath(path, 5, 4, newPath);
           expect(path.length).toBe(pathLength + newPath.length - 4);
-        });
+        })
+        .finally(done);
       });
-
-      $timeout.flush();
     });
-    it('Appends one path to another', function() {
+    it('Appends one path to another', function(done) {
       DrawingSvc.makePath(points, false).then(function(path) {
         var pathLength = path.length;
         DrawingSvc.splicePath(path, pathLength, 0, points);
         expect(path.length).toBe(pathLength + points.length);
-      });
-      
-      $timeout.flush();
+      })
+      .finally(done);
     });
   });
 });

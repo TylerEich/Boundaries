@@ -26,8 +26,8 @@ var unitTestFiles = [
   ],
 
   // Build files
+  traceurRuntime = 'app/bower_components/traceur-runtime/traceur-runtime.min.js',
   jsBuildFiles = [
-    'app/bower_components/traceur-runtime/traceur-runtime.js',
     'build/scripts/*/**.js',
     '!build/scripts/*/**Spec.js',
     'build/scripts/app.js'
@@ -65,7 +65,6 @@ var karmaConf = {
 
 
 // Tests
-
 function test(watch, files, done) {
   watch = Boolean(watch);
 
@@ -79,8 +78,6 @@ function test(watch, files, done) {
 }
 
 function clean(glob) {
-  console.log(glob);
-
   var gulpClean = require('gulp-clean');
 
   gulp.src(glob, {
@@ -89,14 +86,14 @@ function clean(glob) {
     .pipe(gulpClean());
 }
 var tasks = {
-  'test': test.bind(null, false, karmaConfFiles.concat(jsBuildFiles, unitTestBuildFiles)),
+  'test': test.bind(null, false, karmaConfFiles.concat(traceurRuntime, jsBuildFiles, unitTestBuildFiles)),
   'test:dist': test.bind(null, false, karmaConfFiles.concat('dist/script.min.js', unitTestBuildFiles)),
   'build:js': function() {
     var changed = require('gulp-changed'),
       gulpPrint = require('gulp-print'),
       traceur = require('gulp-traceur');
 
-    return gulp.src(jsBuildFiles, unitTestFiles)
+    return gulp.src(jsAppFiles, unitTestFiles)
       .pipe(gulpPrint())
       .pipe(changed('build/scripts'))
       .pipe(traceur())
@@ -130,7 +127,13 @@ var tasks = {
 
     var inject = require('gulp-inject');
 
-    return gulp.src('./app/index.html')
+    return gulp.src('./index.html')
+      .pipe(inject(gulp.src(traceurRuntime, {
+        read: false
+      }), {
+        addRootSlash: false,
+        addPrefix: '..'
+      }))
       .pipe(inject(gulp.src(jsBuildFiles, {
         read: false
       }), {
@@ -143,7 +146,7 @@ var tasks = {
         addRootSlash: false,
         addPrefix: '..'
       }))
-      .pipe(gulp.dest('./app'));
+      .pipe(gulp.dest('.'));
   },
   'clean:css': clean.bind(null, 'build/styles/*'),
   'clean:js': clean.bind(null, 'build/scripts/**/*'),
@@ -156,6 +159,7 @@ var tasks = {
   },
   'dist:js': function() {
     var util = require('util'),
+      ngAnnotate = require('gulp-ng-annotate'),
       uglify = require('gulp-uglify'),
       filesize = require('gulp-filesize'),
       concat = require('gulp-concat'),
@@ -172,6 +176,7 @@ var tasks = {
 
     return gulp.src(jsBuildFiles)
       .pipe(concat('script.min.js'))
+      .pipe(ngAnnotate())
       .pipe(uglify())
       .pipe(insert.prepend(copyright))
       .pipe(gulp.dest('dist'))
@@ -183,7 +188,7 @@ gulp.task('test', tasks['test']);
 gulp.task('test:dist', ['dist:js'], tasks['test:dist']);
 
 // Build tasks
-gulp.task('build', ['build:css', 'build:js', 'test']);
+gulp.task('build', ['build:html', 'test']);
 gulp.task('build:js', tasks['build:js']);
 gulp.task('build:css', tasks['build:css']);
 gulp.task('build:html', ['build:js', 'build:css'], tasks['build:html']);
@@ -207,21 +212,20 @@ gulp.task('server', ['build:html'], function() {
     livereload: true
   });
 
-  gulp.src('app/index.html')
+  gulp.src('index.html')
     .pipe(openUrl('', {
-      url: 'http://localhost:8080/app',
+      url: 'http://localhost:8080/',
       app: 'Google Chrome'
     }))
     .pipe(openUrl('', {
-      url: 'http://localhost:8080/app',
+      url: 'http://localhost:8080/',
       app: 'Firefox'
     }));
 });
 
 // Default
 gulp.task('default', ['server'], function() {
-  gulp.watch('app/**/*.scss', ['build:css']);
-  gulp.watch('app/**/*.js', ['build:js']);
+  gulp.watch('app/**/*', ['build:html']);
 
   gulp.watch('app/**').on('change', function(file) {
     gulp.src(file.path)
