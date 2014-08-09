@@ -211,7 +211,7 @@ var tasks = {
         addRootSlash: false
       }))
       .pipe(googleCdn(require('./bower.json'), {
-        componentsPath: '/app/bower_components',
+        componentsPath: 'app/bower_components',
         cdn: extend(require('cdnjs-cdn-data'), require('google-cdn-data'))
       }))
       .pipe(gulp.dest('.'));
@@ -234,7 +234,7 @@ gulp.task('clean:js', tasks['clean:js']);
 
 // Distribution tasks
 gulp.task('dist', ['dist:html']);
-gulp.task('dist:html', ['dist:css', 'dist:js'], tasks['dist:html']);
+gulp.task('dist:html', ['build:html', 'dist:css', 'dist:js'], tasks['dist:html']);
 gulp.task('dist:css', ['clean:css', 'build:css'], tasks['dist:css']);
 gulp.task('dist:js', ['clean:js', 'build:js'], tasks['dist:js']);
 
