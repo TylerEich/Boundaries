@@ -65,6 +65,7 @@ var karmaConf = {
 
 
 // Tests
+
 function test(watch, files, done) {
   watch = Boolean(watch);
 
@@ -96,7 +97,9 @@ var tasks = {
     return gulp.src(jsAppFiles, unitTestFiles)
       .pipe(gulpPrint())
       .pipe(changed('build/scripts'))
-      .pipe(traceur({sourceMap: true}))
+      .pipe(traceur({
+        sourceMap: true
+      }))
       .pipe(gulp.dest('build/scripts'));
   },
   'build:css': function() {
@@ -123,9 +126,8 @@ var tasks = {
     var changed = require('gulp-changed'),
       htmlmin = require('gulp-htmlmin'),
       filesize = require('gulp-filesize'),
-      replace = require('gulp-replace');
-
-    var inject = require('gulp-inject');
+      replace = require('gulp-replace'),
+      inject = require('gulp-inject');
 
     return gulp.src('app/index.html')
       .pipe(inject(gulp.src(traceurRuntime, {
@@ -184,10 +186,34 @@ var tasks = {
   },
   'dist:html': function() {
     var googleCdn = require('gulp-google-cdn'),
-      extend = require('util')._extend;
-    
+      extend = require('util')._extend,
+      changed = require('gulp-changed'),
+      htmlmin = require('gulp-htmlmin'),
+      filesize = require('gulp-filesize'),
+      replace = require('gulp-replace'),
+      inject = require('gulp-inject');
+
     return gulp.src('build/index.html')
-      .pipe(googleCdn(require('./bower.json'), extend(require('cdnjs-cdn-data'), require('google-cdn-data'))))
+      .pipe(inject(gulp.src(traceurRuntime, {
+        read: false
+      }), {
+        addRootSlash: false,
+        addPrefix: '..'
+      }))
+      .pipe(inject(gulp.src('dist/script.min.js', {
+        read: false
+      }), {
+        addRootSlash: true
+      }))
+      .pipe(inject(gulp.src('dist/style.min.css', {
+        read: false,
+      }), {
+        addRootSlash: true
+      }))
+      .pipe(googleCdn(require('./bower.json'), {
+        componentsPath: '/app/bower_components',
+        cdn: extend(require('cdnjs-cdn-data'), require('google-cdn-data'))
+      }))
       .pipe(gulp.dest('.'));
   }
 };
@@ -228,6 +254,24 @@ gulp.task('server', ['build:html'], function() {
     }))
     .pipe(openUrl('', {
       url: 'http://localhost:8080/build/',
+      app: 'Firefox'
+    }));
+});
+gulp.task('server:dist', ['dist:html'], function() {
+  var openUrl = require('gulp-open');
+
+  connect.server({
+    root: [__dirname],
+    livereload: true
+  });
+
+  gulp.src('index.html')
+    .pipe(openUrl('', {
+      url: 'http://localhost:8080/',
+      app: 'Google Chrome'
+    }))
+    .pipe(openUrl('', {
+      url: 'http://localhost:8080/',
       app: 'Firefox'
     }));
 });

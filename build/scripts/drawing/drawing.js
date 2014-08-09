@@ -265,5 +265,5 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
       DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, newNode);
     }
   };
-  $scope.poly = {click: function($params) {}.deb()};
+  $scope.poly = {click: function($params) {}};
 });
