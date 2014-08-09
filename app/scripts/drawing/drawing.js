@@ -350,6 +350,6 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
   $scope.poly = {
     click: function($params) {
 
-    }.deb()
+    }
   };
 });
