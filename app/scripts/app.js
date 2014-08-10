@@ -13,6 +13,7 @@ angular
     'bndry.color',
     'bndry.drawing',
     'bndry.geo',
+    'bndry.history',
     'bndry.image',
     'bndry.map',
     'bndry.mode',

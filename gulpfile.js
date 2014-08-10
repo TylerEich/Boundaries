@@ -130,7 +130,7 @@ var tasks = {
       inject = require('gulp-inject');
 
     return gulp.src('app/index.html')
-      .pipe(replace('app/bower_components', '/app/bower_components'))
+      .pipe(replace('app/', '/app/'))
       .pipe(inject(gulp.src(traceurRuntime, {
         read: false
       }), {
