@@ -2,7 +2,7 @@
 
 'use strict';
 
-angular.module('boundaries.search', ['ngSanitize', 'boundaries.map'])
+angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
   .directive('focusOn', function($parse) {
     return {
       restrict: 'A',

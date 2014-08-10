@@ -2,7 +2,7 @@
 
 var ColorSvc;
 var converts, tos;
-beforeEach(module('boundaries.color'));
+beforeEach(module('bndry.color'));
 
 describe('ColorSvc', function() {
   beforeEach(inject(function(_ColorSvc_) {
@@ -45,7 +45,7 @@ describe('ColorSvc', function() {
       });
     }
 
-    angular.injector(['ng', 'boundaries.color'])
+    angular.injector(['ng', 'bndry.color'])
       .invoke(function(ColorSvc) {
         converts = ColorSvc.convert;
         tos = ColorSvc.to;

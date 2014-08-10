@@ -2,7 +2,7 @@
 
 'use strict';
 
-angular.module('boundaries.map', ['ngStorage'])
+angular.module('bndry.map', ['ngStorage'])
 
 // MapSvc encapsulates google.maps, making it easier to mock for tests.
 .service('MapSvc', function($rootScope) {

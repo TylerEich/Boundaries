@@ -260,7 +260,7 @@ describe('DrawingSvc', function() {
     'map': {}
   };
 
-  beforeEach(module('boundaries.drawing', function($provide) {
+  beforeEach(module('bndry.drawing', function($provide) {
     $provide.value('DirectionsSvc', new MockDirectionsSvc());
     $provide.value('MapSvc', MockMapSvc);
   }));

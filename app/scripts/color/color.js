@@ -1,6 +1,6 @@
 /* jshint bitwise: false */
 
-angular.module('boundaries.color', [])
+angular.module('bndry.color', [])
 
 /*
 Color Service

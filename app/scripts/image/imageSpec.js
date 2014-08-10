@@ -214,7 +214,7 @@ describe('Image', function() {
     'map': {}
   };
 
-  beforeEach(module('boundaries.image', function($provide) {
+  beforeEach(module('bndry.image', function($provide) {
     $provide.value('MapSvc', MockMapSvc);
   }));
   

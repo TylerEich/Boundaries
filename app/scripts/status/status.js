@@ -2,7 +2,7 @@
 
 'use strict';
 
-angular.module('boundaries.status', ['boundaries.map', 'boundaries.geo'])
+angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
   .directive('statusBar', function($interval) {
     return {
       restrict: 'E',

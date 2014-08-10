@@ -214,7 +214,7 @@ describe('Geo', function() {
     'map': {}
   };
 
-  beforeEach(module('boundaries.geo', function($provide) {
+  beforeEach(module('bndry.geo', function($provide) {
     $provide.value('MapSvc', MockMapSvc);
   }));
   beforeEach(inject(function(_$timeout_, _GeocodeSvc_, _GeolocationSvc_) {
