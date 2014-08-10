@@ -130,23 +130,21 @@ var tasks = {
       inject = require('gulp-inject');
 
     return gulp.src('app/index.html')
+      .pipe(replace('app/bower_components', '/app/bower_components'))
       .pipe(inject(gulp.src(traceurRuntime, {
         read: false
       }), {
-        addRootSlash: false,
-        addPrefix: '..'
+        addRootSlash: true
       }))
       .pipe(inject(gulp.src(jsBuildFiles, {
         read: false
       }), {
-        addRootSlash: false,
-        addPrefix: '..'
+        addRootSlash: true
       }))
       .pipe(inject(gulp.src(styleBuildFiles, {
         read: false,
       }), {
-        addRootSlash: false,
-        addPrefix: '..'
+        addRootSlash: true
       }))
       .pipe(gulp.dest('build'));
   },
@@ -193,12 +191,11 @@ var tasks = {
       replace = require('gulp-replace'),
       inject = require('gulp-inject');
 
-    return gulp.src('build/index.html')
+    return gulp.src('app/index.html')
       .pipe(inject(gulp.src(traceurRuntime, {
         read: false
       }), {
-        addRootSlash: false,
-        addPrefix: '..'
+        addRootSlash: false
       }))
       .pipe(inject(gulp.src('dist/script.min.js', {
         read: false
@@ -210,10 +207,10 @@ var tasks = {
       }), {
         addRootSlash: false
       }))
-      .pipe(googleCdn(require('./bower.json'), {
-        componentsPath: 'app/bower_components',
-        cdn: extend(require('cdnjs-cdn-data'), require('google-cdn-data'))
-      }))
+      // .pipe(googleCdn(require('./bower.json'), {
+      //   componentsPath: 'app/bower_components',
+      //   cdn: extend(require('cdnjs-cdn-data'), require('google-cdn-data'))
+      // }))
       .pipe(gulp.dest('.'));
   }
 };
