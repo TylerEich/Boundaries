@@ -1,4 +1,17 @@
 "use strict";
-angular.module('boundaries.action', []).controller('ActionCtrl', function($rootScope, $scope) {
-  $scope.clear = $rootScope.$broadcast.bind($rootScope, 'action:clear');
+angular.module('bndry.action', []).controller('ActionCtrl', function($rootScope, $scope, HistorySvc) {
+  $scope.clear = function() {
+    $rootScope.$broadcast('action:clear');
+    HistorySvc.clear();
+  };
+  $scope.undo = function() {
+    if (HistorySvc.hasUndo()) {
+      HistorySvc.undo();
+    }
+  };
+  $scope.redo = function() {
+    if (HistorySvc.hasRedo()) {
+      HistorySvc.redo();
+    }
+  };
 });

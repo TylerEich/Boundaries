@@ -1,6 +1,6 @@
 "use strict";
 'use strict';
-angular.module('boundaries.map', ['ngStorage']).service('MapSvc', function($rootScope) {
+angular.module('bndry.map', ['ngStorage']).service('MapSvc', function($rootScope) {
   function makeIcon(color) {
     return {
       path: self.SymbolPath.CIRCLE,

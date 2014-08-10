@@ -1,6 +1,6 @@
 "use strict";
 'use strict';
-angular.module('boundaries.geo', ['boundaries.map']).service('GeolocationSvc', function($q) {
+angular.module('bndry.geo', ['bndry.map']).service('GeolocationSvc', function($q) {
   this.getLocation = function() {
     var deferred = $q.defer();
     if ('geolocation' in navigator) {

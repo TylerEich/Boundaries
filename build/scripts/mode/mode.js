@@ -1,5 +1,5 @@
 "use strict";
-angular.module('boundaries.mode', []).controller('ModeCtrl', function($scope) {
+angular.module('bndry.mode', []).controller('ModeCtrl', function($scope) {
   $scope.rigid = false;
   $scope.polygon = false;
 });

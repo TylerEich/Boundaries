@@ -1,6 +1,6 @@
 "use strict";
 'use strict';
-angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries.color']).service('DirectionsSvc', function($q, MapSvc) {
+angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry.history']).service('DirectionsSvc', function($q, MapSvc) {
   var self = this;
   var directions = new MapSvc.DirectionsService();
   self.route = function(locations) {
@@ -39,8 +39,20 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
   };
 }).service('DrawingSvc', function($rootScope, $q, $localStorage, DirectionsSvc, MapSvc, ColorSvc) {
   var self = this;
+  function debugDrawing() {
+    var drawing = self.drawings[self.drawings.length - 1];
+    console.info('Index of last node:', drawing.nodes[drawing.nodes.length - 1].index);
+    console.info('Length of path:', drawing._poly.getPath().getLength());
+  }
   function rgbaColorToString(rgba) {
     return ("rgba(" + rgba.r * 100 + "%," + rgba.g * 100 + "%," + rgba.b * 100 + "%," + rgba.a + ")");
+  }
+  function shiftNodeIndices(drawingIndex, nodeIndex, shift) {
+    var drawing = self.drawings[drawingIndex];
+    for (var i = nodeIndex; i < drawing.nodes.length; i++) {
+      var node = drawing.nodes[i];
+      node.index += shift;
+    }
   }
   function makeIcon(color) {
     return {
@@ -89,8 +101,11 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     return deferred.promise;
   };
   self.splicePath = function(originalPath, index, removeLength, path) {
-    var args = [index, removeLength].concat(path);
-    Array.prototype.splice.apply(originalPath, args);
+    var args = [index, removeLength];
+    if (path) {
+      args = args.concat(path);
+    }
+    return Array.prototype.splice.apply(originalPath, args);
   };
   self.makeNode = function(colorIndex, latLng) {
     var color = $localStorage.colors[colorIndex];
@@ -107,6 +122,12 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
       removeLength = self.drawings[drawingIndex].nodes.length;
     }
     var drawing = self.drawings[drawingIndex];
+    var args = [nodeIndex, removeLength];
+    if (newNode) {
+      newNode._marker.setMap(MapSvc.map);
+      args = args.concat(newNode);
+    }
+    var removed = Array.prototype.splice.apply(drawing.nodes, args);
     var nodeBefore,
         nodeAtIndex,
         nodeAfter;
@@ -117,64 +138,82 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     if (nodeIndex >= 0 && nodeIndex + 1 < drawing.nodes.length) {
       nodeAfter = drawing.nodes[nodeIndex + 1];
     }
-    var removed = drawing.nodes.splice(nodeIndex, removeLength, newNode);
-    for (var i in removed) {
-      removed[i]._marker.setMap(null);
+    if (removed.length > 0) {
+      var poly = drawing._poly,
+          path = poly.getPath().getArray(),
+          removeStart = (nodeBefore ? nodeBefore.index : -1) + 1,
+          removeEnd = (nodeAfter ? nodeAfter.index : removed[removed.length - 1].index + 1),
+          pathRemoveLength = removeEnd - removeStart;
+      self.splicePath(path, removeStart, pathRemoveLength);
+      poly.setPath(path);
+      if (nodeAtIndex) {
+        nodeAtIndex.index = nodeBefore ? nodeBefore.index : 0;
+      }
+      shiftNodeIndices(drawingIndex, nodeIndex + 1, -pathRemoveLength);
+      debugger;
     }
-    if (!newNode) {
-      return;
+    for (var i = 0; i < removed.length; i++) {
+      removed[i]._marker.setMap(null);
     }
     var promises = [],
         promise;
-    var newNodeLocation = new MapSvc.LatLng(newNode.lat, newNode.lng);
-    var nodeBeforeLocation,
+    var nodeAtIndexLocation,
+        nodeBeforeLocation,
         nodeAfterLocation;
+    if (nodeAtIndex) {
+      nodeAtIndexLocation = new MapSvc.LatLng(nodeAtIndex.lat, nodeAtIndex.lng);
+    } else {
+      return;
+    }
     if (nodeBefore) {
       nodeBeforeLocation = new MapSvc.LatLng(nodeBefore.lat, nodeBefore.lng);
-      promise = self.makePath([nodeBeforeLocation, newNodeLocation], drawing.rigid).then(function(path) {
-        newNode.index = nodeBefore.index + path.length;
+      promise = self.makePath([nodeBeforeLocation, nodeAtIndexLocation], drawing.rigid).then(function(path) {
+        nodeAtIndex.index = nodeBefore.index;
         return path;
       });
       promises.push(promise);
     }
     if (nodeAfter) {
       nodeAfterLocation = new MapSvc.LatLng(nodeAfter.lat, nodeAfter.lng);
-      promises.push(self.makePath([newNodeLocation, nodeAfterLocation], drawing.rigid));
+      promises.push(self.makePath([nodeAtIndexLocation, nodeAfterLocation], drawing.rigid));
     }
     if (!nodeBefore && !nodeAfter) {
-      promises.push(self.makePath([newNodeLocation, newNodeLocation], drawing.rigid));
+      promises.push(self.makePath([nodeAtIndexLocation, nodeAtIndexLocation], drawing.rigid));
     }
-    $q.all(promises).then(function(paths) {
-      var newPath = Array.prototype.concat.apply([], paths);
-      var path = drawing._poly.getPath().getArray();
-      var spliceIndex = 0;
-      var newNodeMarkerPosition;
-      var pathRemoveLength = 1;
+    $q.all(promises).then(function(pathResults) {
+      var newPath,
+          newPathBefore,
+          newPathAfter,
+          polyPath = drawing._poly.getPath().getArray(),
+          spliceIndex = 0,
+          nodeAtIndexMarkerPosition;
+      if (pathResults.length === 2) {
+        pathResults[1].shift();
+      }
       if (nodeBefore) {
-        var pathBefore = paths.shift();
-        newNode.index = nodeBefore.index + pathBefore.length;
-        if (nodeAtIndex) {
-          pathRemoveLength += nodeAtIndex.index - nodeBefore.index;
-        }
-        spliceIndex = nodeBefore.index;
-        newNodeMarkerPosition = pathBefore[pathBefore.length - 1];
+        newPathBefore = pathResults[0];
+        newPathBefore.shift();
+        shiftNodeIndices(drawingIndex, nodeIndex, newPathBefore.length);
+        spliceIndex = nodeBefore.index + 1;
+        nodeAtIndexMarkerPosition = newPathBefore[newPathBefore.length - 1];
       } else {
         newNode.index = 0;
       }
       if (nodeAfter) {
-        var pathAfter = paths[0];
-        if (nodeAtIndex) {
-          pathRemoveLength += nodeAfter.index - nodeAtIndex.index;
-        }
-        nodeAfter.index = newNode.index + pathAfter.length;
-        newNodeMarkerPosition = pathAfter[0];
+        newPathAfter = pathResults[pathResults.length - 1];
+        newPathAfter.pop();
+        shiftNodeIndices(drawingIndex, nodeIndex + 1, newPathAfter.length);
+        nodeAtIndexMarkerPosition = nodeAtIndexMarkerPosition || newPathAfter[0];
       }
       if (!nodeBefore && !nodeAfter) {
-        newNodeMarkerPosition = paths[0][0];
+        nodeAtIndexMarkerPosition = pathResults[0][0];
       }
-      self.splicePath(path, spliceIndex, pathRemoveLength, newPath);
-      newNode._marker.setPosition(newNodeMarkerPosition);
-      drawing._poly.setPath(path);
+      newPath = Array.prototype.concat.apply([], pathResults);
+      debugger;
+      self.splicePath(polyPath, spliceIndex, 0, newPath);
+      newNode._marker.setPosition(nodeAtIndexMarkerPosition);
+      drawing._poly.setPath(polyPath);
+      debugDrawing();
     });
   };
   self.makeDrawing = function(colorIndex, rigid, fill) {
@@ -206,7 +245,7 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     Array.prototype.splice.apply(self.drawings, arguments);
   };
   self.drawings = [];
-}).controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc) {
+}).controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc, HistorySvc) {
   $scope.$storage = $localStorage.$default({
     rigid: false,
     colors: [{
@@ -234,13 +273,42 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     var colorIndex = $scope.$storage.activeColor;
     var rigid = false,
         fill = false;
-    if (automaticNewDrawing()) {
+    var createNewDrawing = automaticNewDrawing();
+    if (createNewDrawing) {
       var newDrawing = DrawingSvc.makeDrawing(colorIndex, rigid, fill);
       DrawingSvc.spliceDrawing(DrawingSvc.drawings.length, 0, newDrawing);
     }
     var lastDrawingIndex = DrawingSvc.drawings.length - 1;
     var newNodeIndex = DrawingSvc.drawings[lastDrawingIndex].nodes.length;
-    DrawingSvc.spliceNode(lastDrawingIndex, newNodeIndex, 0, DrawingSvc.makeNode(colorIndex, param.latLng));
+    var newNode = DrawingSvc.makeNode(colorIndex, param.latLng);
+    DrawingSvc.spliceNode(lastDrawingIndex, newNodeIndex, 0, newNode);
+    HistorySvc.add({
+      undo: function(drawingIndex, nodeIndex, createNewDrawing) {
+        console.log('Undo:', DrawingSvc.drawings);
+        DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1);
+        if (createNewDrawing) {
+          DrawingSvc.spliceDrawing(drawingIndex, 1);
+        }
+      }.bind(null, lastDrawingIndex, newNodeIndex, createNewDrawing),
+      redo: function(drawingIndex, nodeIndex, newNode) {
+        DrawingSvc.spliceNode(drawingIndex, nodeIndex, 0, newNode);
+      }.bind(null, lastDrawingIndex, newNodeIndex, newNode)
+    });
+  }
+  function changeNode($params, drawingIndex, nodeIndex) {
+    var event = $params[0];
+    var colorIndex = DrawingSvc.drawings[drawingIndex].colorIndex;
+    var originalNode = DrawingSvc.drawings[drawingIndex].nodes[nodeIndex];
+    var newNode = DrawingSvc.makeNode(colorIndex, event.latLng);
+    DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, newNode);
+    HistorySvc.add({
+      undo: function(drawingIndex, nodeIndex, originalNode) {
+        DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, originalNode);
+      }.bind(null, drawingIndex, nodeIndex, originalNode),
+      redo: function(drawingIndex, nodeIndex, newNode) {
+        DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, newNode);
+      }.bind(null, drawingIndex, nodeIndex, newNode)
+    });
   }
   function automaticNewDrawing() {
     if (DrawingSvc.drawings.length === 0) {
@@ -258,12 +326,7 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     click: function($params) {
       addNode(undefined, $params[0]);
     },
-    dragend: function($params, drawingIndex, nodeIndex) {
-      var event = $params[0];
-      var colorIndex = DrawingSvc.drawings[drawingIndex].colorIndex;
-      var newNode = DrawingSvc.makeNode(colorIndex, event.latLng);
-      DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, newNode);
-    }
+    dragend: changeNode
   };
   $scope.poly = {click: function($params) {}};
 });

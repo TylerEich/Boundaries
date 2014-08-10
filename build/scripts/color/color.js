@@ -1,5 +1,5 @@
 "use strict";
-angular.module('boundaries.color', []).service('ColorSvc', function() {
+angular.module('bndry.color', []).service('ColorSvc', function() {
   var _rgba = {};
   var self = this;
   function min() {
@@ -35,7 +35,7 @@ angular.module('boundaries.color', []).service('ColorSvc', function() {
       return self;
     },
     hsla: function(hsla) {
-      var $__0 = $traceurRuntime.assertObject(hsla),
+      var $__0 = hsla,
           h = $__0.h,
           s = $__0.s,
           l = $__0.l,
@@ -71,7 +71,7 @@ angular.module('boundaries.color', []).service('ColorSvc', function() {
     },
     hsla: function() {
       var rgba = self.to.rgba();
-      var $__0 = $traceurRuntime.assertObject(rgba),
+      var $__0 = rgba,
           r = $__0.r,
           g = $__0.g,
           b = $__0.b,
