@@ -37,7 +37,6 @@ angular.module('boundaries', ['ngStorage', 'ui.map', 'ngAnimate', 'boundaries.ac
   };
 }).run(function() {
   window.addEventListener('DOMContentLoaded', function() {
-    FastClick.attach(document.body);
     angular.element(document.querySelector('#splash')).removeClass('loading');
   }, false);
   window.addEventListener('orientationchange', function() {
