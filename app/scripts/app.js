@@ -4,6 +4,7 @@
 
 angular
   .module('boundaries', [
+    'ngTouch',
     'ngStorage',
     'ui.map',
     'ngAnimate',

@@ -1,6 +1,6 @@
 "use strict";
 'use strict';
-angular.module('boundaries', ['ngStorage', 'ui.map', 'ngAnimate', 'boundaries.action', 'boundaries.color', 'boundaries.drawing', 'boundaries.geo', 'boundaries.image', 'boundaries.map', 'boundaries.mode', 'boundaries.search', 'boundaries.status']).directive('noScroll', function() {
+angular.module('boundaries', ['ngTouch', 'ngStorage', 'ui.map', 'ngAnimate', 'boundaries.action', 'boundaries.color', 'boundaries.drawing', 'boundaries.geo', 'boundaries.image', 'boundaries.map', 'boundaries.mode', 'boundaries.search', 'boundaries.status']).directive('noScroll', function() {
   return {
     restrict: 'A',
     link: function(scope, elem) {
