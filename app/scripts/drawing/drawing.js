@@ -2,7 +2,7 @@
 
 'use strict';
 
-angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries.color'])
+angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry.history'])
   .service('DirectionsSvc', function($q, MapSvc) {
     var self = this;
 
@@ -123,7 +123,7 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     self.splicePath = function(originalPath, index, removeLength, path) {
       var args = [index, removeLength].concat(path);
 
-      Array.prototype.splice.apply(originalPath, args);
+      return Array.prototype.splice.apply(originalPath, args);
     };
 
     // Node functions
@@ -193,7 +193,7 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
         promises.push(self.makePath([newNodeLocation, newNodeLocation], drawing.rigid));
       }
 
-      $q.all(promises).then(function(paths) {
+      $q.all(promises).then(function(removed, paths) {
         var newPath = Array.prototype.concat.apply([], paths);
         var path = drawing._poly.getPath().getArray();
         var spliceIndex = 0;
@@ -228,8 +228,9 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
         if (!nodeBefore && !nodeAfter) { // Special case for first node
           newNodeMarkerPosition = paths[0][0];
         }
-
-        self.splicePath(path, spliceIndex, pathRemoveLength, newPath); // Will alter path; no need to assign result to variable
+        
+        // Will alter original path
+        self.splicePath(path, spliceIndex, pathRemoveLength, newPath);
 
         newNode._marker.setPosition(newNodeMarkerPosition);
         drawing._poly.setPath(path);
@@ -280,7 +281,7 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
   })
 
 // Controllers
-.controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc) {
+.controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc, HistorySvc) {
   $scope.$storage = $localStorage.$default({
     rigid: false,
     colors: [{
@@ -312,15 +313,46 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     var rigid = false,
       fill = false;
 
-    if (automaticNewDrawing()) {
+    var createNewDrawing = automaticNewDrawing();
+    if (createNewDrawing) {
       var newDrawing = DrawingSvc.makeDrawing(colorIndex, rigid, fill);
       DrawingSvc.spliceDrawing(DrawingSvc.drawings.length, 0, newDrawing);
     }
     
     var lastDrawingIndex = DrawingSvc.drawings.length - 1;
     var newNodeIndex = DrawingSvc.drawings[lastDrawingIndex].nodes.length;
-
-    DrawingSvc.spliceNode(lastDrawingIndex, newNodeIndex, 0, DrawingSvc.makeNode(colorIndex, param.latLng));
+    var newNode = DrawingSvc.makeNode(colorIndex, param.latLng);
+    
+    DrawingSvc.spliceNode(lastDrawingIndex, newNodeIndex, 0, newNode);
+    
+    HistorySvc.add({
+      undo: function(drawingIndex, nodeIndex, createNewDrawing) {
+        DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1);
+        if (createNewDrawing) {
+          DrawingSvc.spliceDrawing(drawingIndex, 1);
+        }
+      }.bind(null, lastDrawingIndex, newNodeIndex, createNewDrawing),
+      redo: function(drawingIndex, nodeIndex, newNode) {
+        DrawingSvc.spliceNode(drawingIndex, nodeIndex, 0, newNode);
+      }.bind(null, lastDrawingIndex, newNodeIndex, newNode)
+    });
+  }
+  function changeNode($params, drawingIndex, nodeIndex) {
+    var event = $params[0];
+    var colorIndex = DrawingSvc.drawings[drawingIndex].colorIndex;
+    var originalNode = DrawingSvc.drawings[drawingIndex].nodes[nodeIndex];
+    var newNode = DrawingSvc.makeNode(colorIndex, event.latLng);
+    
+    DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, newNode);
+    
+    HistorySvc.add({
+      undo: function(drawingIndex, nodeIndex, originalNode) {
+        DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, originalNode);
+      }.bind(null, drawingIndex, nodeIndex, originalNode),
+      redo: function(drawingIndex, nodeIndex, newNode) {
+        DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, newNode);
+      }.bind(null, drawingIndex, nodeIndex, newNode)
+    });
   }
   function automaticNewDrawing() {
     if (DrawingSvc.drawings.length === 0) {
@@ -339,13 +371,7 @@ angular.module('boundaries.drawing', ['ngStorage', 'boundaries.map', 'boundaries
     click: function($params) {
       addNode(undefined, $params[0]);
     },
-    dragend: function($params, drawingIndex, nodeIndex) {
-      var event = $params[0];
-      var colorIndex = DrawingSvc.drawings[drawingIndex].colorIndex;
-      var newNode = DrawingSvc.makeNode(colorIndex, event.latLng);
-      
-      DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, newNode);
-    }
+    dragend: changeNode
   };
   $scope.poly = {
     click: function($params) {

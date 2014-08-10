@@ -3,22 +3,22 @@
 'use strict';
 
 angular
-  .module('boundaries', [
+  .module('bndry', [
     'ngTouch',
     'ngStorage',
     'ui.map',
     'ngAnimate',
     
-    'boundaries.action',
-    'boundaries.color',
-    'boundaries.drawing',
-    'boundaries.geo',
-    'boundaries.image',
-    'boundaries.map',
-    'boundaries.mode',
-    'boundaries.search',
-    'boundaries.status'
-    // 'boundaries.settings'
+    'bndry.action',
+    'bndry.color',
+    'bndry.drawing',
+    'bndry.geo',
+    'bndry.image',
+    'bndry.map',
+    'bndry.mode',
+    'bndry.search',
+    'bndry.status'
+    // 'bndry.settings'
   ])
   .directive('noScroll', function() {
     return {

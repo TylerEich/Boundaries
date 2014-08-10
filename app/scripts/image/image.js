@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('boundaries.image', ['ngStorage', 'boundaries.map', 'boundaries.drawing', 'boundaries.color'])
+angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry.color'])
   .service('ImageSvc', function($localStorage, MapSvc, DrawingSvc, ColorSvc) {
     this.pxSize = function(maxWidth, maxHeight) {
       var ratio = $localStorage.width / $localStorage.height;

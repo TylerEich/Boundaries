@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('boundaries.geo', ['boundaries.map'])
+angular.module('bndry.geo', ['bndry.map'])
   .service('GeolocationSvc', function($q) {
     this.getLocation = function() {
       var deferred = $q.defer();

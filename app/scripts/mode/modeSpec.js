@@ -3,7 +3,7 @@
 describe('ModeCtrl', function() {
   var ModeCtrl, scope;
 
-  beforeEach(module('boundaries.mode'));
+  beforeEach(module('bndry.mode'));
   beforeEach(inject(function($rootScope, $controller) {
     scope = $rootScope.$new();
     ModeCtrl = $controller('ModeCtrl', {
