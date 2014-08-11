@@ -36,9 +36,6 @@ angular.module('bndry', ['ngTouch', 'ngStorage', 'ui.map', 'ngAnimate', 'bndry.a
     }
   };
 }).run(function() {
-  window.addEventListener('DOMContentLoaded', function() {
-    angular.element(document.querySelector('#splash')).removeClass('loading');
-  }, false);
   window.addEventListener('orientationchange', function() {
     window.scrollTo(0, 0);
   });
