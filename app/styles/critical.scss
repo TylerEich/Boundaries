@@ -1,3 +1,25 @@
+@keyframes scale-fade {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    display: block;
+  }
+  99% {
+    transform: scale(1.6);
+    opacity: 0;
+    display: block;
+    pointer-events: none;
+  }
+}
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(60deg);
+  }
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
