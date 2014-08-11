@@ -6,7 +6,9 @@
   "repository": "https://github.com/TylerEich/Boundaries",
   "homepage": "https://github.com/TylerEich/Boundaries",
   "README": "A web app for creating territories quickly and easily",
-  "dependencies": {},
+  "dependencies": {
+    "scriptjs": "^2.5.7"
+  },
   "devDependencies": {
     "cdnjs-cdn-data": "^0.1.1",
     "google-cdn-data": "^0.1.6",
@@ -19,6 +21,7 @@
     "gulp-filesize": "0.0.6",
     "gulp-google-cdn": "^0.4.1",
     "gulp-htmlmin": "~0.1.2",
+    "gulp-ignore": "^1.2.0",
     "gulp-inject": "~0.4.1",
     "gulp-insert": "~0.3.0",
     "gulp-karma": "0.0.4",
