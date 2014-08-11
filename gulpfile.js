@@ -214,7 +214,8 @@ var tasks = {
       .pipe(inject(gulp.src(bowerDistFiles.concat('dist/script.min.js'), {
         read: false
       }), {
-        addRootSlash: false
+        addRootSlash: false,
+        transform: deferScript
       }))
       .pipe(inject(gulp.src('dist/critical.min.css'), {
         transform: function(filename, file) {
