@@ -11,8 +11,7 @@
     "angular-ui-map": "0.5.0",
     "ngstorage": "*",
     "angular-touch": "1.x",
-    "traceur-runtime": "~0.0.55",
-    "angular-loader": "~1.2.21"
+    "traceur-runtime": "~0.0.55"
   },
   "devDependencies": {
     "angular-mocks": "1.x",
