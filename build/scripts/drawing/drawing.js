@@ -39,11 +39,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   };
 }).service('DrawingSvc', function($rootScope, $q, $localStorage, DirectionsSvc, MapSvc, ColorSvc) {
   var self = this;
-  function debugDrawing() {
-    var drawing = self.drawings[self.drawings.length - 1];
-    console.info('Index of last node:', drawing.nodes[drawing.nodes.length - 1].index);
-    console.info('Length of path:', drawing._poly.getPath().getLength());
-  }
   function rgbaColorToString(rgba) {
     return ("rgba(" + rgba.r * 100 + "%," + rgba.g * 100 + "%," + rgba.b * 100 + "%," + rgba.a + ")");
   }
@@ -150,7 +145,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
         nodeAtIndex.index = nodeBefore ? nodeBefore.index : 0;
       }
       shiftNodeIndices(drawingIndex, nodeIndex + 1, -pathRemoveLength);
-      debugger;
     }
     for (var i = 0; i < removed.length; i++) {
       removed[i]._marker.setMap(null);
@@ -209,11 +203,9 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
         nodeAtIndexMarkerPosition = pathResults[0][0];
       }
       newPath = Array.prototype.concat.apply([], pathResults);
-      debugger;
       self.splicePath(polyPath, spliceIndex, 0, newPath);
       newNode._marker.setPosition(nodeAtIndexMarkerPosition);
       drawing._poly.setPath(polyPath);
-      debugDrawing();
     });
   };
   self.makeDrawing = function(colorIndex, rigid, fill) {
@@ -236,13 +228,16 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     if (removeLength === undefined) {
       removeLength = self.drawings.length;
     }
-    console.log(removeLength, newDrawing);
     var removed = self.drawings.slice(drawingIndex, drawingIndex + removeLength);
     for (var i in removed) {
       removed[i]._poly.setMap(null);
       self.spliceNode(i, 0);
     }
-    Array.prototype.splice.apply(self.drawings, arguments);
+    var args = [drawingIndex, removeLength];
+    if (newDrawing) {
+      args.push(newDrawing);
+    }
+    Array.prototype.splice.apply(self.drawings, args);
   };
   self.drawings = [];
 }).controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc, HistorySvc) {
@@ -284,7 +279,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     DrawingSvc.spliceNode(lastDrawingIndex, newNodeIndex, 0, newNode);
     HistorySvc.add({
       undo: function(drawingIndex, nodeIndex, createNewDrawing) {
-        console.log('Undo:', DrawingSvc.drawings);
         DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1);
         if (createNewDrawing) {
           DrawingSvc.spliceDrawing(drawingIndex, 1);

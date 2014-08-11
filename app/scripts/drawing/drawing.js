@@ -63,11 +63,11 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     var self = this;
 
 
-    function debugDrawing() {
-      var drawing = self.drawings[self.drawings.length - 1];
-      console.info('Index of last node:', drawing.nodes[drawing.nodes.length - 1].index);
-      console.info('Length of path:', drawing._poly.getPath().getLength());
-    }
+    // function debugDrawing() {
+    //   var drawing = self.drawings[self.drawings.length - 1];
+    //   // console.info('Index of last node:', drawing.nodes[drawing.nodes.length - 1].index);
+    //   // console.info('Length of path:', drawing._poly.getPath().getLength());
+    // }
 
 
     function rgbaColorToString(rgba) {
@@ -200,8 +200,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
         }
         
         shiftNodeIndices(drawingIndex, nodeIndex + 1, -pathRemoveLength);
-        
-        debugger;
       }
       
       // Remove obselete markers from map
@@ -278,15 +276,11 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
         
         newPath = Array.prototype.concat.apply([], pathResults);
         
-        debugger;
-        
         // Will alter original path
         self.splicePath(polyPath, spliceIndex, 0, newPath);
 
         newNode._marker.setPosition(nodeAtIndexMarkerPosition);
         drawing._poly.setPath(polyPath);
-        
-        debugDrawing();
       });
     };
 
@@ -313,9 +307,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       if (removeLength === undefined) {
         removeLength = self.drawings.length;
       }
-
-      console.log(removeLength, newDrawing);
-
+      
       var removed = self.drawings.slice(drawingIndex, drawingIndex + removeLength); // Get obselete drawings
 
       // Remove obselete drawings from map
@@ -326,8 +318,12 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
         self.spliceNode(i, 0);
       }
       
+      var args = [drawingIndex, removeLength];
+      if (newDrawing) {
+        args.push(newDrawing);
+      }
       Array.prototype.splice
-        .apply(self.drawings, arguments); // Remove obselete drawings
+        .apply(self.drawings, args); // Remove obselete drawings
     };
 
     self.drawings = [];
@@ -380,7 +376,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     
     HistorySvc.add({
       undo: function(drawingIndex, nodeIndex, createNewDrawing) {
-        console.log('Undo:', DrawingSvc.drawings);
         DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1);
         if (createNewDrawing) {
           DrawingSvc.spliceDrawing(drawingIndex, 1);
