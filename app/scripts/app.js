@@ -61,10 +61,6 @@ angular
     };
   })
   .run(function() {
-    window.addEventListener('DOMContentLoaded', function() {
-      // FastClick.attach(document.body);
-      angular.element(document.querySelector('#splash')).removeClass('loading');
-    }, false);
     window.addEventListener('orientationchange', function() {
       window.scrollTo(0,0);
     });
