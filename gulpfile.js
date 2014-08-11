@@ -27,6 +27,17 @@ var unitTestFiles = [
 
   // Build files
   traceurRuntime = 'app/bower_components/traceur-runtime/traceur-runtime.min.js',
+  bowerBuildFiles = [
+    'app/bower_components/*/*.js',
+    '!app/bower_components/*/*.min.js',
+    '!app/bower_components/*/Gruntfile.js',
+    '!app/bower_components/angular/*',
+    '!app/bower_components/angular-ui-utils/ui-utils-ieshiv.js',
+    '!app/bower_components/angular-mocks/*',
+    '!app/bower_components/angular-resource/*',
+    '!app/bower_components/angular-scenario/*'
+  ],
+  bowerDistFiles = bowerBuildFiles.slice(1),
   jsBuildFiles = [
     'build/scripts/*/**.js',
     '!build/scripts/*/**Spec.js',
@@ -43,8 +54,11 @@ var unitTestFiles = [
   // 'build/views/*.min.html'
   // ],
   styleBuildFiles = [
-    'build/styles/**/*.min.css'
+    'build/styles/**/*.min.css',
+    'build/styles/critical.min.css'
   ];
+
+bowerDistFiles[0] = 'app/bower_components/*/*.min.js';
 
 var karmaConfFiles = [
   'app/bower_components/angular/angular.js',
@@ -63,9 +77,14 @@ var karmaConf = {
   files: karmaConfFiles
 };
 
+function deferScript(filepath) {
+  return '<script defer src="' + filepath + '"></script>';
+}
+function fileContents (filePath, file) {
+  return file.contents.toString('utf8');
+}
 
 // Tests
-
 function test(watch, files, done) {
   watch = Boolean(watch);
 
@@ -93,6 +112,8 @@ var tasks = {
     var changed = require('gulp-changed'),
       gulpPrint = require('gulp-print'),
       traceur = require('gulp-traceur');
+      
+    gulp.src(bowerBuildFiles).pipe(gulpPrint());
 
     return gulp.src(jsAppFiles, unitTestFiles)
       .pipe(gulpPrint())
@@ -130,22 +151,18 @@ var tasks = {
       inject = require('gulp-inject');
 
     return gulp.src('app/index.html')
-      .pipe(replace('app/', '/app/'))
-      .pipe(inject(gulp.src(traceurRuntime, {
+      .pipe(inject(gulp.src(bowerBuildFiles.concat(jsBuildFiles), {
         read: false
       }), {
-        addRootSlash: true
-      }))
-      .pipe(inject(gulp.src(jsBuildFiles, {
-        read: false
-      }), {
-        addRootSlash: true
+        addRootSlash: true,
+        transform: deferScript
       }))
       .pipe(inject(gulp.src(styleBuildFiles, {
         read: false,
       }), {
         addRootSlash: true
       }))
+      .pipe(replace('app/', '../app/'))
       .pipe(gulp.dest('build'));
   },
   'clean:css': clean.bind(null, 'build/styles/*'),
@@ -153,6 +170,8 @@ var tasks = {
   'dist:css': function() {
     var concat = require('gulp-concat');
 
+    gulp.src(styleBuildFiles.pop()).pipe(gulp.dest('dist'));
+    
     return gulp.src(styleBuildFiles)
       .pipe(concat('style.min.css'))
       .pipe(gulp.dest('dist'));
@@ -192,15 +211,16 @@ var tasks = {
       inject = require('gulp-inject');
 
     return gulp.src('app/index.html')
-      .pipe(inject(gulp.src(traceurRuntime, {
+      .pipe(inject(gulp.src(bowerDistFiles.concat('dist/script.min.js'), {
         read: false
       }), {
         addRootSlash: false
       }))
-      .pipe(inject(gulp.src('dist/script.min.js', {
-        read: false
-      }), {
-        addRootSlash: false
+      .pipe(inject(gulp.src('dist/critical.min.css'), {
+        transform: function(filename, file) {
+          return '<style>' + fileContents.apply(null, arguments) + '</style>';
+        },
+        starttag: '<!-- inject:critical:{{ext}} -->'
       }))
       .pipe(inject(gulp.src('dist/style.min.css', {
         read: false,
