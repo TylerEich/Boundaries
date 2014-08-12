@@ -1,21 +1,22 @@
 "use strict";
 'use strict';
-angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry.color']).service('ImageSvc', function($localStorage, MapSvc, DrawingSvc, ColorSvc) {
-  this.pxSize = function(maxWidth, maxHeight) {
-    var ratio = $localStorage.width / $localStorage.height;
+angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry.color']).service('ImageSvc', function($http, $document, $localStorage, MapSvc, DrawingSvc, ColorSvc) {
+  var self = this;
+  self.pxSize = function(maxWidth, maxHeight) {
+    var ratio = 3.5 / 5;
     return {
       ratio: ratio,
       width: (ratio >= 1) ? maxWidth : Math.round(ratio * maxWidth),
       height: (ratio < 1) ? maxHeight : Math.round(1 / ratio * maxHeight)
     };
   };
-  this.generateUrl = function() {
+  self.generateUrl = function() {
     if (!DrawingSvc.drawings) {
       return;
     }
     var path = 'https://maps.googleapis.com/maps/api/staticmap';
     var params = [];
-    var pxSize = this.pxSize(640, 640);
+    var pxSize = self.pxSize(640, 640);
     var i,
         j;
     var rule,
@@ -62,8 +63,9 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
         bounds.extend(polyPath[j]);
       }
       encodedPath = MapSvc.geometry.encoding.encodePath(polyPath);
-      color = $localStorage.colors[drawing.activeColor];
-      hex = '0x' + ColorSvc.convert.hex24().toHex(color.rgba);
+      color = $localStorage.colors[drawing.colorIndex];
+      debugger;
+      hex = '0x' + ColorSvc.convert.rgba(color).to.hex32();
       if (drawing.polygon) {
         urlPath.push('fillcolor:' + hex);
       } else {
@@ -78,15 +80,47 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
     }
     var northEast = bounds.getNorthEast();
     var southWest = bounds.getSouthWest();
-    var heading = Math.abs(MapSvc.computeHeading(northEast, southWest) + MapSvc.computeHeading(MapSvc.southWest, northEast)) / 2;
+    var computeHeading = MapSvc.geometry.spherical.computeHeading;
+    var heading = Math.abs(computeHeading(northEast, southWest) + computeHeading(southWest, northEast)) / 2;
     if ((45 <= heading && heading < 135) === (pxSize.ratio >= 1)) {
       params.push('size=' + pxSize.height + 'x' + pxSize.width);
     } else {
       params.push('size=' + pxSize.width + 'x' + pxSize.height);
     }
-    params.push('format=' + $localStorage.format);
+    params.push('format=jpg');
     params.push('scale=2');
     params.push('sensor=true');
     return encodeURI(path + '?' + params.join('&'));
   };
+  self.generatePdf = function(locality, number, imageUrl) {
+    if (!imageUrl) {
+      imageUrl = self.generateUrl();
+    }
+    console.info(imageUrl);
+    var data = {
+      serif: true,
+      locality: locality,
+      notes: "See attached form for Do Not Calls.\nAdd new Do Not Calls as you find them.",
+      legend: [],
+      number: number,
+      image: imageUrl
+    };
+    var form = document.createElement('form');
+    form.style = 'display: none;';
+    form.enctype = 'x-www-form-urlencoded';
+    form.action = 'http://boundariesapp.herokuapp.com/pdf';
+    form.method = 'POST';
+    var input = document.createElement('input');
+    input.name = 'json';
+    input.type = 'text';
+    input.value = angular.toJson(data);
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  };
+}).controller('ImageCtrl', function($scope, ImageSvc) {
+  $scope.locality = '';
+  $scope.number = '';
+  $scope.downloadPdf = ImageSvc.generatePdf.bind(ImageSvc, $scope.locality, $scope.number);
 });

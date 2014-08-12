@@ -39,6 +39,49 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   };
 }).service('DrawingSvc', function($rootScope, $q, $localStorage, DirectionsSvc, MapSvc, ColorSvc) {
   var self = this;
+  function saveDrawings() {
+    var storableDrawings = [];
+    for (var i = 0; i < self.drawings.length; i++) {
+      var drawing = self.drawings[i];
+      var storableDrawing = {};
+      for (var key in drawing) {
+        if (key === '_poly') {
+          storableDrawing.path = MapSvc.geometry.encoding.encodePath(drawing._poly.getPath());
+        } else if (key === 'nodes') {
+          var storableNodes = [];
+          for (var j = 0; j < drawing.nodes.length; j++) {
+            var node = drawing.nodes[j];
+            var storableNode = {};
+            for (var nodeKey in node) {
+              if (key[0] !== '_' && key[0] !== '$' && node.hasOwnProperty(nodeKey)) {
+                storableNode[nodeKey] = node[nodeKey];
+              }
+            }
+            storableNodes[i] = storableNode;
+          }
+        } else if (drawing.hasOwnProperty(key)) {
+          storableDrawing[key] = drawing[key];
+        }
+      }
+      storableDrawings[i] = storableDrawing;
+    }
+    $localStorage.drawings = storableDrawings;
+  }
+  function loadDrawings() {
+    var storedDrawings = $localStorage.drawings || {};
+    for (var i = 0; i < storedDrawings.length; i++) {
+      var storedDrawing = storedDrawings[i];
+      var path = MapSvc.geometry.encoding.decodePath(storedDrawing.path);
+      var drawing = self.makeDrawing(storedDrawing.colorIndex, storedDrawing.rigid, storedDrawing.fill, path);
+      for (var j = 0; j < storedDrawing.nodes.length; j++) {
+        var storedNode = storedDrawing[j];
+        var latLng = new MapSvc.LatLng(storedNode.lat, storedNode.lng);
+        var node = self.makeNode(storedDrawing.colorIndex, latLng);
+        drawing.nodes.push(node);
+      }
+      self.drawings.push(drawing);
+    }
+  }
   function rgbaColorToString(rgba) {
     return ("rgba(" + rgba.r * 100 + "%," + rgba.g * 100 + "%," + rgba.b * 100 + "%," + rgba.a + ")");
   }
@@ -149,6 +192,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     for (var i = 0; i < removed.length; i++) {
       removed[i]._marker.setMap(null);
     }
+    saveDrawings();
     var promises = [],
         promise;
     var nodeAtIndexLocation,
@@ -206,6 +250,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       self.splicePath(polyPath, spliceIndex, 0, newPath);
       newNode._marker.setPosition(nodeAtIndexMarkerPosition);
       drawing._poly.setPath(polyPath);
+      saveDrawings();
     });
   };
   self.makeDrawing = function(colorIndex, rigid, fill) {
