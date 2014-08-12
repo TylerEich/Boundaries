@@ -147,18 +147,21 @@ Supported formats: rgba, hsla, hex24, hex32
   .controller('ColorCtrl', function($scope, $localStorage, ColorSvc) {
     $scope.$storage = $localStorage.$default({
       colors: [{
+        name: 'Red',
         r: 1,
         g: 0,
         b: 0,
         a: 0.125,
         weight: 10
       }, {
+        name: 'Green',
         r: 0,
         g: 1,
         b: 0,
         a: 0.125,
         weight: 10
       }, {
+        name: 'Blue',
         r: 0,
         g: 0,
         b: 1,

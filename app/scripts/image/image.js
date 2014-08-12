@@ -1,16 +1,19 @@
 'use strict';
 
 angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry.color'])
-  .service('ImageSvc', function($localStorage, MapSvc, DrawingSvc, ColorSvc) {
-    this.pxSize = function(maxWidth, maxHeight) {
-      var ratio = $localStorage.width / $localStorage.height;
+  .service('ImageSvc', function($http, $document, $localStorage, MapSvc, DrawingSvc, ColorSvc) {
+    var self = this;
+    
+    self.pxSize = function(maxWidth, maxHeight) {
+      // var ratio = $localStorage.width / $localStorage.height;
+      var ratio = 3.5 / 5;
       return {
         ratio: ratio,
         width: (ratio >= 1) ? maxWidth : Math.round(ratio * maxWidth),
         height: (ratio < 1) ? maxHeight : Math.round(1 / ratio * maxHeight)
       };
     };
-    this.generateUrl = function() {
+    self.generateUrl = function() {
       if (!DrawingSvc.drawings) {
         return;
       }
@@ -19,7 +22,7 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
 
       var params = [];
 
-      var pxSize = this.pxSize(640, 640);
+      var pxSize = self.pxSize(640, 640);
 
       // Generate style from map styling and drawings
       var i, j;
@@ -72,8 +75,9 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
         }
 
         encodedPath = MapSvc.geometry.encoding.encodePath(polyPath);
-        color = $localStorage.colors[drawing.activeColor];
-        hex = '0x' + ColorSvc.convert.hex24().toHex(color.rgba);
+        color = $localStorage.colors[drawing.colorIndex];
+        debugger;
+        hex = '0x' + ColorSvc.convert.rgba(color).to.hex32();
 
         // If drawing is polygon, use 'fillcolor'
         if (drawing.polygon) {
@@ -94,8 +98,8 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
 
       var northEast = bounds.getNorthEast();
       var southWest = bounds.getSouthWest();
-
-      var heading = Math.abs(MapSvc.computeHeading(northEast, southWest) + MapSvc.computeHeading(MapSvc.southWest, northEast)) / 2;
+      var computeHeading = MapSvc.geometry.spherical.computeHeading;
+      var heading = Math.abs(computeHeading(northEast, southWest) + computeHeading(southWest, northEast)) / 2;
 
       // Check orientation
       if ((45 <= heading && heading < 135) === (pxSize.ratio >= 1)) {
@@ -106,10 +110,50 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
         params.push('size=' + pxSize.width + 'x' + pxSize.height);
       }
 
-      params.push('format=' + $localStorage.format);
+      params.push('format=jpg');
       params.push('scale=2');
       params.push('sensor=true');
 
       return encodeURI(path + '?' + params.join('&'));
     };
+    self.generatePdf = function(locality, number, imageUrl) {
+      if (!imageUrl) {
+        imageUrl = self.generateUrl();
+      }
+      console.info(imageUrl);
+      
+      var data = {
+        serif: true,
+        locality: locality,
+        notes: "See attached form for Do Not Calls.\nAdd new Do Not Calls as you find them.",
+        legend: [],
+        number: number,
+        image: imageUrl
+      }
+      
+      // Ugly hack to force browser to download file
+      var form = document.createElement('form');
+      form.style = 'display: none;'
+      form.enctype = 'x-www-form-urlencoded';
+      form.action = 'http://boundariesapp.herokuapp.com/pdf';
+      form.method = 'POST';
+      
+      
+      var input = document.createElement('input');
+      input.name = 'json';
+      input.type = 'text';
+      input.value = angular.toJson(data);
+      
+      form.appendChild(input);
+      
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
+    }
+  })
+  .controller('ImageCtrl', function($scope, ImageSvc) {
+    $scope.locality = '';
+    $scope.number = '';
+    
+    $scope.downloadPdf = ImageSvc.generatePdf.bind(ImageSvc, $scope.locality, $scope.number);
   });
