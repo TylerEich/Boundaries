@@ -67,7 +67,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     }
     $localStorage.drawings = storableDrawings;
   }
-  function loadDrawings() {
+  self.loadDrawings = function() {
     var storedDrawings = $localStorage.drawings || {};
     for (var i = 0; i < storedDrawings.length; i++) {
       var storedDrawing = storedDrawings[i];
@@ -81,7 +81,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       }
       self.drawings.push(drawing);
     }
-  }
+  };
   function rgbaColorToString(rgba) {
     return ("rgba(" + rgba.r * 100 + "%," + rgba.g * 100 + "%," + rgba.b * 100 + "%," + rgba.a + ")");
   }
@@ -145,7 +145,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     }
     return Array.prototype.splice.apply(originalPath, args);
   };
-  self.makeNode = function(colorIndex, latLng) {
+  self.makeNode = function(colorIndex, latLng, index) {
     var color = $localStorage.colors[colorIndex];
     var marker = new MapSvc.Marker(makeMarkerOptions(color, latLng));
     return {
@@ -155,7 +155,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       _marker: marker
     };
   };
-  self.spliceNode = function(drawingIndex, nodeIndex, removeLength, newNode) {
+  self.spliceNode = function(drawingIndex, nodeIndex, removeLength, newNode, cachedPath) {
     if (removeLength === undefined) {
       removeLength = self.drawings[drawingIndex].nodes.length;
     }
@@ -176,10 +176,10 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     if (nodeIndex >= 0 && nodeIndex + 1 < drawing.nodes.length) {
       nodeAfter = drawing.nodes[nodeIndex + 1];
     }
+    var poly = drawing._poly,
+        path = poly.getPath().getArray();
     if (removed.length > 0) {
-      var poly = drawing._poly,
-          path = poly.getPath().getArray(),
-          removeStart = (nodeBefore ? nodeBefore.index : -1) + 1,
+      var removeStart = (nodeBefore ? nodeBefore.index : -1) + 1,
           removeEnd = (nodeAfter ? nodeAfter.index : removed[removed.length - 1].index + 1),
           pathRemoveLength = removeEnd - removeStart;
       self.splicePath(path, removeStart, pathRemoveLength);
@@ -188,9 +188,14 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
         nodeAtIndex.index = nodeBefore ? nodeBefore.index : 0;
       }
       shiftNodeIndices(drawingIndex, nodeIndex + 1, -pathRemoveLength);
+      for (var i = 0; i < removed.length; i++) {
+        removed[i]._marker.setMap(null);
+      }
     }
-    for (var i = 0; i < removed.length; i++) {
-      removed[i]._marker.setMap(null);
+    if (cachedPath) {
+      var poly = drawing._poly,
+          path = poly.getPath().getArray();
+      self.splicePath(path, removedPath);
     }
     saveDrawings();
     var promises = [],
@@ -225,32 +230,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
           polyPath = drawing._poly.getPath().getArray(),
           spliceIndex = 0,
           nodeAtIndexMarkerPosition;
-      if (pathResults.length === 2) {
-        pathResults[1].shift();
-      }
-      if (nodeBefore) {
-        newPathBefore = pathResults[0];
-        newPathBefore.shift();
-        shiftNodeIndices(drawingIndex, nodeIndex, newPathBefore.length);
-        spliceIndex = nodeBefore.index + 1;
-        nodeAtIndexMarkerPosition = newPathBefore[newPathBefore.length - 1];
-      } else {
-        newNode.index = 0;
-      }
-      if (nodeAfter) {
-        newPathAfter = pathResults[pathResults.length - 1];
-        newPathAfter.pop();
-        shiftNodeIndices(drawingIndex, nodeIndex + 1, newPathAfter.length);
-        nodeAtIndexMarkerPosition = nodeAtIndexMarkerPosition || newPathAfter[0];
-      }
-      if (!nodeBefore && !nodeAfter) {
-        nodeAtIndexMarkerPosition = pathResults[0][0];
-      }
-      newPath = Array.prototype.concat.apply([], pathResults);
-      self.splicePath(polyPath, spliceIndex, 0, newPath);
-      newNode._marker.setPosition(nodeAtIndexMarkerPosition);
-      drawing._poly.setPath(polyPath);
-      saveDrawings();
     });
   };
   self.makeDrawing = function(colorIndex, rigid, fill) {
@@ -287,6 +266,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   self.drawings = [];
 }).controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc, HistorySvc) {
   $scope.$storage = $localStorage.$default({
+    drawings: [],
     rigid: false,
     colors: [{
       r: 1,
