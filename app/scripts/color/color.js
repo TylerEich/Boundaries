@@ -1,6 +1,6 @@
 /* jshint bitwise: false */
 
-angular.module('bndry.color', [])
+angular.module('bndry.color', ['ngStorage'])
 
 /*
 Color Service
@@ -8,27 +8,9 @@ Color Service
 Converts color notations to various formats
 Supported formats: rgba, hsla, hex24, hex32
 */
-.service('ColorSvc', function() {
+.service('ColorSvc', function($localStorage) {
   var _rgba = {};
   var self = this;
-
-  function min() {
-    for (var i = 1, m = 0, len = arguments.length; i < len; i++) {
-      if (arguments[m] > arguments[i]) {
-        m = i;
-      }
-    }
-    return arguments[m];
-  }
-
-  function max() {
-    for (var i = 1, m = 0, len = arguments.length; i < len; i++) {
-      if (arguments[i] > arguments[m]) {
-        m = i;
-      }
-    }
-    return arguments[m];
-  }
 
   function rgbaToInt(r, g, b, a) {
     r = Math.round(r * 255);
@@ -49,7 +31,15 @@ Supported formats: rgba, hsla, hex24, hex32
     */
     return ((r << 24) | (g << 16) | (b << 8) | (a)) >>> 0;
   }
-
+  function hueToRgb(p, q, t) {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1/6) return p + (q - p) * 6 * t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+  }
+  
   this.convert = {
     rgba: function(rgba) {
       _rgba = rgbaToInt(rgba.r,
@@ -60,29 +50,21 @@ Supported formats: rgba, hsla, hex24, hex32
       return self;
     },
     hsla: function(hsla) {
-      // !!! Highly optimized, not legible !!!
-      var { h, s, l, a } = hsla,
-        vals;
+      var r, g, b;
+      var {h, s, l, a} = hsla;
 
-      h *= 6;
-      vals = [
-        l += s *= l < 0.5 ?
-        l :
-        1 - l,
-        l - h % 1 * s * 2,
-        l -= s *= 2,
-        l,
-        l + h % 1 * s,
-        l + s
-      ];
-
-      _rgba = rgbaToInt(
-        vals[~~h % 6], // red
-        vals[(h | 16) % 6], // green
-        vals[(h | 8) % 6], // blue
-        a
-      );
-
+      if (s == 0) {
+          r = g = b = l; // achromatic
+      } else {
+          var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+          var p = 2 * l - q;
+          r = hueToRgb(p, q, h + 1/3);
+          g = hueToRgb(p, q, h);
+          b = hueToRgb(p, q, h - 1/3);
+      }
+      
+      _rgba = rgbaToInt(r, g, b, a);
+      
       return self;
     },
     hex24: function(hex24) {
@@ -108,30 +90,25 @@ Supported formats: rgba, hsla, hex24, hex32
       return {r,g,b,a};
     },
     hsla: function() {
-      var rgba = self.to.rgba();
-
-      var {r, g, b, a} = rgba;
-
-      var m = min(r, g, b),
-        M = max(r, g, b);
-
-      var h, s, l, d = M - m; // d means delta
-      h = s = l = (M + m) / 2;
+      var {r, g, b, a} = self.to.rgba();
       
-      if (M === m) {
-        h = s = 0;
+      var max = Math.max(r, g, b), min = Math.min(r, g, b);
+      var h, s, l = (max + min) / 2;
+
+      if (max === min) {
+        h = s = 0; // achromatic
       } else {
-        if (r === M) {
-          h = (g - b) / d % 6;
-        } else if (g === M) {
-          h = (b - r) / d + 2;
-        } else {
-          h = (r - g) / d + 4;
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
         }
         h /= 6;
       }
 
-      return {h,s,l,a};
+      return {h, s, l, a};
     },
     hex24: function() {
       return self.to.hex32().substring(0, 6);
@@ -143,36 +120,41 @@ Supported formats: rgba, hsla, hex24, hex32
       return ('00000000' + hex).slice(-8); // Pad output with leading zero
     }
   };
+  
+  $localStorage.$default({
+    colors: [{
+      name: 'Red',
+      r: 1,
+      g: 0,
+      b: 0,
+      a: 0.125,
+      weight: 10
+    }, {
+      name: 'Green',
+      r: 0,
+      g: 1,
+      b: 0,
+      a: 0.125,
+      weight: 10
+    }, {
+      name: 'Blue',
+      r: 0,
+      g: 0,
+      b: 1,
+      a: 0.125,
+      weight: 10
+    }],
+    activeColorIndex: 1
+  });
+  self.colors = $localStorage.colors;
+  self.activeColorIndex = $localStorage.activeColorIndex;
+  self.activeColor = function() {
+    return self.colors[self.activeColorIndex];
+  };
 })
   .controller('ColorCtrl', function($scope, $localStorage, ColorSvc) {
-    $scope.$storage = $localStorage.$default({
-      colors: [{
-        name: 'Red',
-        r: 1,
-        g: 0,
-        b: 0,
-        a: 0.125,
-        weight: 10
-      }, {
-        name: 'Green',
-        r: 0,
-        g: 1,
-        b: 0,
-        a: 0.125,
-        weight: 10
-      }, {
-        name: 'Blue',
-        r: 0,
-        g: 0,
-        b: 1,
-        a: 0.125,
-        weight: 10
-      }],
-      activeColor: 1
-    });
-
     $scope.fillColor = function(index) {
-      var color = $scope.$storage.colors[index];
+      var color = ColorSvc.colors[index];
       return '#' + ColorSvc.convert.rgba(color).to.hex24();
     };
   });
