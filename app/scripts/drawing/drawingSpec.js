@@ -1,55 +1,28 @@
-'use strict';
-
-function makeLatLng(lat, lng) {
-  return {
-    lat: function() {
-      return function() {
-        return lat;
-      };
-    },
-    lng: function() {
-      return function() {
-        return lng;
-      };
-    }
-  };
-}
-
-describe('DrawingSvc', function() {
-  var $q, $timeout, DrawingSvc, MockDirectionsSvc;
+describe('DrawingSvc ·', function() {
+  var $q, $timeout, DrawingSvc, MapSvc, MockDirectionsSvc, drawing;
 
   MockDirectionsSvc = function() {
     this.route = function(locations) {
-      var deferred = $q.defer();
+      var path = [], lat, lng;
 
-      var path = [];
-
-      for (var i = 0; i < locations.length; i++) {
-        if (i !== 0) {
-          path.push(locations[i]);
+      path.push(locations[0]);
+      if (
+        !(locations[0].lat() === locations[1].lat() &&
+        locations[0].lng() === locations[1].lng())
+      ) {
+        for (var i = 0; i < 8; i++) {
+          lat = -90 + (180 * Math.random());
+          lng = -180 + (360 * Math.random());
+          path.push(new MapSvc.LatLng(lat, lng));
         }
-
-        if (i === locations.length - 1) {
-          break;
-        }
-
-        var pathLength = Math.round(10 + 10 * Math.random());
-        var lat, lng;
-
-        for (var j = 0; j < pathLength; j++) {
-          lat = -90 + 180 * Math.random();
-          lng = -180 + 360 * Math.random();
-          path.push(makeLatLng(lat, lng));
-        }
+        path.push(locations[1]);
       }
 
-      deferred.resolve(path);
-
-      return deferred.promise;
+      return $q.when(path);
     };
   };
 
-  var MockMapSvc = {
+  var MockMapSvc = MapSvc = {
     '__gjsload__': function() {},
     'Animation': {
       'BOUNCE': 1,
@@ -81,7 +54,14 @@ describe('DrawingSvc', function() {
     'GroundOverlay': function() {},
     'ImageMapType': function() {},
     'InfoWindow': function() {},
-    'LatLng': function() {},
+    'LatLng': function(lat, lng) {
+      this.lat = () => lat;
+      this.lng = () => lng;
+      this.equals = (latLng) => {
+        return (this.lat() === latLng.lat() &&
+          this.lng() === latLng.lng());
+      }
+    },
     'LatLngBounds': function() {},
     'MVCArray': function() {},
     'MVCObject': function() {},
@@ -98,7 +78,9 @@ describe('DrawingSvc', function() {
       'TERRAIN': 'terrain'
     },
     'MapTypeRegistry': function() {},
-    'Marker': function() {},
+    'Marker': function() {
+      this.setPosition = () => {};
+    },
     'MarkerImage': function() {},
     'NavigationControlStyle': {
       'DEFAULT': 0,
@@ -110,8 +92,28 @@ describe('DrawingSvc', function() {
     },
     'OverlayView': function() {},
     'Point': function() {},
-    'Polygon': function() {},
-    'Polyline': function() {},
+    'Polygon': function() {
+      var path;
+      this.setPath = (polyPath) => {
+        path = polyPath;
+      }
+      this.getPath = () => {
+        return {
+          getArray: () => path
+        };
+      }
+    },
+    'Polyline': function() {
+      var path = [];
+      this.setPath = (polyPath) => {
+        path = polyPath;
+      }
+      this.getPath = () => {
+        return {
+          getArray: () => path
+        };
+      }
+    },
     'Rectangle': function() {},
     'ScaleControlStyle': {
       'DEFAULT': 0
@@ -274,55 +276,334 @@ describe('DrawingSvc', function() {
     DrawingSvc = _DrawingSvc_;
   }));
 
-  it('Makes rigid paths', function(done) {
-    var start = makeLatLng(0, 40),
-      end = makeLatLng(40, 0),
-      path;
+  describe('Splice tests ·', function() {
+    describe('Flexible paths ·', function() {
+      it('Creates a path with a single point', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, false);
+        var node = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0));
+        
+        DrawingSvc.addNodeToDrawing(drawing, 0, node)
+          .then(function(path) {
+            expect(path.length).toBe(1);
+          
+            expect(node.index).toBe(0);
+            expect(path[0].lat()).toBe(node.lat);
+            expect(path[0].lng()).toBe(node.lng);
+          })
+          .finally(done);
+      
+        $timeout.flush();
+      });
+    
+    
+      it('Appends a path to a single point', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, false);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1));
+      
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 1, node1)
+              .then(function(path) {
+                expect(path.length).toBe(10);
+              
+                expect(node0.index).toBe(0);
+                expect(path[0].lat()).toBe(node0.lat);
+                expect(path[0].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(9);
+                expect(path[9].lat()).toBe(node1.lat);
+                expect(path[9].lng()).toBe(node1.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
+      });
+    
+    
+      it('Appends a path to a path', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, false);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1)),
+          node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
+      
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 2, node2)
+              .then(function(path) {
+                expect(path.length).toBe(19);
+              
+                expect(node0.index).toBe(0);
+                expect(path[0].lat()).toBe(node0.lat);
+                expect(path[0].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(9);
+                expect(path[9].lat()).toBe(node1.lat);
+                expect(path[9].lng()).toBe(node1.lng);
+              
+                expect(node2.index).toBe(18);
+                expect(path[18].lat()).toBe(node2.lat);
+                expect(path[18].lng()).toBe(node2.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
+      });
 
-    var promise = DrawingSvc.makePath([start, end], true);
 
-    promise.then(function(result) {
-      path = result;
+      it('Inserts a path into a path', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, false);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1)),
+          node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
+      
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 1, node2)
+              .then(function(path) {
+                expect(path.length).toBe(19);
+              
+                expect(node0.index).toBe(0);
+                expect(path[0].lat()).toBe(node0.lat);
+                expect(path[0].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(18);
+                expect(path[18].lat()).toBe(node1.lat);
+                expect(path[18].lng()).toBe(node1.lng);
+              
+                expect(node2.index).toBe(9);
+                expect(path[9].lat()).toBe(node2.lat);
+                expect(path[9].lng()).toBe(node2.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
+      });
 
-      expect(path.length).toEqual(2);
-      expect(path[0]).toEqual(start);
-      expect(path[1]).toEqual(end);
-    })
-    .finally(done);
-  });
 
-  describe('splice tests', function() {
-    var points = [makeLatLng(0, 10), makeLatLng(0, 20), makeLatLng(0, 30)];
-
-    it('Prepends one path to another', function(done) {
-      DrawingSvc.makePath(points, false)
-        .then(function(path) {
-          var pathLength = path.length;
-
-          DrawingSvc.splicePath(path, 0, 0, points);
-          expect(path).toBe(path);
-
-          expect(path.length).toBe(pathLength + points.length);
-        })
-        .finally(done);
-    });
-    it('Splices one path midway of another', function(done) {
-      DrawingSvc.makePath(points, false).then(function(path) {
-        DrawingSvc.makePath(points, false).then(function(newPath) {
-          var pathLength = path.length;
-          DrawingSvc.splicePath(path, 5, 4, newPath);
-          expect(path.length).toBe(pathLength + newPath.length - 4);
-        })
-        .finally(done);
+      it('Prepends a path to a single point', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, false);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1));
+      
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 0, node1)
+              .then(function(path) {
+                expect(path.length).toBe(10);
+              
+                expect(node0.index).toBe(9);
+                expect(path[9].lat()).toBe(node0.lat);
+                expect(path[9].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(0);
+                expect(path[0].lat()).toBe(node1.lat);
+                expect(path[0].lng()).toBe(node1.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
+      });
+    
+    
+      it('Prepends a path to a path', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, false);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1)),
+          node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
+      
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 0, node2)
+              .then(function(path) {
+                expect(path.length).toBe(19);
+              
+                expect(node0.index).toBe(9);
+                expect(path[9].lat()).toBe(node0.lat);
+                expect(path[9].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(18);
+                expect(path[18].lat()).toBe(node1.lat);
+                expect(path[18].lng()).toBe(node1.lng);
+              
+                expect(node2.index).toBe(0);
+                expect(path[0].lat()).toBe(node2.lat);
+                expect(path[0].lng()).toBe(node2.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
       });
     });
-    it('Appends one path to another', function(done) {
-      DrawingSvc.makePath(points, false).then(function(path) {
-        var pathLength = path.length;
-        DrawingSvc.splicePath(path, pathLength, 0, points);
-        expect(path.length).toBe(pathLength + points.length);
-      })
-      .finally(done);
+    
+    
+    describe('Rigid paths ·', function() {
+      it('Creates a path with a single point', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, true);
+        var node = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0));
+        
+        DrawingSvc.addNodeToDrawing(drawing, 0, node)
+          .then(function(path) {
+            expect(path.length).toBe(1);
+          
+            expect(node.index).toBe(0);
+            expect(path[0].lat()).toBe(node.lat);
+            expect(path[0].lng()).toBe(node.lng);
+          })
+          .finally(done);
+      
+        $timeout.flush();
+      });
+    
+    
+      it('Appends a path to a single point', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, true);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1));
+      
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 1, node1)
+              .then(function(path) {
+                expect(path.length).toBe(2);
+              
+                expect(node0.index).toBe(0);
+                expect(path[0].lat()).toBe(node0.lat);
+                expect(path[0].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(1);
+                expect(path[1].lat()).toBe(node1.lat);
+                expect(path[1].lng()).toBe(node1.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
+      });
+    
+    
+      it('Appends a path to a path', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, true);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1)),
+          node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
+      
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 2, node2)
+              .then(function(path) {
+                expect(path.length).toBe(3);
+              
+                expect(node0.index).toBe(0);
+                expect(path[0].lat()).toBe(node0.lat);
+                expect(path[0].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(1);
+                expect(path[1].lat()).toBe(node1.lat);
+                expect(path[1].lng()).toBe(node1.lng);
+              
+                expect(node2.index).toBe(2);
+                expect(path[2].lat()).toBe(node2.lat);
+                expect(path[2].lng()).toBe(node2.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
+      });
+
+
+      it('Inserts a path into a path', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, true);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1)),
+          node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
+      
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 1, node2)
+              .then(function(path) {
+                expect(path.length).toBe(3);
+              
+                expect(node0.index).toBe(0);
+                expect(path[0].lat()).toBe(node0.lat);
+                expect(path[0].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(2);
+                expect(path[2].lat()).toBe(node1.lat);
+                expect(path[2].lng()).toBe(node1.lng);
+              
+                expect(node2.index).toBe(1);
+                expect(path[1].lat()).toBe(node2.lat);
+                expect(path[1].lng()).toBe(node2.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
+      });
+
+
+      it('Prepends a path to a single point', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, true);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1));
+      
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 0, node1)
+              .then(function(path) {
+                expect(path.length).toBe(2);
+              
+                expect(node0.index).toBe(1);
+                expect(path[1].lat()).toBe(node0.lat);
+                expect(path[1].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(0);
+                expect(path[0].lat()).toBe(node1.lat);
+                expect(path[0].lng()).toBe(node1.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
+      });
+    
+    
+      it('Prepends a path to a path', function(done) {
+        drawing = DrawingSvc.makeDrawing(0, true);
+        var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
+          node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1)),
+          node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
+      
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
+          .then(function() {
+            DrawingSvc.addNodeToDrawing(drawing, 0, node2)
+              .then(function(path) {
+                expect(path.length).toBe(3);
+              
+                expect(node0.index).toBe(1);
+                expect(path[1].lat()).toBe(node0.lat);
+                expect(path[1].lng()).toBe(node0.lng);
+              
+                expect(node1.index).toBe(2);
+                expect(path[2].lat()).toBe(node1.lat);
+                expect(path[2].lng()).toBe(node1.lng);
+              
+                expect(node2.index).toBe(0);
+                expect(path[0].lat()).toBe(node2.lat);
+                expect(path[0].lng()).toBe(node2.lng);
+              })
+              .finally(done);
+          });
+      
+        $timeout.flush();
+      });
     });
   });
 });

@@ -70,18 +70,23 @@ var karmaConfFiles = [
 ];
 
 var karmaConf = {
-  browsers: ['Firefox', 'Chrome'],
+  browsers: ['Chrome'],
   frameworks: ['jasmine'],
   reporters: ['osx', 'dots'],
-  logLevel: 'INFO',
-  files: karmaConfFiles
+  logLevel: 'WARN',
+  files: karmaConfFiles,
+  exclude: ['app/bower_components/angular-scenario/angular-scenario.js']
 };
 
 function deferScript(filepath) {
   return '<script defer src="' + filepath + '"></script>';
 }
-function fileContents (filePath, file) {
+function fileContents(filePath, file) {
   return file.contents.toString('utf8');
+}
+function errorHandler(e) {
+  console.log(e.toString());
+  this.emit('end');
 }
 
 // Tests
@@ -91,7 +96,6 @@ function test(watch, files, done) {
   var karmaServer = require('karma').server;
 
   karmaConf.files = files;
-  // karmaConf.autoWatch = watch;
   karmaConf.singleRun = !watch;
 
   karmaServer.start(karmaConf, done);
@@ -106,22 +110,25 @@ function clean(glob) {
     .pipe(gulpClean());
 }
 var tasks = {
-  'test': test.bind(null, false, karmaConfFiles.concat(traceurRuntime, jsBuildFiles, unitTestBuildFiles)),
+  'test': test.bind(null, true, karmaConfFiles.concat(traceurRuntime, jsBuildFiles, unitTestBuildFiles)),
+  'test:once': test.bind(null, false, karmaConfFiles.concat(traceurRuntime, jsBuildFiles, unitTestBuildFiles)),
   'test:dist': test.bind(null, false, karmaConfFiles.concat('dist/script.min.js', unitTestBuildFiles)),
   'build:js': function() {
     var changed = require('gulp-changed'),
-      gulpPrint = require('gulp-print'),
+      sourcemaps = require('gulp-sourcemaps'),
       traceur = require('gulp-traceur');
-      
-    gulp.src(bowerBuildFiles).pipe(gulpPrint());
-
-    return gulp.src(jsAppFiles, unitTestFiles)
-      .pipe(gulpPrint())
+          
+      jsAppFiles[1] = unitTestFiles[0];
+    
+    return gulp.src(jsAppFiles.concat(unitTestFiles))
       .pipe(changed('build/scripts'))
-      .pipe(traceur({
-        sourceMap: true
-      }))
-      .pipe(gulp.dest('build/scripts'));
+      .pipe(sourcemaps.init())
+        .pipe(traceur({
+          sourceMap: true
+        }))
+      .pipe(sourcemaps.write())
+      .pipe(gulp.dest('build/scripts'))
+      .on('error', errorHandler);
   },
   'build:css': function() {
     var changed = require('gulp-changed'),
@@ -178,7 +185,9 @@ var tasks = {
   },
   'dist:js': function() {
     var util = require('util'),
+      sourcemaps = require('gulp-sourcemaps'),
       ngAnnotate = require('gulp-ng-annotate'),
+      traceur = require('gulp-traceur'),
       uglify = require('gulp-uglify'),
       filesize = require('gulp-filesize'),
       concat = require('gulp-concat'),
@@ -194,9 +203,14 @@ var tasks = {
         pkg.license);
 
     return gulp.src(jsBuildFiles)
-      .pipe(concat('script.min.js'))
-      .pipe(ngAnnotate())
-      .pipe(uglify())
+      .pipe(sourcemaps.init())
+        .pipe(concat('script.min.js'))
+        .pipe(ngAnnotate())
+        .pipe(traceur({
+          sourceMap: true
+        }))
+        .pipe(uglify())
+      .pipe(sourcemaps.write())
       .pipe(insert.prepend(copyright))
       .pipe(gulp.dest('dist'))
       .pipe(filesize());
@@ -236,11 +250,13 @@ var tasks = {
   }
 };
 
-gulp.task('test', tasks['test']);
+// Test tasks
+gulp.task('test', ['build:js'], tasks['test']);
+gulp.task('test:once', ['build:js'], tasks['test:once']);
 gulp.task('test:dist', ['dist:js'], tasks['test:dist']);
 
 // Build tasks
-gulp.task('build', ['build:html', 'test']);
+gulp.task('build', ['build:html', 'test:once']);
 gulp.task('build:js', tasks['build:js']);
 gulp.task('build:css', tasks['build:css']);
 gulp.task('build:html', ['build:js', 'build:css'], tasks['build:html']);
@@ -295,7 +311,14 @@ gulp.task('server:dist', ['dist:html'], function() {
 });
 
 // Default
-gulp.task('default', ['server'], function() {
+gulp.task('default', ['server'], function(done) {
+  tasks['test'](function(exitCode) {
+    console.log('Karma exited with code ' + exitCode);
+    if (exitCode === 0) {
+      done();
+    }
+  });
+  
   gulp.watch('app/**/*', ['build:html']);
 
   gulp.watch('app/**').on('change', function(file) {
