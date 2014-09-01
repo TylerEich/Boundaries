@@ -147,14 +147,24 @@ Supported formats: rgba, hsla, hex24, hex32
     activeColorIndex: 1
   });
   self.colors = $localStorage.colors;
-  self.activeColorIndex = $localStorage.activeColorIndex;
+  self.activeColorIndex = () => $localStorage.activeColorIndex;
+  self.setActiveColorIndex = function(index) {
+    $localStorage.activeColorIndex = index;
+  }
   self.activeColor = function() {
-    return self.colors[self.activeColorIndex];
+    return self.colors[self.activeColorIndex()];
   };
 })
   .controller('ColorCtrl', function($scope, $localStorage, ColorSvc) {
+    $scope.$storage = $localStorage;
+    
     $scope.fillColor = function(index) {
+      if (index === undefined) {
+        index = ColorSvc.activeColorIndex;
+      }
       var color = ColorSvc.colors[index];
       return '#' + ColorSvc.convert.rgba(color).to.hex24();
     };
+    $scope.activeColorIndex = ColorSvc.activeColorIndex;
+    $scope.setActiveColorIndex = ColorSvc.setActiveColorIndex;
   });

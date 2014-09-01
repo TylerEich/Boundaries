@@ -241,8 +241,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   }
   function processPaths(paths) {}
   function removeNodesAndTheirPathsFromDrawing(drawing, index, nodeRemoveLength) {
-    if (nodeRemoveLength !== 0)
-      debugger;
     var range = rangeOfPathAroundNodes(drawing.nodes, index, index + nodeRemoveLength);
     if (nodeRemoveLength === 0 && range.firstNode && !range.lastNode) {
       return;
@@ -436,7 +434,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     }
   }
   function rgbaColorToString(rgba) {
-    return ("rgba(" + rgba.r * 100 + "%," + rgba.g * 100 + "%," + rgba.b * 100 + "%," + rgba.a + ")");
+    return ("rgba(" + Math.round(rgba.r * 255) + "," + Math.round(rgba.g * 255) + "," + Math.round(rgba.b * 255) + "," + rgba.a + ")");
   }
   function shiftIndices(array, index, shift) {
     for (var i = index; i < array.length; i++) {
@@ -504,13 +502,12 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       b: 1,
       a: 0.125,
       weight: 10
-    }],
-    activeColor: 1
+    }]
   });
   var drawings = $scope.drawings = [];
   var activeDrawingIndex = -1;
   function addNode(event, param) {
-    var colorIndex = $scope.$storage.activeColor;
+    var colorIndex = ColorSvc.activeColorIndex();
     var rigid = false,
         fill = false;
     if (shouldCreateNewDrawing()) {
@@ -538,7 +535,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       return true;
     }
     var latestDrawing = drawings[drawings.length - 1];
-    return (latestDrawing && latestDrawing.colorIndex !== ColorSvc.activeColorIndex);
+    return (latestDrawing && latestDrawing.colorIndex !== ColorSvc.activeColorIndex());
   }
   $scope.$on('map:click', addNode);
   $scope.$on('action:clear', function($params) {

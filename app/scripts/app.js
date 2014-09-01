@@ -33,9 +33,7 @@ angular
     $scope.$storage = $localStorage;
     
     $scope.fillActiveColor = function() {
-      var index = $scope.$storage.activeColor;
-      var color = $scope.$storage.colors[index];
-      var hex = ColorSvc.convert.rgba(color).to.hex24();
+      var hex = ColorSvc.convert.rgba(ColorSvc.activeColor()).to.hex24();
       return `#${hex}`;
     };
     $scope.show = {

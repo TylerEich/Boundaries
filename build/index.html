@@ -72,7 +72,7 @@
           </button>
         </nav>
         <nav ng-show="show.header === 'color'" ng-controller="ColorCtrl">
-          <button ng-repeat="color in $storage.colors track by $index" ng-click="$storage.activeColor = $index" ng-class="{ active: $storage.activeColor === $index, first: $first, last: $last }" class="group">
+          <button ng-repeat="color in $storage.colors track by $index" ng-click="setActiveColorIndex($index)" ng-class="{ active: activeColorIndex() === $index, first: $first, last: $last }" class="group">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
               <circle ng-attr-fill="{{ fillColor($index) }}" stroke-width="6" r="20" cy="32" cx="32" />
             </svg>
