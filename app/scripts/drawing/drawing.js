@@ -651,8 +651,17 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
 
       return value;
     }
+    
+    self.forceCreateNewDrawing = false;
+    self.shouldCreateNewDrawing = () => {
+      if (self.drawings.length === 0 || self.forceCreateNewDrawing) {
+        return true;
+      }
+      var latestDrawing = self.drawings[self.drawings.length - 1];
+      return (latestDrawing && latestDrawing.colorIndex !== ColorSvc.activeColorIndex());
+    };
+    self.drawings;
   })
-
 // Controllers
 .controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc, ColorSvc, HistorySvc) {
   $scope.$storage = $localStorage.$default({
@@ -678,7 +687,8 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       weight: 10
     }]
   });
-  var drawings = $scope.drawings = [];
+    
+  var drawings = $scope.drawings = DrawingSvc.drawings = [];
   
   var activeDrawingIndex = -1;
   // $scope.$storage = DrawingSvc.loadDrawings();
@@ -690,10 +700,11 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     var rigid = false,
       fill = false;
 
-    if (shouldCreateNewDrawing()) {
+    if (DrawingSvc.shouldCreateNewDrawing()) {
       var newDrawing = DrawingSvc.makeDrawing(colorIndex, rigid, fill);
       activeDrawingIndex++;
       DrawingSvc.addDrawing(drawings, activeDrawingIndex, newDrawing);
+      DrawingSvc.forceCreateNewDrawing = false;
     }
     
     var drawing = drawings[activeDrawingIndex];
@@ -733,13 +744,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     //     DrawingSvc.spliceNode(drawingIndex, nodeIndex, 1, newNode);
     //   }.bind(null, drawingIndex, nodeIndex, newNode)
     // });
-  }
-  function shouldCreateNewDrawing() {
-    if (drawings.length === 0) {
-      return true;
-    }
-    var latestDrawing = drawings[drawings.length - 1];
-    return (latestDrawing && latestDrawing.colorIndex !== ColorSvc.activeColorIndex());
   }
   $scope.$on('map:click', addNode);
   $scope.$on('action:clear', function($params) {

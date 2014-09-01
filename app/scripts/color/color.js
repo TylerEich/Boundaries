@@ -121,9 +121,13 @@ Supported formats: rgba, hsla, hex24, hex32
     }
   };
   
+  // HOTFIX until proper interface arrives
+  delete $localStorage.colors;
+  
   $localStorage.$default({
     colors: [{
       name: 'Red',
+      label: 'Do not work either side',
       r: 1,
       g: 0,
       b: 0,
@@ -131,6 +135,7 @@ Supported formats: rgba, hsla, hex24, hex32
       weight: 10
     }, {
       name: 'Green',
+      label: 'Work ONLY the inner side',
       r: 0,
       g: 1,
       b: 0,
@@ -138,6 +143,7 @@ Supported formats: rgba, hsla, hex24, hex32
       weight: 10
     }, {
       name: 'Blue',
+      label: 'Work both sides',
       r: 0,
       g: 0,
       b: 1,
