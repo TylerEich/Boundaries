@@ -480,6 +480,15 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     }
     return value;
   }
+  self.forceCreateNewDrawing = false;
+  self.shouldCreateNewDrawing = (function() {
+    if (self.drawings.length === 0 || self.forceCreateNewDrawing) {
+      return true;
+    }
+    var latestDrawing = self.drawings[self.drawings.length - 1];
+    return (latestDrawing && latestDrawing.colorIndex !== ColorSvc.activeColorIndex());
+  });
+  self.drawings;
 }).controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc, ColorSvc, HistorySvc) {
   $scope.$storage = $localStorage.$default({
     drawings: [],
@@ -504,16 +513,17 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       weight: 10
     }]
   });
-  var drawings = $scope.drawings = [];
+  var drawings = $scope.drawings = DrawingSvc.drawings = [];
   var activeDrawingIndex = -1;
   function addNode(event, param) {
     var colorIndex = ColorSvc.activeColorIndex();
     var rigid = false,
         fill = false;
-    if (shouldCreateNewDrawing()) {
+    if (DrawingSvc.shouldCreateNewDrawing()) {
       var newDrawing = DrawingSvc.makeDrawing(colorIndex, rigid, fill);
       activeDrawingIndex++;
       DrawingSvc.addDrawing(drawings, activeDrawingIndex, newDrawing);
+      DrawingSvc.forceCreateNewDrawing = false;
     }
     var drawing = drawings[activeDrawingIndex];
     var newNode = DrawingSvc.makeNode(colorIndex, param.latLng);
@@ -529,13 +539,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       lat: latLng.lat(),
       lng: latLng.lng()
     });
-  }
-  function shouldCreateNewDrawing() {
-    if (drawings.length === 0) {
-      return true;
-    }
-    var latestDrawing = drawings[drawings.length - 1];
-    return (latestDrawing && latestDrawing.colorIndex !== ColorSvc.activeColorIndex());
   }
   $scope.$on('map:click', addNode);
   $scope.$on('action:clear', function($params) {

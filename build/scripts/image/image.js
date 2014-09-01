@@ -96,11 +96,24 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
       imageUrl = self.generateUrl();
     }
     console.info(imageUrl);
+    var legend = [];
+    for (var $__0 = ColorSvc.colors[Symbol.iterator](),
+        $__1; !($__1 = $__0.next()).done; ) {
+      var color = $__1.value;
+      {
+        var entry = {
+          name: color.name,
+          label: color.label,
+          color: ("#" + ColorSvc.convert.rgba(color).to.hex24())
+        };
+        legend.push(entry);
+      }
+    }
     var data = {
       serif: true,
       locality: locality,
       notes: "See attached form for Do Not Calls.\nAdd new Do Not Calls as you find them.",
-      legend: [],
+      legend: legend,
       number: number,
       image: imageUrl
     };
@@ -121,7 +134,17 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
 }).controller('ImageCtrl', function($scope, ImageSvc) {
   $scope.locality = '';
   $scope.number = '';
-  $scope.downloadPdf = ImageSvc.generatePdf.bind(ImageSvc, $scope.locality, $scope.number);
+  $scope.downloadPdf = (function() {
+    var locality = prompt('Locality (for example, the name of the city)', '');
+    if (locality === null) {
+      return;
+    }
+    var number = prompt('Territory number (for example, MR-1056)', '');
+    if (number === null) {
+      return;
+    }
+    ImageSvc.generatePdf(locality, number, ImageSvc.generateUrl());
+  });
 });
 
 //# sourceMappingURL=../../sourcemaps/image/image.js.map

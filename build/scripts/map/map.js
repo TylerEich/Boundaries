@@ -99,8 +99,8 @@ angular.module('bndry.map', ['ngStorage']).service('MapSvc', function($rootScope
     draggableCursor: 'crosshair',
     draggingCursor: 'move',
     mapTypeId: $localStorage.mapTypeId,
-    mapTypeControl: true,
-    mapTypeControlOptions: {mapTypeIds: [MapSvc.MapTypeId.ROADMAP, MapSvc.MapTypeId.HYBRID, 'custom']},
+    zoomControl: true,
+    zoomControlOptions: {position: MapSvc.ControlPosition.LEFT_CENTER},
     scaleControl: true,
     zoom: $localStorage.zoom
   };

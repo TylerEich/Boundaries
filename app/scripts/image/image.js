@@ -120,11 +120,20 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
       }
       console.info(imageUrl);
       
+      var legend = [];
+      for (var color of ColorSvc.colors) {
+        var entry = {
+          name: color.name,
+          label: color.label,
+          color: `#${ColorSvc.convert.rgba(color).to.hex24()}`
+        };
+        legend.push(entry);
+      }
       var data = {
         serif: true,
         locality: locality,
         notes: "See attached form for Do Not Calls.\nAdd new Do Not Calls as you find them.",
-        legend: [],
+        legend: legend,
         number: number,
         image: imageUrl
       }
@@ -135,7 +144,6 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
       form.enctype = 'x-www-form-urlencoded';
       form.action = 'http://boundariesapp.herokuapp.com/pdf';
       form.method = 'POST';
-      
       
       var input = document.createElement('input');
       input.name = 'json';
@@ -153,5 +161,16 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
     $scope.locality = '';
     $scope.number = '';
     
-    $scope.downloadPdf = ImageSvc.generatePdf.bind(ImageSvc, $scope.locality, $scope.number);
+    $scope.downloadPdf = () => {
+      var locality = prompt('Locality (for example, the name of the city)', '');
+      if (locality === null) {
+        return;
+      }
+      var number = prompt('Territory number (for example, MR-1056)', '');
+      if (number === null) {
+        return;
+      }
+      
+      ImageSvc.generatePdf(locality, number, ImageSvc.generateUrl());
+    };
   });

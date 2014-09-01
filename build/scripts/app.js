@@ -8,12 +8,16 @@ angular.module('bndry', ['ngTouch', 'ngStorage', 'ui.map', 'ngAnimate', 'bndry.a
       });
     }
   };
-}).controller('MasterCtrl', function($scope, $localStorage, ColorSvc) {
+}).controller('MasterCtrl', function($scope, $localStorage, ColorSvc, DrawingSvc) {
   $scope.$storage = $localStorage;
   $scope.fillActiveColor = function() {
     var hex = ColorSvc.convert.rgba(ColorSvc.activeColor()).to.hex24();
     return ("#" + hex);
   };
+  $scope.shouldCreateNewDrawing = DrawingSvc.shouldCreateNewDrawing;
+  $scope.toggleForceCreateNewDrawing = (function() {
+    DrawingSvc.forceCreateNewDrawing = !DrawingSvc.forceCreateNewDrawing;
+  });
   $scope.show = {
     header: '',
     footer: ''
