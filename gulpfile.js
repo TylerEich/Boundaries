@@ -112,7 +112,7 @@ function clean(glob) {
 var tasks = {
   'test': test.bind(null, true, karmaConfFiles.concat(traceurRuntime, jsBuildFiles, unitTestBuildFiles)),
   'test:once': test.bind(null, false, karmaConfFiles.concat(traceurRuntime, jsBuildFiles, unitTestBuildFiles)),
-  'test:dist': test.bind(null, false, karmaConfFiles.concat('dist/script.min.js', unitTestBuildFiles)),
+  'test:dist': test.bind(null, false, karmaConfFiles.concat(traceurRuntime, 'dist/script.min.js', unitTestBuildFiles)),
   'build:js': function() {
     var changed = require('gulp-changed'),
       sourcemaps = require('gulp-sourcemaps'),
@@ -126,7 +126,7 @@ var tasks = {
         .pipe(traceur({
           sourceMap: true
         }))
-      .pipe(sourcemaps.write())
+      .pipe(sourcemaps.write('../sourcemaps'))
       .pipe(gulp.dest('build/scripts'))
       .on('error', errorHandler);
   },
@@ -210,7 +210,7 @@ var tasks = {
           sourceMap: true
         }))
         .pipe(uglify())
-      .pipe(sourcemaps.write())
+      .pipe(sourcemaps.write('sourcemaps'))
       .pipe(insert.prepend(copyright))
       .pipe(gulp.dest('dist'))
       .pipe(filesize());
@@ -267,7 +267,7 @@ gulp.task('clean:css', tasks['clean:css']);
 gulp.task('clean:js', tasks['clean:js']);
 
 // Distribution tasks
-gulp.task('dist', ['dist:html']);
+gulp.task('dist', ['dist:html', 'test:dist']);
 gulp.task('dist:html', ['build:html', 'dist:css', 'dist:js'], tasks['dist:html']);
 gulp.task('dist:css', ['clean:css', 'build:css'], tasks['dist:css']);
 gulp.task('dist:js', ['clean:js', 'build:js'], tasks['dist:js']);

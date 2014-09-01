@@ -1,5 +1,3 @@
-'use strict';
-
 angular.module('bndry.geo', ['bndry.map'])
   .service('GeolocationSvc', function($q) {
     this.getLocation = function() {

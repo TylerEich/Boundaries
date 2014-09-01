@@ -1,5 +1,3 @@
-'use strict';
-
 describe('Image', function() {
   var ImageSvc;
 

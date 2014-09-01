@@ -1,7 +1,5 @@
 /* global FastClick */
 
-'use strict';
-
 angular
   .module('bndry', [
     'ngTouch',

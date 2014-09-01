@@ -1,5 +1,3 @@
-'use strict';
-
 describe('Geo', function() {
   var $timeout, GeolocationSvc, GeocodeSvc;
 

@@ -1,5 +1,3 @@
-'use strict';
-
 describe('ModeCtrl', function() {
   var ModeCtrl, scope;
 

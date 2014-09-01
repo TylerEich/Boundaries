@@ -1,5 +1,3 @@
-'use strict';
-
 angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry.color'])
   .service('ImageSvc', function($http, $document, $localStorage, MapSvc, DrawingSvc, ColorSvc) {
     var self = this;
