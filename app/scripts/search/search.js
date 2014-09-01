@@ -1,7 +1,5 @@
 /* jslint camelcase: false */
 
-'use strict';
-
 angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
   .directive('focusOn', function($parse) {
     return {

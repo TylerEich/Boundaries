@@ -1,7 +1,5 @@
 /* jshint camelcase: false */
 
-'use strict';
-
 angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
   .directive('statusBar', function($interval) {
     return {
