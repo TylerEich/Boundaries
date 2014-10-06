@@ -115,7 +115,7 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map']).directive('focusOn',
     if ($scope.suggestions[$scope.$tempStorage.active]) {
       if (enter) {
         $scope.loadOnMap($scope.suggestions[$scope.$tempStorage.active].reference);
-        $scope.show.value = '';
+        $scope.show.header = '';
       } else if (up && $scope.$tempStorage.active > -1) {
         $scope.$tempStorage.active--;
       } else if (down && $scope.$tempStorage.active < $scope.suggestions.length - 1) {

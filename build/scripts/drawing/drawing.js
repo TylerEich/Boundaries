@@ -57,6 +57,13 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       }
     }
   }
+  function arrayify(items) {
+    if (!Array.isArray(items)) {
+      return [items];
+    } else {
+      return items;
+    }
+  }
   function makePoint(latLng) {
     console.assert('lat' in latLng && 'lng' in latLng && typeof latLng.lat === 'number' && typeof latLng.lat === 'number', 'latLng is not formatted properly');
     return new MapSvc.LatLng(latLng.lat, latLng.lng);
@@ -83,13 +90,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   }
   function removePoints(path, index, removeLength) {
     return splice(path, index, removeLength);
-  }
-  function arrayify(nodes) {
-    if (!Array.isArray(nodes)) {
-      return [nodes];
-    } else {
-      return nodes;
-    }
   }
   function addNodes(nodes, index, nodesToAdd) {
     splice(nodes, index, 0, nodesToAdd);
@@ -259,15 +259,15 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     var newPaths = arguments[3] !== (void 0) ? arguments[3] : null;
     setInitialIndexOfNodes(drawing.nodes, index, newNodes);
     addNodes(drawing.nodes, index, newNodes);
-    var promise = $q.when();
+    var steps = [];
     if (newPaths) {
-      promise = promise.then((function(newPaths) {
+      steps.push((function(newPaths) {
         return newPaths;
       }));
     } else {
-      promise = promise.then(makePathsAroundNodes.bind(null, drawing.nodes, index, index + newNodes.length, drawing.rigid));
+      steps.push(makePathsAroundNodes.bind(null, drawing.nodes, index, index + newNodes.length, drawing.rigid));
     }
-    promise = promise.then(function(drawing, index, newNodes, newPaths) {
+    steps.push(function(drawing, index, newNodes, newPaths) {
       var polyPath = drawing._poly.getPath().getArray(),
           nodes = drawing.nodes;
       var shifts = [];
@@ -297,26 +297,25 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       drawing._poly.setPath(polyPath);
       return polyPath;
     }.bind(null, drawing, index, newNodes));
-    return promise;
+    return queue(steps);
   }
   function spliceNodesIntoDrawing(drawing, index, nodeRemoveLength) {
     var nodesToAdd = arguments[3] !== (void 0) ? arguments[3] : [];
     var pathsToAdd = arguments[4] !== (void 0) ? arguments[4] : null;
     var polyPath = drawing._poly.getPath().getArray();
     nodesToAdd = arrayify(nodesToAdd);
-    var promise = $q.when();
-    promise = promise.then(function(drawing, index, nodeRemoveLength, nodesToAdd, pathsToAdd) {
+    return queue(function(drawing, index, nodeRemoveLength, nodesToAdd, pathsToAdd) {
       removeNodesAndTheirPathsFromDrawing(drawing, index, nodeRemoveLength);
       return addNodesAndTheirPathsToDrawing(drawing, index, nodesToAdd, pathsToAdd);
     }.bind(null, drawing, index, nodeRemoveLength, nodesToAdd, pathsToAdd));
-    return promise;
   }
   var internalQueue = $q.when();
-  function queue(promise) {
-    internalQueue = internalQueue.then((function(promise) {
-      return promise;
-    }));
+  function queue(steps) {
+    console.assert(steps !== undefined, 'steps cannot be undefined');
+    var internalQueue = arrayify(steps).reduce($q.when, internalQueue);
+    return internalQueue;
   }
+  self.queue = queue;
   function makeNode(colorIndex, latLng) {
     var index = arguments[2] !== (void 0) ? arguments[2] : null;
     var marker = new MapSvc.Marker(makeMarkerOptions(colorIndex, latLng));
@@ -346,7 +345,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   }
   self.makeDrawing = makeDrawing;
   function addDrawings(drawings, index, drawingsToAdd) {
-    splice(drawings, index, 0, drawingsToAdd);
+    return queue(splice.bind(null, drawings, index, 0, drawingsToAdd));
   }
   self.addDrawings = self.addDrawing = addDrawings;
   function addNodesToDrawing(drawing, index) {
@@ -356,12 +355,14 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   }
   self.addNodesToDrawing = self.addNodeToDrawing = addNodesToDrawing;
   function removeDrawings(drawings, index, removeLength) {
-    var removedDrawings = splice(drawings, index, removeLength);
-    for (var i = 0; i < removedDrawings.length; i++) {
-      var removedDrawing = removedDrawings[i];
-      removeNodesFromDrawing(removedDrawing, 0, removedDrawing.nodes.length);
-      removedDrawing._poly.setMap(null);
-    }
+    return queue(function(drawings, index, removeLength) {
+      var removedDrawings = splice(drawings, index, removeLength);
+      for (var i = 0; i < removedDrawings.length; i++) {
+        var removedDrawing = removedDrawings[i];
+        removeNodesFromDrawing(removedDrawing, 0, removedDrawing.nodes.length);
+        removedDrawing._poly.setMap(null);
+      }
+    }.bind(null, drawings, index, removeLength));
   }
   self.removeDrawings = self.removeDrawing = removeDrawings;
   function removeNodesFromDrawing(drawing, index, removeLength) {
@@ -371,9 +372,11 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   self.removeNodesFromDrawing = self.removeNodeFromDrawing = removeNodesFromDrawing;
   function changeNodeOfDrawing(drawing, index, changes) {
     var pathsToAdd = arguments[3] !== (void 0) ? arguments[3] : null;
-    var node = drawing.nodes[index];
-    changeNode(node, changes);
-    return spliceNodesIntoDrawing(drawing, index, 1, duplicateNode(drawing, node), pathsToAdd);
+    return queue(function(drawing, index, changes, pathsToAdd) {
+      var node = drawing.nodes[index];
+      changeNode(node, changes);
+      return spliceNodesIntoDrawing(drawing, index, 1, duplicateNode(drawing, node), pathsToAdd);
+    }.bind(null, drawing, index, changes, pathsToAdd));
   }
   self.changeNodeOfDrawing = changeNodeOfDrawing;
   function changeDrawing(drawing, changes) {
@@ -392,31 +395,27 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   }
   function drawingsToGeoJson(drawings) {
     var storableDrawings = [];
-    for (var i = 0; i < drawings.length; i++) {
-      var drawing = drawings[i];
-      var storableDrawing = {};
+    return drawings.map((function(drawing) {
+      var geoJson = {};
       for (var key in drawing) {
         if (key === '_poly') {
-          storableDrawing.path = MapSvc.geometry.encoding.encodePath(drawing._poly.getPath());
+          geoJson.path = MapSvc.geometry.encoding.encodePath(drawing._poly.getPath());
         } else if (key === 'nodes') {
-          var storableNodes = [];
-          for (var j = 0; j < drawing.nodes.length; j++) {
-            var node = drawing.nodes[j];
-            var storableNode = {};
+          geoJson.nodes = drawing.nodes.map((function(node) {
+            nodeGeoJson = {};
             for (var nodeKey in node) {
-              if (key[0] !== '_' && key[0] !== '$' && node.hasOwnProperty(nodeKey)) {
-                storableNode[nodeKey] = node[nodeKey];
+              if (nodeKey[0] !== '_' && nodeKey[0] !== '$' && node.hasOwnProperty(nodeKey)) {
+                geoJson[nodeKey] = node[nodeKey];
               }
             }
-            storableNodes[i] = storableNode;
-          }
+            return nodeGeoJson;
+          }));
         } else if (drawing.hasOwnProperty(key)) {
-          storableDrawing[key] = drawing[key];
+          geoJson[key] = drawing[key];
         }
       }
-      return storableDrawing;
-    }
-    $localStorage.drawings = storableDrawings;
+      return geoJson;
+    }));
   }
   function geoJsonToDrawings(drawings) {
     var storedDrawings = $localStorage.drawings || {};
@@ -475,6 +474,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       value.fillColor = rgbaColorToString(color);
       value.strokeWeight = 0;
     } else {
+      color.a = 0.5;
       value.strokeColor = rgbaColorToString(color);
       value.strokeWeight = color.weight;
     }
@@ -514,6 +514,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     }]
   });
   var drawings = $scope.drawings = DrawingSvc.drawings = [];
+  var queue = DrawingSvc.queue;
   var activeDrawingIndex = -1;
   function addNode(event, param) {
     var colorIndex = ColorSvc.activeColorIndex();
@@ -525,10 +526,11 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       DrawingSvc.addDrawing(drawings, activeDrawingIndex, newDrawing);
       DrawingSvc.forceCreateNewDrawing = false;
     }
-    var drawing = drawings[activeDrawingIndex];
-    var newNode = DrawingSvc.makeNode(colorIndex, param.latLng);
-    DrawingSvc.addNodeToDrawing(drawing, drawing.nodes.length, newNode);
-    return;
+    queue(((function(activeDrawingIndex, colorIndex, latLng) {
+      var drawing = drawings[activeDrawingIndex];
+      var newNode = DrawingSvc.makeNode(colorIndex, latLng);
+      DrawingSvc.addNodeToDrawing(drawing, drawing.nodes.length, newNode);
+    })).bind(null, activeDrawingIndex, colorIndex, param.latLng));
   }
   function changeNode($params, drawingIndex, nodeIndex) {
     var event = $params[0],
