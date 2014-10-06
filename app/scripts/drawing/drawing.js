@@ -492,54 +492,85 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     }
 
     function drawingsToGeoJson(drawings) {
-      var storableDrawings = [];
+      var geoJson = {
+        type: 'FeatureCollection'
+      };
 
-      return drawings.map(
+      geoJson.features = drawings.map(
         (drawing) => {
-          var geoJson = {};
-          for (var key in drawing) {
-            if (key === '_poly') {
-              geoJson.path = MapSvc.geometry.encoding.encodePath(drawing._poly.getPath());
-            } else if (key === 'nodes') {
-              geoJson.nodes = drawing.nodes.map(
-                (node) => {
-                  nodeGeoJson = {};
-                  for (var nodeKey in node) {
-                    if (nodeKey[0] !== '_' && nodeKey[0] !== '$' && node.hasOwnProperty(nodeKey)) {
-                      geoJson[nodeKey] = node[nodeKey];
-                    }
-                  }
-                  return nodeGeoJson;
-                }
-              );
-            } else if (drawing.hasOwnProperty(key)) {
-              geoJson[key] = drawing[key];
+          var feature = {
+            type: 'Feature'
+          };
+          
+          var coordinates = drawing._poly.getPath().getArray().map(
+            (latLng) => {
+              return [
+                latLng.lat(),
+                latLng.lng()
+              ];
             }
-          }
-          return geoJson;
+          );
+          
+          feature.geometry = {
+            type: drawing.fill ? 'Polygon' : 'LineString',
+            coordinates: drawing.fill ? [coordinates] : coordinates
+          };
+          
+          var {colorIndex, rigid, fill, nodes} = drawing;
+          feature.properties = {colorIndex, rigid, fill};
+          feature.properties.nodes = nodes.map(
+            (node) => {
+              var {lat, lng, index} = node;
+              return {lat, lng, index};
+            }
+          );
+          return feature;
         }
       );
-    }
-    function geoJsonToDrawings(drawings) {
-      var storedDrawings = $localStorage.drawings || {};
-      for (var i = 0; i < storedDrawings.length; i++) {
-        var storedDrawing = storedDrawings[i];
-        var path = MapSvc.geometry.encoding.decodePath(storedDrawing.path);
-        var drawing = self.makeDrawing(storedDrawing.colorIndex, storedDrawing.rigid,
-          storedDrawing.fill, path);
-          
-        for (var j = 0; j < storedDrawing.nodes.length; j++) {
-          var storedNode = storedDrawing[j];
-          var latLng = new MapSvc.LatLng(storedNode.lat, storedNode.lng);
-          var node = self.makeNode(storedDrawing.colorIndex, latLng);
-          
-          drawing.nodes.push(node);
-        }
-        
-        self.drawings.push(drawing);
-      }
       
+      return JSON.stringify(geoJson);
     }
+    self.drawingsToGeoJson = drawingsToGeoJson;
+    function geoJsonToDrawings(geoJsonString) {
+      console.assert(
+        typeof geoJsonString === 'string',
+  
+        'geoJson must be a string'
+      );
+      
+      var drawings = [];
+      var geoJson = JSON.parse(geoJsonString);
+      geoJson.features.forEach(
+        (feature, i) => {
+          var {colorIndex, rigid, fill, nodes} = feature.properties;
+          var drawing = makeDrawing(colorIndex, rigid, fill);
+          addDrawings(drawings, i, drawing);
+          
+          var nodesToAdd = nodes.map(
+            (node) => {
+              var latLng = new MapSvc.LatLng(node.lat, node.lng);
+              return makeNode(node.colorIndex, latLng, node.index);
+            }
+          );
+          
+          var coordinates;
+          if (fill) {
+            coordinates = feature.geometry.coordinates[0];
+          } else {
+            coordinates = feature.geometry.coordinates;
+          }
+          pathToAdd = coordinates.map(
+            (coordinate) => new MapSvc.LatLng(coordinate[0], coordinate[1])
+          );
+          addNodesToDrawing(drawing, 0, nodesToAdd, pathToAdd);
+          
+          drawings.push(drawing);
+        }
+      );
+      
+      return drawings;
+    }
+    self.geoJsonToDrawings = geoJsonToDrawings;
     
     function rgbaColorToString(rgba) {
       return `rgba(${Math.round(rgba.r*255)},${Math.round(rgba.g*255)},${Math.round(rgba.b*255)},${rgba.a})`;
