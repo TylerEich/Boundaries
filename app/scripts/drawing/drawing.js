@@ -693,8 +693,8 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     drawings.push(storedDrawing);
   }
   
+  var activeDrawingIndex = drawings.length - 1;
   var queue = DrawingSvc.queue;
-  var activeDrawingIndex = -1;
   // $scope.$storage = DrawingSvc.loadDrawings();
 
   function addNode(event, param) {
