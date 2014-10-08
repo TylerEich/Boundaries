@@ -254,6 +254,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     shiftIndexOfNodes(drawing.nodes, range.nodeStart, -range.length);
     removeNodes(drawing.nodes, index, nodeRemoveLength);
     drawing._poly.setPath(path);
+    $rootScope.$broadcast('drawing:change');
   }
   function addNodesAndTheirPathsToDrawing(drawing, index, newNodes) {
     var newPaths = arguments[3] !== (void 0) ? arguments[3] : null;
@@ -261,9 +262,9 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     addNodes(drawing.nodes, index, newNodes);
     var steps = [];
     if (newPaths) {
-      steps.push((function(newPaths) {
+      steps.push(((function(newPaths) {
         return newPaths;
-      }));
+      })).bind(null, newPaths));
     } else {
       steps.push(makePathsAroundNodes.bind(null, drawing.nodes, index, index + newNodes.length, drawing.rigid));
     }
@@ -295,6 +296,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       var nodesToAlign = nodes.slice(index, index + alignLength);
       alignNodesWithPath(polyPath, nodesToAlign);
       drawing._poly.setPath(polyPath);
+      $rootScope.$broadcast('drawing:change');
       return polyPath;
     }.bind(null, drawing, index, newNodes));
     return queue(steps);
@@ -392,13 +394,15 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
           break;
       }
     }
+    $rootScope.$broadcast('drawing:change');
   }
   function drawingsToGeoJson(drawings) {
     var geoJson = {type: 'FeatureCollection'};
     geoJson.features = drawings.map((function(drawing) {
       var feature = {type: 'Feature'};
-      var coordinates = drawing._poly.getPath().getArray().map((function(latLng) {
-        return [latLng.lat(), latLng.lng()];
+      var polyPath = drawing._poly.getPath().getArray();
+      var coordinates = polyPath.map((function(latLng) {
+        return [latLng.lng(), latLng.lat()];
       }));
       feature.geometry = {
         type: drawing.fill ? 'Polygon' : 'LineString',
@@ -434,7 +438,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     console.assert(typeof geoJsonString === 'string', 'geoJson must be a string');
     var drawings = [];
     var geoJson = JSON.parse(geoJsonString);
-    geoJson.features.forEach((function(feature, i) {
+    var drawings = geoJson.features.map((function(feature, i) {
       var $__2 = feature.properties,
           colorIndex = $__2.colorIndex,
           rigid = $__2.rigid,
@@ -444,7 +448,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       addDrawings(drawings, i, drawing);
       var nodesToAdd = nodes.map((function(node) {
         var latLng = new MapSvc.LatLng(node.lat, node.lng);
-        return makeNode(node.colorIndex, latLng, node.index);
+        return makeNode.bind(null, drawing.colorIndex, latLng, node.index)();
       }));
       var coordinates;
       if (fill) {
@@ -452,11 +456,19 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       } else {
         coordinates = feature.geometry.coordinates;
       }
-      pathToAdd = coordinates.map((function(coordinate) {
-        return new MapSvc.LatLng(coordinate[0], coordinate[1]);
+      var polyPath = coordinates.map((function(coordinate) {
+        return new MapSvc.LatLng(coordinate[1], coordinate[0]);
       }));
-      addNodesToDrawing(drawing, 0, nodesToAdd, pathToAdd);
-      drawings.push(drawing);
+      var pathsToAdd = [];
+      for (var i = 0; i < nodesToAdd.length - 1; i++) {
+        var nodeAt = nodesToAdd[i],
+            nodeAfter = nodesToAdd[i + 1],
+            pathChunk = polyPath.slice(nodeAt.index, nodeAfter.index + 1);
+        pathsToAdd.push(pathChunk);
+      }
+      console.log(pathsToAdd);
+      addNodesToDrawing.bind(null, drawing, 0, nodesToAdd, pathsToAdd)();
+      return drawing;
     }));
     return drawings;
   }
@@ -518,7 +530,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     return (latestDrawing && latestDrawing.colorIndex !== ColorSvc.activeColorIndex());
   });
   self.drawings;
-}).controller('DrawingCtrl', function($scope, $localStorage, DrawingSvc, ColorSvc, HistorySvc) {
+}).controller('DrawingCtrl', function($scope, $localStorage, $timeout, DrawingSvc, ColorSvc, HistorySvc) {
   $scope.$storage = $localStorage.$default({
     drawings: [],
     rigid: false,
@@ -543,6 +555,14 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     }]
   });
   var drawings = $scope.drawings = DrawingSvc.drawings = [];
+  var storedDrawings = DrawingSvc.geoJsonToDrawings(localStorage.geoJson || DrawingSvc.drawingsToGeoJson(drawings));
+  for (var $__0 = storedDrawings[Symbol.iterator](),
+      $__1; !($__1 = $__0.next()).done; ) {
+    var storedDrawing = $__1.value;
+    {
+      drawings.push(storedDrawing);
+    }
+  }
   var queue = DrawingSvc.queue;
   var activeDrawingIndex = -1;
   function addNode(event, param) {
@@ -576,6 +596,9 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     DrawingSvc.removeDrawings(drawings, 0, drawings.length);
     activeDrawingIndex = -1;
   });
+  $scope.$on('drawing:change', (function() {
+    localStorage.geoJson = DrawingSvc.drawingsToGeoJson(drawings);
+  }));
   $scope.marker = {
     click: function($params) {
       addNode(undefined, $params[0]);
