@@ -43,7 +43,7 @@
       </svg>
     </div>
     <header no-scroll ng-cloak>
-      <div ui-view="header" ng-controller="ModeCtrl" class="slide" ng-class="{left: top && bottom, right: !top && !bottom}">
+      <div ui-view="header" ng-controller="ShapeCtrl" class="slide" ng-class="{left: top && bottom, right: !top && !bottom}">
         <nav>
           <button ng-click="setShowHeader('search')" ng-class="{ active: show.header === 'search' }">
             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
@@ -74,6 +74,20 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
               <circle ng-attr-fill="{{ fillColor($index) }}" stroke-width="6" r="20" cy="32" cx="32" />
             </svg>
+          </button>
+        </nav>
+        <nav ng-show="show.header === 'shape'" ng-controller="ShapeCtrl">
+          <button ng-click="$storage.rigid = !$storage.rigid" ng-class="{ active: $storage.rigid }" class="group first">
+            Rigid
+          </button>
+          <button ng-click="$storage.rigid = !$storage.rigid" ng-class="{ active: !$storage.rigid }" class="group last">
+            Flex
+          </button>
+          <button ng-click="$storage.fill = !$storage.fill" ng-class="{ active: $storage.fill }" class="group first">
+            Fill
+          </button>
+          <button ng-click="$storage.fill = !$storage.fill" ng-class="{ active: !$storage.fill }" class="group last">
+            Line
           </button>
         </nav>
       </div>

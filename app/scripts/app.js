@@ -14,7 +14,7 @@ angular
     'bndry.history',
     'bndry.image',
     'bndry.map',
-    'bndry.mode',
+    'bndry.shape',
     'bndry.search',
     'bndry.status'
     // 'bndry.settings'
