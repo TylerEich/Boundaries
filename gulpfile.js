@@ -250,10 +250,46 @@ var tasks = {
   }
 };
 
+
+
+gulp.task('6to5', function() {
+  var util = require('util'),
+    sourcemaps = require('gulp-sourcemaps'),
+    ngAnnotate = require('gulp-ng-annotate'),
+    to5 = require('gulp-6to5'),
+    uglify = require('gulp-uglify'),
+    filesize = require('gulp-filesize'),
+    concat = require('gulp-concat'),
+    insert = require('gulp-insert');
+
+  var pkg = require('./package.json'),
+    copyright = util.format('/*\n %s v%s\n (c) 2013-%s %s %s\n License: %s\n*/\n',
+      pkg.name,
+      pkg.version,
+      new Date().getFullYear(),
+      pkg.author,
+      pkg.homepage,
+      pkg.license);
+
+  return gulp.src(jsBuildFiles)
+    .pipe(sourcemaps.init())
+      .pipe(to5())
+      .pipe(concat('script.min.js'))
+      .pipe(ngAnnotate())
+
+      .pipe(uglify())
+    .pipe(sourcemaps.write('sourcemaps'))
+    .pipe(insert.prepend(copyright))
+    .pipe(gulp.dest('dist'))
+    .pipe(filesize());
+});
+
+
+
 // Test tasks
 gulp.task('test', ['build:js'], tasks['test']);
 gulp.task('test:once', ['build:js'], tasks['test:once']);
-gulp.task('test:dist', ['dist:js'], tasks['test:dist']);
+gulp.task('test:dist', ['dist:js']/*['6to5']*/, tasks['test:dist']);
 
 // Build tasks
 gulp.task('build', ['build:html', 'test:once']);

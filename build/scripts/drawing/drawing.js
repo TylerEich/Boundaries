@@ -1,5 +1,5 @@
 "use strict";
-angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry.history']).service('DirectionsSvc', function($q, MapSvc) {
+angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry.shape', 'bndry.history']).service('DirectionsSvc', function($q, MapSvc) {
   var self = this;
   var directions = new MapSvc.DirectionsService();
   self.route = function(locations) {
@@ -36,7 +36,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     processRequest(0);
     return deferred.promise;
   };
-}).service('DrawingSvc', function($rootScope, $q, $localStorage, DirectionsSvc, MapSvc, ColorSvc) {
+}).service('DrawingSvc', function($rootScope, $q, $localStorage, DirectionsSvc, MapSvc, ColorSvc, ShapeSvc) {
   var self = this;
   function splice(itemArray) {
     var index = arguments[1] !== (void 0) ? arguments[1] : 0;
@@ -505,17 +505,18 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   }
   function makePolyOptions(colorIndex, fill) {
     var value = {
-      clickable: true,
+      clickable: !fill,
       draggable: false,
       editable: false,
       map: MapSvc.map
     };
-    var color = ColorSvc.colors[colorIndex];
+    var color = angular.copy(ColorSvc.colors[colorIndex]);
+    color.a = 0.5;
     if (fill) {
       value.fillColor = rgbaColorToString(color);
+      value.fillOpacity = 1;
       value.strokeWeight = 0;
     } else {
-      color.a = 0.5;
       value.strokeColor = rgbaColorToString(color);
       value.strokeWeight = color.weight;
     }
@@ -527,10 +528,11 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       return true;
     }
     var latestDrawing = self.drawings[self.drawings.length - 1];
-    return (latestDrawing && latestDrawing.colorIndex !== ColorSvc.activeColorIndex());
+    var value = (latestDrawing && (latestDrawing.colorIndex !== ColorSvc.activeColorIndex() || latestDrawing.rigid !== ShapeSvc.rigid() || latestDrawing.fill !== ShapeSvc.fill()));
+    return value;
   });
   self.drawings;
-}).controller('DrawingCtrl', function($scope, $localStorage, $timeout, DrawingSvc, ColorSvc, HistorySvc) {
+}).controller('DrawingCtrl', function($scope, $localStorage, $timeout, DrawingSvc, ColorSvc, ShapeSvc, HistorySvc) {
   $scope.$storage = $localStorage.$default({
     drawings: [],
     rigid: false,
@@ -567,8 +569,8 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   var queue = DrawingSvc.queue;
   function addNode(event, param) {
     var colorIndex = ColorSvc.activeColorIndex();
-    var rigid = false,
-        fill = false;
+    var rigid = ShapeSvc.rigid(),
+        fill = ShapeSvc.fill();
     if (DrawingSvc.shouldCreateNewDrawing()) {
       var newDrawing = DrawingSvc.makeDrawing(colorIndex, rigid, fill);
       activeDrawingIndex++;
@@ -605,7 +607,9 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     },
     dragend: changeNode
   };
-  $scope.poly = {click: function($params) {}};
+  $scope.poly = {click: function($params) {
+      addNode(undefined, $params[0]);
+    }};
 });
 
 //# sourceMappingURL=../../sourcemaps/drawing/drawing.js.map
