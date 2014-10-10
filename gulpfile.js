@@ -72,7 +72,7 @@ var karmaConfFiles = [
 var karmaConf = {
   browsers: ['Chrome'],
   frameworks: ['jasmine'],
-  reporters: ['osx', 'dots'],
+  reporters: ['osx', 'mocha'],
   logLevel: 'WARN',
   files: karmaConfFiles,
   exclude: ['app/bower_components/angular-scenario/angular-scenario.js']

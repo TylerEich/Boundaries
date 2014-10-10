@@ -78,8 +78,9 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
         hex = '0x' + ColorSvc.convert.rgba(color).to.hex32();
 
         // If drawing is polygon, use 'fillcolor'
-        if (drawing.polygon) {
+        if (drawing.fill) {
           urlPath.push('fillcolor:' + hex);
+          urlPath.push('weight:0');
         } else {
           urlPath.push('color:' + hex);
           urlPath.push('weight:' + color.weight);
