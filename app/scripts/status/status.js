@@ -10,9 +10,7 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
       },
       template: '<div ng-style="{width: value * 100 + \'%\'}" style="height: 100%; position: absolute;" ng-hide="hide"></div>',
       link: function(scope) {
-        $interval(function() {
-          scope.value = Math.random();
-        }, 1000);
+        
       }
     };
   })
