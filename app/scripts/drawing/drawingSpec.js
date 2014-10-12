@@ -1,4 +1,4 @@
-describe('DrawingSvc ·', function() {
+describe('DrawingSvc', function() {
   var $q,
     $timeout,
     DrawingSvc,
@@ -286,8 +286,8 @@ describe('DrawingSvc ·', function() {
     DrawingSvc = _DrawingSvc_;
   }));
 
-  describe('Flexible paths ·', function() {
-    describe('Addition ·', function() {
+  describe('Flexible paths', function() {
+    describe('Addition', function() {
       it('Creates a path with a single point', function(done) {
         drawing = DrawingSvc.makeDrawing(0, false);
         var node = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0));
@@ -342,23 +342,20 @@ describe('DrawingSvc ·', function() {
         var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
           node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1));
     
-        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
-          .then(function() {
-            DrawingSvc.addNodeToDrawing(drawing, 1, node1)
-              .then(function(path) {
-                expect(path.length).toBe(10);
-            
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(9);
-                expect(path[9].lat()).toBe(node1.lat);
-                expect(path[9].lng()).toBe(node1.lng);
-              })
-              .finally(done);
-          });
-    
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0);
+        DrawingSvc.addNodeToDrawing(drawing, 1, node1)
+          .then(function(path) {
+            expect(path.length).toBe(10);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(9);
+            expect(path[9].lat()).toBe(node1.lat);
+            expect(path[9].lng()).toBe(node1.lng);
+          })
+          .finally(done);
         $timeout.flush();
       });
   
@@ -369,26 +366,24 @@ describe('DrawingSvc ·', function() {
           node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1)),
           node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
     
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
-          .then(function() {
-            DrawingSvc.addNodeToDrawing(drawing, 2, node2)
-              .then(function(path) {
-                expect(path.length).toBe(19);
-            
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(9);
-                expect(path[9].lat()).toBe(node1.lat);
-                expect(path[9].lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(18);
-                expect(path[18].lat()).toBe(node2.lat);
-                expect(path[18].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1]);
+        DrawingSvc.addNodeToDrawing(drawing, 2, node2)
+          .then(function(path) {
+            expect(path.length).toBe(19);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(9);
+            expect(path[9].lat()).toBe(node1.lat);
+            expect(path[9].lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(18);
+            expect(path[18].lat()).toBe(node2.lat);
+            expect(path[18].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
@@ -400,26 +395,24 @@ describe('DrawingSvc ·', function() {
           node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1)),
           node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
     
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1]);
+        DrawingSvc.addNodeToDrawing(drawing, 1, node2)
           .then(function(path) {
-            DrawingSvc.addNodeToDrawing(drawing, 1, node2)
-              .then(function(path) {
-                expect(path.length).toBe(19);
-            
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(18);
-                expect(path[18].lat()).toBe(node1.lat);
-                expect(path[18].lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(9);
-                expect(path[9].lat()).toBe(node2.lat);
-                expect(path[9].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+            expect(path.length).toBe(19);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(18);
+            expect(path[18].lat()).toBe(node1.lat);
+            expect(path[18].lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(9);
+            expect(path[9].lat()).toBe(node2.lat);
+            expect(path[9].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
@@ -430,23 +423,21 @@ describe('DrawingSvc ·', function() {
         var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
           node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1));
     
-        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
-          .then(function() {
-            DrawingSvc.addNodeToDrawing(drawing, 0, node1)
-              .then(function(path) {
-                expect(path.length).toBe(10);
-            
-                expect(node0.index).toBe(9);
-                expect(path[9].lat()).toBe(node0.lat);
-                expect(path[9].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(0);
-                expect(path[0].lat()).toBe(node1.lat);
-                expect(path[0].lng()).toBe(node1.lng);
-              })
-              .finally(done);
-          });
-    
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0);
+        DrawingSvc.addNodeToDrawing(drawing, 0, node1)
+          .then(function(path) {
+            expect(path.length).toBe(10);
+        
+            expect(node0.index).toBe(9);
+            expect(path[9].lat()).toBe(node0.lat);
+            expect(path[9].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(0);
+            expect(path[0].lat()).toBe(node1.lat);
+            expect(path[0].lng()).toBe(node1.lng);
+          })
+          .finally(done);
+          
         $timeout.flush();
       });
   
@@ -457,54 +448,50 @@ describe('DrawingSvc ·', function() {
           node1 = DrawingSvc.makeNode(0, new MapSvc.LatLng(1, 1)),
           node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
     
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
-          .then(function() {
-            DrawingSvc.addNodeToDrawing(drawing, 0, node2)
-              .then(function(path) {
-                expect(path.length).toBe(19);
-            
-                expect(node0.index).toBe(9);
-                expect(path[9].lat()).toBe(node0.lat);
-                expect(path[9].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(18);
-                expect(path[18].lat()).toBe(node1.lat);
-                expect(path[18].lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(0);
-                expect(path[0].lat()).toBe(node2.lat);
-                expect(path[0].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1]);
+        DrawingSvc.addNodeToDrawing(drawing, 0, node2)
+          .then(function(path) {
+            expect(path.length).toBe(19);
+        
+            expect(node0.index).toBe(9);
+            expect(path[9].lat()).toBe(node0.lat);
+            expect(path[9].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(18);
+            expect(path[18].lat()).toBe(node1.lat);
+            expect(path[18].lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(0);
+            expect(path[0].lat()).toBe(node2.lat);
+            expect(path[0].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
     });
     
-    describe('Change existing ·', function() {
+    describe('Change existing', function() {
       it('Moves orphan node', function(done) {
         drawing = DrawingSvc.makeDrawing(0, false);
         var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
           latLng = new MapSvc.LatLng(1, 1);
     
-        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
-          .then(function() {
-            DrawingSvc.changeNodeOfDrawing(drawing, 0, {
-              lat: latLng.lat(),
-              lng: latLng.lng()
-            })
-              .then(function(path) {
-                expect(path.length).toBe(1);
-            
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-                expect(latLng.lat()).toBe(node0.lat);
-                expect(latLng.lng()).toBe(node0.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0);
+        DrawingSvc.changeNodeOfDrawing(drawing, 0, {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        })
+          .then(function(path) {
+            expect(path.length).toBe(1);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+            expect(latLng.lat()).toBe(node0.lat);
+            expect(latLng.lng()).toBe(node0.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
@@ -517,34 +504,29 @@ describe('DrawingSvc ·', function() {
           node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2)),
           latLng = new MapSvc.LatLng(3, 3);
     
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
-          .then(function() {
-            DrawingSvc.changeNodeOfDrawing(drawing, 2, {
-              lat: latLng.lat(),
-              lng: latLng.lng()
-            })
-              .then(function(path) {
-                expect(path.length).toBe(19);
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2]);
+        DrawingSvc.changeNodeOfDrawing(drawing, 2, {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        })
+          .then(function(path) {
+            expect(path.length).toBe(19);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(9);
+            expect(path[9].lat()).toBe(node1.lat);
+            expect(path[9].lng()).toBe(node1.lng);
             
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(9);
-                expect(path[9].lat()).toBe(node1.lat);
-                expect(path[9].lng()).toBe(node1.lng);
-            
-                expect(drawing.nodes).not.toContain(node2);
-                node2 = drawing.nodes[2];
-                
-                expect(node2.index).toBe(18);
-                expect(path[18].lat()).toBe(node2.lat);
-                expect(path[18].lng()).toBe(node2.lng);
-                expect(latLng.lat()).toBe(node2.lat);
-                expect(latLng.lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+            expect(node2.index).toBe(18);
+            expect(path[18].lat()).toBe(node2.lat);
+            expect(path[18].lng()).toBe(node2.lng);
+            expect(latLng.lat()).toBe(node2.lat);
+            expect(latLng.lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
@@ -557,34 +539,29 @@ describe('DrawingSvc ·', function() {
           node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2)),
           latLng = new MapSvc.LatLng(3, 3);
     
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
-          .then(function() {
-            DrawingSvc.changeNodeOfDrawing(drawing, 0, {
-              lat: latLng.lat(),
-              lng: latLng.lng()
-            })
-              .then(function(path) {
-                expect(path.length).toBe(19);
-            
-                expect(drawing.nodes).not.toContain(node0);
-                node0 = drawing.nodes[0];
-                
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-                expect(latLng.lat()).toBe(node0.lat);
-                expect(latLng.lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(9);
-                expect(path[9].lat()).toBe(node1.lat);
-                expect(path[9].lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(18);
-                expect(path[18].lat()).toBe(node2.lat);
-                expect(path[18].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2]);
+        DrawingSvc.changeNodeOfDrawing(drawing, 0, {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        })
+          .then(function(path) {
+            expect(path.length).toBe(19);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+            expect(latLng.lat()).toBe(node0.lat);
+            expect(latLng.lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(9);
+            expect(path[9].lat()).toBe(node1.lat);
+            expect(path[9].lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(18);
+            expect(path[18].lat()).toBe(node2.lat);
+            expect(path[18].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
@@ -598,47 +575,34 @@ describe('DrawingSvc ·', function() {
           latLng = new MapSvc.LatLng(3, 3);
           
         DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
+        DrawingSvc.changeNodeOfDrawing(drawing, 1, {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        })
           .then(function(path) {
-            DrawingSvc.changeNodeOfDrawing(drawing, 1, {
-              lat: latLng.lat(),
-              lng: latLng.lng()
-            })
-              .then(function(path) {
-                expect(path.length).toBe(19);
+            expect(path.length).toBe(19);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
             
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(drawing.nodes).not.toContain(node1);
-                
-                node1 = drawing.nodes[1];
-                expect(node1.index).toBe(9);
-                expect(path[9].lat()).toBe(node1.lat);
-                expect(path[9].lng()).toBe(node1.lng);
-                expect(latLng.lat()).toBe(node1.lat);
-                expect(latLng.lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(18);
-                expect(path[18].lat()).toBe(node2.lat);
-                expect(path[18].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+            expect(node1.index).toBe(9);
+            expect(path[9].lat()).toBe(node1.lat);
+            expect(path[9].lng()).toBe(node1.lng);
+            expect(latLng.lat()).toBe(node1.lat);
+            expect(latLng.lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(18);
+            expect(path[18].lat()).toBe(node2.lat);
+            expect(path[18].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
     });
     
-    
-    
-    
-    
-    
-    /*
-    ALL REMOVAL TESTS USE NEW ASYNC PATTERN
-    */
-    describe('Removal ·', function() {
+    describe('Removal', function() {
       it('Removes orphan node', function(done) {
         drawing = DrawingSvc.makeDrawing(0, false);
         var node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0)),
@@ -743,7 +707,7 @@ describe('DrawingSvc ·', function() {
   });
   
   
-  describe('Rigid paths ·', function() {
+  describe('Rigid paths', function() {
     beforeEach(() => {
       drawing = DrawingSvc.makeDrawing(0, true);
       node0 = DrawingSvc.makeNode(0, new MapSvc.LatLng(0, 0));
@@ -751,7 +715,7 @@ describe('DrawingSvc ·', function() {
       node2 = DrawingSvc.makeNode(0, new MapSvc.LatLng(2, 2));
       latLng = new MapSvc.LatLng(3, 3);
     })
-    describe('Addition ·', function() {
+    describe('Addition', function() {
       it('Creates a path with a single point', function(done) {
         DrawingSvc.addNodeToDrawing(drawing, 0, node0)
           .then(function(path) {
@@ -791,214 +755,192 @@ describe('DrawingSvc ·', function() {
   
   
       it('Appends a path to a single point', function(done) {
-        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
-          .then(function() {
-            DrawingSvc.addNodeToDrawing(drawing, 1, node1)
-              .then(function(path) {
-                expect(path.length).toBe(2);
-            
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(1);
-                expect(path[1].lat()).toBe(node1.lat);
-                expect(path[1].lng()).toBe(node1.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0);
+        DrawingSvc.addNodeToDrawing(drawing, 1, node1)
+          .then(function(path) {
+            expect(path.length).toBe(2);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(1);
+            expect(path[1].lat()).toBe(node1.lat);
+            expect(path[1].lng()).toBe(node1.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
   
   
       it('Appends a path to a path', function(done) {
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
-          .then(function() {
-            DrawingSvc.addNodeToDrawing(drawing, 2, node2)
-              .then(function(path) {
-                expect(path.length).toBe(3);
-            
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(1);
-                expect(path[1].lat()).toBe(node1.lat);
-                expect(path[1].lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(2);
-                expect(path[2].lat()).toBe(node2.lat);
-                expect(path[2].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
-    
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1]);
+        DrawingSvc.addNodeToDrawing(drawing, 2, node2)
+          .then(function(path) {
+            expect(path.length).toBe(3);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(1);
+            expect(path[1].lat()).toBe(node1.lat);
+            expect(path[1].lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(2);
+            expect(path[2].lat()).toBe(node2.lat);
+            expect(path[2].lng()).toBe(node2.lng);
+          })
+          .finally(done);
+
         $timeout.flush();
       });
 
 
       it('Inserts a path into a path', function(done) {
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1]);
+        DrawingSvc.addNodeToDrawing(drawing, 1, node2)
           .then(function(path) {
-            DrawingSvc.addNodeToDrawing(drawing, 1, node2)
-              .then(function(path) {
-                expect(path.length).toBe(3);
-            
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(2);
-                expect(path[2].lat()).toBe(node1.lat);
-                expect(path[2].lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(1);
-                expect(path[1].lat()).toBe(node2.lat);
-                expect(path[1].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+            expect(path.length).toBe(3);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(2);
+            expect(path[2].lat()).toBe(node1.lat);
+            expect(path[2].lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(1);
+            expect(path[1].lat()).toBe(node2.lat);
+            expect(path[1].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
 
 
       it('Prepends a path to a single point', function(done) {
-        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
-          .then(function() {
-            DrawingSvc.addNodeToDrawing(drawing, 0, node1)
-              .then(function(path) {
-                expect(path.length).toBe(2);
-            
-                expect(node0.index).toBe(1);
-                expect(path[1].lat()).toBe(node0.lat);
-                expect(path[1].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(0);
-                expect(path[0].lat()).toBe(node1.lat);
-                expect(path[0].lng()).toBe(node1.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0);
+        DrawingSvc.addNodeToDrawing(drawing, 0, node1)
+          .then(function(path) {
+            expect(path.length).toBe(2);
+        
+            expect(node0.index).toBe(1);
+            expect(path[1].lat()).toBe(node0.lat);
+            expect(path[1].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(0);
+            expect(path[0].lat()).toBe(node1.lat);
+            expect(path[0].lng()).toBe(node1.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
   
   
       it('Prepends a path to a path', function(done) {
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1])
-          .then(function() {
-            DrawingSvc.addNodeToDrawing(drawing, 0, node2)
-              .then(function(path) {
-                expect(path.length).toBe(3);
-            
-                expect(node0.index).toBe(1);
-                expect(path[1].lat()).toBe(node0.lat);
-                expect(path[1].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(2);
-                expect(path[2].lat()).toBe(node1.lat);
-                expect(path[2].lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(0);
-                expect(path[0].lat()).toBe(node2.lat);
-                expect(path[0].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1]);
+        DrawingSvc.addNodeToDrawing(drawing, 0, node2)
+          .then(function(path) {
+            expect(path.length).toBe(3);
+        
+            expect(node0.index).toBe(1);
+            expect(path[1].lat()).toBe(node0.lat);
+            expect(path[1].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(2);
+            expect(path[2].lat()).toBe(node1.lat);
+            expect(path[2].lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(0);
+            expect(path[0].lat()).toBe(node2.lat);
+            expect(path[0].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
     });
     
-    describe('Change existing ·', function() {
+    describe('Change existing', function() {
       it('Moves orphan node', function(done) {
-        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
-          .then(function() {
-            DrawingSvc.changeNodeOfDrawing(drawing, 0, {
-              lat: latLng.lat(),
-              lng: latLng.lng()
-            })
-              .then(function(path) {
-                expect(path.length).toBe(1);
-            
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-                expect(latLng.lat()).toBe(node0.lat);
-                expect(latLng.lng()).toBe(node0.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0);
+        DrawingSvc.changeNodeOfDrawing(drawing, 0, {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        })
+          .then(function(path) {
+            expect(path.length).toBe(1);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+            expect(latLng.lat()).toBe(node0.lat);
+            expect(latLng.lng()).toBe(node0.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
     
     
       it('Moves last node', function(done) {
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
-          .then(function() {
-            DrawingSvc.changeNodeOfDrawing(drawing, 2, {
-              lat: latLng.lat(),
-              lng: latLng.lng()
-            })
-              .then(function(path) {
-                expect(path.length).toBe(3);
-            
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(1);
-                expect(path[1].lat()).toBe(node1.lat);
-                expect(path[1].lng()).toBe(node1.lng);
-            
-                expect(drawing.nodes).not.toContain(node2);
-                node2 = drawing.nodes[2];
-                
-                expect(node2.index).toBe(2);
-                expect(path[2].lat()).toBe(node2.lat);
-                expect(path[2].lng()).toBe(node2.lng);
-                expect(latLng.lat()).toBe(node2.lat);
-                expect(latLng.lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2]);
+        DrawingSvc.changeNodeOfDrawing(drawing, 2, {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        })
+          .then(function(path) {
+            expect(path.length).toBe(3);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(1);
+            expect(path[1].lat()).toBe(node1.lat);
+            expect(path[1].lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(2);
+            expect(path[2].lat()).toBe(node2.lat);
+            expect(path[2].lng()).toBe(node2.lng);
+            expect(latLng.lat()).toBe(node2.lat);
+            expect(latLng.lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
     
     
       it('Moves first node', function(done) {
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
-          .then(function() {
-            DrawingSvc.changeNodeOfDrawing(drawing, 0, {
-              lat: latLng.lat(),
-              lng: latLng.lng()
-            })
-              .then(function(path) {
-                expect(path.length).toBe(3);
-            
-                expect(drawing.nodes).not.toContain(node0);
-                node0 = drawing.nodes[0];
-                
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-                expect(latLng.lat()).toBe(node0.lat);
-                expect(latLng.lng()).toBe(node0.lng);
-            
-                expect(node1.index).toBe(1);
-                expect(path[1].lat()).toBe(node1.lat);
-                expect(path[1].lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(2);
-                expect(path[2].lat()).toBe(node2.lat);
-                expect(path[2].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2]);
+        DrawingSvc.changeNodeOfDrawing(drawing, 0, {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        })
+          .then(function(path) {
+            expect(path.length).toBe(3);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+            expect(latLng.lat()).toBe(node0.lat);
+            expect(latLng.lng()).toBe(node0.lng);
+        
+            expect(node1.index).toBe(1);
+            expect(path[1].lat()).toBe(node1.lat);
+            expect(path[1].lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(2);
+            expect(path[2].lat()).toBe(node2.lat);
+            expect(path[2].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
@@ -1006,143 +948,128 @@ describe('DrawingSvc ·', function() {
 
       it('Moves middle node', function(done) {
         DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
+        DrawingSvc.changeNodeOfDrawing(drawing, 1, {
+          lat: latLng.lat(),
+          lng: latLng.lng()
+        })
           .then(function(path) {
-            DrawingSvc.changeNodeOfDrawing(drawing, 1, {
-              lat: latLng.lat(),
-              lng: latLng.lng()
-            })
-              .then(function(path) {
-                expect(path.length).toBe(3);
+            expect(path.length).toBe(3);
+        
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
             
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(drawing.nodes).not.toContain(node1);
-                
-                node1 = drawing.nodes[1];
-                expect(node1.index).toBe(1);
-                expect(path[1].lat()).toBe(node1.lat);
-                expect(path[1].lng()).toBe(node1.lng);
-                expect(latLng.lat()).toBe(node1.lat);
-                expect(latLng.lng()).toBe(node1.lng);
-            
-                expect(node2.index).toBe(2);
-                expect(path[2].lat()).toBe(node2.lat);
-                expect(path[2].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+            expect(node1.index).toBe(1);
+            expect(path[1].lat()).toBe(node1.lat);
+            expect(path[1].lng()).toBe(node1.lng);
+            expect(latLng.lat()).toBe(node1.lat);
+            expect(latLng.lng()).toBe(node1.lng);
+        
+            expect(node2.index).toBe(2);
+            expect(path[2].lat()).toBe(node2.lat);
+            expect(path[2].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
     });
     
-    describe('Removal ·', function() {
+    describe('Removal', function() {
       it('Removes orphan node', function(done) {
-        DrawingSvc.addNodeToDrawing(drawing, 0, node0)
-          .then(function() {
-            DrawingSvc.removeNodeFromDrawing(drawing, 0, 1)
-              .then(function(path) {
-                expect(path.length).toBe(0);
-                expect(drawing.nodes.length).toBe(0);
-              })
-              .finally(done);
-          });
+        DrawingSvc.addNodeToDrawing(drawing, 0, node0);
+        DrawingSvc.removeNodeFromDrawing(drawing, 0, 1)
+          .then(function(path) {
+            expect(path.length).toBe(0);
+            expect(drawing.nodes.length).toBe(0);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
     
     
       it('Removes first node', function(done) {
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
-          .then(function() {
-            DrawingSvc.removeNodeFromDrawing(drawing, 0, 1)
-              .then(function(path) {
-                expect(path.length).toBe(2);
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2]);
+        DrawingSvc.removeNodeFromDrawing(drawing, 0, 1)
+          .then(function(path) {
+            expect(path.length).toBe(2);
+        
+            expect(drawing.nodes.length).toBe(2);
             
-                expect(drawing.nodes.length).toBe(2);
-                
-                expect(drawing.nodes[0]).toBe(node1);
-                expect(node1.index).toBe(0);
-                expect(path[0].lat()).toBe(node1.lat);
-                expect(path[0].lng()).toBe(node1.lng);
-            
-                expect(drawing.nodes[1]).toBe(node2);
-                expect(node2.index).toBe(1);
-                expect(path[1].lat()).toBe(node2.lat);
-                expect(path[1].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
-    
+            expect(drawing.nodes[0]).toBe(node1);
+            expect(node1.index).toBe(0);
+            expect(path[0].lat()).toBe(node1.lat);
+            expect(path[0].lng()).toBe(node1.lng);
+        
+            expect(drawing.nodes[1]).toBe(node2);
+            expect(node2.index).toBe(1);
+            expect(path[1].lat()).toBe(node2.lat);
+            expect(path[1].lng()).toBe(node2.lng);
+          })
+          .finally(done);
+
         $timeout.flush();
       });
 
 
       it('Removes middle node', function(done) {
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2]);
+        DrawingSvc.removeNodeFromDrawing(drawing, 1, 1)
           .then(function(path) {
-            DrawingSvc.removeNodeFromDrawing(drawing, 1, 1)
-              .then(function(path) {
-                expect(path.length).toBe(2);
+            expect(path.length).toBe(2);
+        
+            expect(drawing.nodes.length).toBe(2);
             
-                expect(drawing.nodes.length).toBe(2);
-                
-                expect(drawing.nodes[0]).toBe(node0);
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(drawing.nodes[1]).toBe(node2);
-                expect(node2.index).toBe(1);
-                expect(path[1].lat()).toBe(node2.lat);
-                expect(path[1].lng()).toBe(node2.lng);
-              })
-              .finally(done);
-          });
+            expect(drawing.nodes[0]).toBe(node0);
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(drawing.nodes[1]).toBe(node2);
+            expect(node2.index).toBe(1);
+            expect(path[1].lat()).toBe(node2.lat);
+            expect(path[1].lng()).toBe(node2.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
 
 
       it('Removes last node', function(done) {
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
-          .then(function() {
-            DrawingSvc.removeNodeFromDrawing(drawing, 2, 1)
-              .then(function(path) {
-                expect(path.length).toBe(2);
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2]);
+        DrawingSvc.removeNodeFromDrawing(drawing, 2, 1)
+          .then(function(path) {
+            expect(path.length).toBe(2);
+        
+            expect(drawing.nodes.length).toBe(2);
             
-                expect(drawing.nodes.length).toBe(2);
-                
-                expect(drawing.nodes[0]).toBe(node0);
-                expect(node0.index).toBe(0);
-                expect(path[0].lat()).toBe(node0.lat);
-                expect(path[0].lng()).toBe(node0.lng);
-            
-                expect(drawing.nodes[1]).toBe(node1);
-                expect(node1.index).toBe(1);
-                expect(path[1].lat()).toBe(node1.lat);
-                expect(path[1].lng()).toBe(node1.lng);
-              })
-              .finally(done);
-          });
+            expect(drawing.nodes[0]).toBe(node0);
+            expect(node0.index).toBe(0);
+            expect(path[0].lat()).toBe(node0.lat);
+            expect(path[0].lng()).toBe(node0.lng);
+        
+            expect(drawing.nodes[1]).toBe(node1);
+            expect(node1.index).toBe(1);
+            expect(path[1].lat()).toBe(node1.lat);
+            expect(path[1].lng()).toBe(node1.lng);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
       
       
       it('Removes all nodes', function(done) {
-        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2])
+        DrawingSvc.addNodesToDrawing(drawing, 0, [node0, node1, node2]);
+        DrawingSvc.removeNodesFromDrawing(drawing, 0, 3)
           .then(function(path) {
-            DrawingSvc.removeNodesFromDrawing(drawing, 0, 3)
-              .then(function(path) {
-                expect(path.length).toBe(0);
-            
-                expect(drawing.nodes.length).toBe(0);
-              })
-              .finally(done);
-          });
+            expect(path.length).toBe(0);
+        
+            expect(drawing.nodes.length).toBe(0);
+          })
+          .finally(done);
     
         $timeout.flush();
       });
