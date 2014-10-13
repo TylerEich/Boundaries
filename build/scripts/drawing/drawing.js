@@ -410,18 +410,20 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     return spliceNodesIntoDrawing.bind(null, drawing, index, 1, null, pathsToAdd)();
   }
   self.changeNodeOfDrawing = changeNodeOfDrawing;
-  function makeIcon(colorIndex) {
+  function makeIcon(colorIndex, options) {
     var color = ColorSvc.colors[colorIndex];
-    return {
+    var icon = {
       path: MapSvc.SymbolPath.CIRCLE,
       scale: 10,
       strokeColor: '#' + ColorSvc.convert.rgba(color).to.hex24(),
       strokeOpacity: 1,
       strokeWeight: 2.5
     };
+    change(icon, options);
+    return icon;
   }
-  function makeMarkerOptions(colorIndex, latLng) {
-    return {
+  function makeMarkerOptions(colorIndex, latLng, options) {
+    var markerOptions = {
       clickable: true,
       crossOnDrag: false,
       cursor: 'pointer',
@@ -431,6 +433,8 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       map: MapSvc.map,
       position: latLng
     };
+    change(markerOptions, options);
+    return markerOptions;
   }
   function makePolyOptions(colorIndex, fill) {
     var value = {
@@ -531,6 +535,26 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   function rgbaColorToString(rgba) {
     return ("rgba(" + Math.round(rgba.r * 255) + "," + Math.round(rgba.g * 255) + "," + Math.round(rgba.b * 255) + "," + rgba.a + ")");
   }
+  var activeMarker = new MapSvc.Marker();
+  function showActiveNode(colorIndex, node) {
+    var color = ColorSvc.colors[colorIndex];
+    activeMarker.setOptions(makeMarkerOptions(colorIndex, makePoint(node), {
+      clickable: false,
+      draggable: false,
+      icon: makeIcon(colorIndex, {
+        scale: 20,
+        strokeWeight: 2,
+        strokeOpacity: 0.5,
+        fillColor: '#' + ColorSvc.convert.rgba(color).to.hex24(),
+        fillOpacity: 0.125
+      })
+    }));
+  }
+  self.showActiveNode = showActiveNode;
+  function hideActiveNode() {
+    activeMarker.setMap(null);
+  }
+  self.hideActiveNode = hideActiveNode;
   self.forceCreateNewDrawing = false;
   self.shouldCreateNewDrawing = (function() {
     if (self.drawings.length === 0 || self.forceCreateNewDrawing) {
@@ -580,27 +604,58 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     var colorIndex = ColorSvc.activeColorIndex();
     var rigid = ShapeSvc.rigid(),
         fill = ShapeSvc.fill();
-    if (DrawingSvc.shouldCreateNewDrawing()) {
+    var createNewDrawing = DrawingSvc.shouldCreateNewDrawing();
+    if (createNewDrawing) {
       var newDrawing = DrawingSvc.makeDrawing(colorIndex, rigid, fill);
       activeDrawingIndex++;
       DrawingSvc.addDrawing(drawings, activeDrawingIndex, newDrawing);
       DrawingSvc.forceCreateNewDrawing = false;
     }
-    queue(((function(activeDrawingIndex, colorIndex, latLng) {
+    queue(function(activeDrawingIndex, colorIndex, latLng, createNewDrawing) {
       var drawing = drawings[activeDrawingIndex];
       var newNode = DrawingSvc.makeNode(colorIndex, latLng);
-      DrawingSvc.addNodeToDrawing(drawing, drawing.nodes.length, newNode);
-    })).bind(null, activeDrawingIndex, colorIndex, param.latLng));
+      var nodeIndex = drawing.nodes.length;
+      DrawingSvc.addNodeToDrawing(drawing, nodeIndex, newNode);
+      HistorySvc.add({
+        undo: function(drawings, drawing, drawingIndex, nodeIndex, didCreateNewDrawing) {
+          DrawingSvc.removeNodeFromDrawing(drawing, nodeIndex, 1);
+          if (didCreateNewDrawing) {
+            DrawingSvc.removeDrawing(drawings, drawingIndex, 1);
+          }
+        }.bind(null, drawings, drawing, activeDrawingIndex, nodeIndex, createNewDrawing),
+        redo: function(drawings, drawing, drawingIndex, nodeIndex, newNode, didCreateNewDrawing) {
+          if (didCreateNewDrawing) {
+            DrawingSvc.addDrawing(drawings, drawingIndex, drawing);
+          }
+          DrawingSvc.addNodeToDrawing(drawing, nodeIndex, newNode);
+        }.bind(null, drawings, drawing, activeDrawingIndex, nodeIndex, newNode, createNewDrawing)
+      });
+    }.bind(null, activeDrawingIndex, colorIndex, param.latLng, createNewDrawing));
   }
   function changeNode($params, drawingIndex, nodeIndex) {
     var event = $params[0],
         drawing = drawings[drawingIndex],
-        originalNode = drawing.nodes[nodeIndex],
         latLng = event.latLng;
-    DrawingSvc.changeNodeOfDrawing(drawing, nodeIndex, {
-      lat: latLng.lat(),
-      lng: latLng.lng()
-    });
+    queue(function(drawing, nodeIndex, latLng) {
+      var originalNode = drawing.nodes[nodeIndex],
+          originalPosition = {
+            lat: originalNode.lat,
+            lng: originalNode.lng
+          },
+          newPosition = {
+            lat: latLng.lat(),
+            lng: latLng.lng()
+          };
+      DrawingSvc.changeNodeOfDrawing(drawing, nodeIndex, newPosition);
+      HistorySvc.add({
+        undo: function(drawing, nodeIndex, originalPosition) {
+          DrawingSvc.changeNodeOfDrawing(drawing, nodeIndex, originalPosition);
+        }.bind(null, drawing, nodeIndex, originalPosition),
+        redo: function(drawing, nodeIndex, newPosition) {
+          DrawingSvc.changeNodeOfDrawing(drawing, nodeIndex, newPosition);
+        }.bind(null, drawing, nodeIndex, newPosition)
+      });
+    }.bind(null, drawing, nodeIndex, latLng));
   }
   $scope.$on('map:click', addNode);
   $scope.$on('action:clear', function($params) {
@@ -609,6 +664,13 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   });
   $scope.$on('drawing:change', (function() {
     localStorage.geoJson = DrawingSvc.drawingsToGeoJson(drawings);
+    if (drawings.length > 0 && drawings[0].nodes.length > 0) {
+      var latestNodes = drawings[drawings.length - 1].nodes,
+          latestNode = latestNodes[latestNodes.length - 1];
+      DrawingSvc.showActiveNode(ColorSvc.activeColorIndex(), latestNode);
+    } else {
+      DrawingSvc.hideActiveNode();
+    }
   }));
   $scope.marker = {
     click: function($params) {
