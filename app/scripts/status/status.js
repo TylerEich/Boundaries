@@ -8,9 +8,30 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
         hide: '@',
         value: '@'
       },
-      template: '<div ng-style="{width: value * 100 + \'%\'}" style="height: 100%; position: absolute;" ng-hide="hide"></div>',
+      template: '<div ng-style="{width: percentage()}" style="height: 100%; position: absolute;" ng-hide="hide"></div>',
       link: function(scope) {
+        var pending = 0,
+          finished = 0;
         
+        scope.$on('load:start', () => {
+          pending++;
+        });
+        scope.$on('load:done', () => {
+          finished++;
+          if (finished >= pending) {
+            pending = 0;
+            finished = 0;
+          }
+        });
+        scope.$on('load:error', () => {
+          pending = 0;
+          finished = 0;
+        });
+        
+        scope.percentage = function() {
+          console.log(`${(finished + 1) / (pending + 1) * 100}%`);
+          return `${(finished + 1) / (pending + 1) * 100}%`;
+        }
       }
     };
   })
@@ -24,6 +45,8 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
     $scope.$on('map:idle', function() {
       GeocodeSvc.geocode(MapSvc.map.getCenter())
         .then(function(results) {
+          console.info(results);
+          
           var localityOptions = [
             'administrative_area_level_3',
             'administrative_area_level_2',

@@ -1,5 +1,18 @@
 "use strict";
-angular.module('bndry', ['ngTouch', 'ngStorage', 'ui.map', 'ngAnimate', 'bndry.action', 'bndry.color', 'bndry.drawing', 'bndry.geo', 'bndry.history', 'bndry.image', 'bndry.map', 'bndry.shape', 'bndry.search', 'bndry.status']).directive('noScroll', function() {
+angular.module('bndry', ['ngTouch', 'ngStorage', 'ui.map', 'ngAnimate', 'bndry.action', 'bndry.color', 'bndry.drawing', 'bndry.geo', 'bndry.history', 'bndry.image', 'bndry.map', 'bndry.shape', 'bndry.search', 'bndry.status']).directive('ngXlinkHref', function() {
+  return {
+    priority: 99,
+    restrict: 'A',
+    link: function(scope, element, attr) {
+      var attrName = 'xlink:href';
+      attr.$observe('ngXlinkHref', function(value) {
+        if (!value)
+          return;
+        element.attr(attrName, value);
+      });
+    }
+  };
+}).directive('noScroll', function() {
   return {
     restrict: 'A',
     link: function(scope, elem) {
@@ -8,7 +21,7 @@ angular.module('bndry', ['ngTouch', 'ngStorage', 'ui.map', 'ngAnimate', 'bndry.a
       });
     }
   };
-}).controller('MasterCtrl', function($scope, $localStorage, ColorSvc, DrawingSvc) {
+}).controller('MasterCtrl', function($scope, $localStorage, $sce, ColorSvc, DrawingSvc) {
   $scope.$storage = $localStorage;
   $scope.fillActiveColor = function() {
     var hex = ColorSvc.convert.rgba(ColorSvc.activeColor()).to.hex24();
@@ -18,6 +31,9 @@ angular.module('bndry', ['ngTouch', 'ngStorage', 'ui.map', 'ngAnimate', 'bndry.a
   $scope.toggleForceCreateNewDrawing = (function() {
     DrawingSvc.forceCreateNewDrawing = !DrawingSvc.forceCreateNewDrawing;
   });
+  $scope.sprite = function() {
+    return $sce.trustAsResourceUrl('#' + ($scope.$storage.rigid ? 'rigid' : 'flex') + '-' + ($scope.$storage.fill ? 'fill' : 'nofill'));
+  };
   $scope.show = {
     header: '',
     footer: ''

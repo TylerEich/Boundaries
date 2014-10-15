@@ -6,8 +6,29 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo']).directive('statusBar'
       hide: '@',
       value: '@'
     },
-    template: '<div ng-style="{width: value * 100 + \'%\'}" style="height: 100%; position: absolute;" ng-hide="hide"></div>',
-    link: function(scope) {}
+    template: '<div ng-style="{width: percentage()}" style="height: 100%; position: absolute;" ng-hide="hide"></div>',
+    link: function(scope) {
+      var pending = 0,
+          finished = 0;
+      scope.$on('load:start', (function() {
+        pending++;
+      }));
+      scope.$on('load:done', (function() {
+        finished++;
+        if (finished >= pending) {
+          pending = 0;
+          finished = 0;
+        }
+      }));
+      scope.$on('load:error', (function() {
+        pending = 0;
+        finished = 0;
+      }));
+      scope.percentage = function() {
+        console.log(((finished + 1) / (pending + 1) * 100 + "%"));
+        return ((finished + 1) / (pending + 1) * 100 + "%");
+      };
+    }
   };
 }).controller('StatusCtrl', function($scope, $timeout, MapSvc, GeocodeSvc) {
   var locality = '';
@@ -16,6 +37,7 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo']).directive('statusBar'
   };
   $scope.$on('map:idle', function() {
     GeocodeSvc.geocode(MapSvc.map.getCenter()).then(function(results) {
+      console.info(results);
       var localityOptions = ['administrative_area_level_3', 'administrative_area_level_2', 'administrative_area_level_1', 'country'];
       locality = '';
       results.forEach(function(result) {
