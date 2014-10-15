@@ -1,7 +1,7 @@
 /* jshint camelcase: false */
 
 angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry.shape', 'bndry.history'])
-.service('DirectionsSvc', function($q, MapSvc) {
+.service('DirectionsSvc', function($rootScope, $q, MapSvc) {
   var self = this;
   var directions = new MapSvc.DirectionsService();
 
@@ -35,6 +35,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
             // Try again
             processRequest(tries);
           } else {
+            $rootScope.$broadcast('load:error');
             deferred.reject();
           }
         },
@@ -46,6 +47,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
             tries++;
             processRequest(tries);
           } else {
+            $rootScope.$broadcast('load:error');
             deferred.reject();
           }
         });
@@ -53,7 +55,12 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
 
     processRequest(0);
 
-    return deferred.promise;
+    $rootScope.$broadcast('load:start');
+    
+    return deferred.promise.then((result) => {
+      $rootScope.$broadcast('load:done');
+      return result;
+    });
   };
 })
 .service('DrawingSvc', function($rootScope, $q, $localStorage, DirectionsSvc, MapSvc, ColorSvc, ShapeSvc) {
@@ -739,6 +746,8 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   };
   
   self.drawings;
+  
+  self.activeDrawingIndex = -1;
 })
 // Controllers
 .controller('DrawingCtrl', function($scope, $localStorage, $timeout, DrawingSvc, ColorSvc, ShapeSvc, HistorySvc) {
@@ -776,7 +785,14 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     drawings.push(storedDrawing);
   }
   
-  var activeDrawingIndex = drawings.length - 1;
+  function activeDrawingIndex(value) {
+    if (typeof value === 'number') {
+      DrawingSvc.activeDrawingIndex = value;
+    } else {
+      return DrawingSvc.activeDrawingIndex;
+    }
+  }
+  activeDrawingIndex(drawings.length - 1);
   var queue = DrawingSvc.queue;
   // $scope.$storage = DrawingSvc.loadDrawings();
 
@@ -789,14 +805,14 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     var createNewDrawing = DrawingSvc.shouldCreateNewDrawing();
     if (createNewDrawing) {
       var newDrawing = DrawingSvc.makeDrawing(colorIndex, rigid, fill);
-      activeDrawingIndex++;
-      DrawingSvc.addDrawing(drawings, activeDrawingIndex, newDrawing);
+      activeDrawingIndex(activeDrawingIndex() + 1);
+      DrawingSvc.addDrawing(drawings, activeDrawingIndex(), newDrawing);
       DrawingSvc.forceCreateNewDrawing = false;
     }
 
     queue(
-      function(activeDrawingIndex, colorIndex, latLng, createNewDrawing) {
-        var drawing = drawings[activeDrawingIndex];
+      function(drawingIndex, colorIndex, latLng, createNewDrawing) {
+        var drawing = drawings[drawingIndex];
         var newNode = DrawingSvc.makeNode(colorIndex, latLng);
         var nodeIndex = drawing.nodes.length;
         
@@ -808,18 +824,21 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
             
             if (didCreateNewDrawing) {
               DrawingSvc.removeDrawing(drawings, drawingIndex, 1);
+              activeDrawingIndex(drawingIndex - 1);
+              debugger;
             }
-          }.bind(null, drawings, drawing, activeDrawingIndex, nodeIndex, createNewDrawing),
+          }.bind(null, drawings, drawing, drawingIndex, nodeIndex, createNewDrawing),
           
           redo: function(drawings, drawing, drawingIndex, nodeIndex, newNode, didCreateNewDrawing) {
             if (didCreateNewDrawing) {
               DrawingSvc.addDrawing(drawings, drawingIndex, drawing);
+              activeDrawingIndex(drawingIndex + 1);
             }
             
             DrawingSvc.addNodeToDrawing(drawing, nodeIndex, newNode);
-          }.bind(null, drawings, drawing, activeDrawingIndex, nodeIndex, newNode, createNewDrawing)
+          }.bind(null, drawings, drawing, drawingIndex, nodeIndex, newNode, createNewDrawing)
         });
-      }.bind(null, activeDrawingIndex, colorIndex, param.latLng, createNewDrawing)
+      }.bind(null, activeDrawingIndex(), colorIndex, param.latLng, createNewDrawing)
     );
   }
   function changeNode($params, drawingIndex, nodeIndex) {
@@ -856,13 +875,13 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   $scope.$on('map:click', addNode);
   $scope.$on('action:clear', function($params) {
     DrawingSvc.removeDrawings(drawings, 0, drawings.length);
-    activeDrawingIndex = -1;
+    activeDrawingIndex(-1);
   });
   
   $scope.$on('drawing:change', () => {
     localStorage.geoJson = DrawingSvc.drawingsToGeoJson(drawings);
     
-    if (drawings.length > 0 && drawings[0].nodes.length > 0) {
+    if (drawings.length > 0 && drawings[drawings.length - 1].nodes.length > 0) {
       var latestNodes = drawings[drawings.length - 1].nodes,
         latestNode = latestNodes[latestNodes.length - 1];
       
