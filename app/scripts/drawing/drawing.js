@@ -19,11 +19,11 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
 
     var deferred = $q.defer();
 
-    function processRequest(tries) {
+    function processRequest(tries, request) {
       directions.route(request,
         // Success handler
 
-        function(result, status) {
+        function(request, result, status) {
           if (status === MapSvc.DirectionsStatus.OK) {
             var overviewPath = result.routes[0].overview_path;
 
@@ -36,24 +36,24 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
             processRequest(tries);
           } else {
             $rootScope.$broadcast('load:error');
-            deferred.reject();
+            deferred.reject([request.origin, request.destination]);
           }
-        },
+        }.bind(null, request),
         // Error handler
 
-        function() {
+        function(request) {
           if (tries < 3) {
             // Try again
             tries++;
-            processRequest(tries);
+            processRequest(tries, request);
           } else {
             $rootScope.$broadcast('load:error');
             deferred.reject();
           }
-        });
+        }.bind(null, request));
     }
 
-    processRequest(0);
+    processRequest(0, request);
 
     $rootScope.$broadcast('load:start');
     
@@ -136,7 +136,12 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
           $q.when([start]) :
           $q.when([start, end]);
       } else {
-        promise = DirectionsSvc.route([start, end]);
+        promise = DirectionsSvc.route([start, end])
+				  .catch(function(start, end) {
+				  	return start.equals(end) ?
+		          $q.when([start]) :
+		          $q.when([start, end]);
+				  }.bind(null, start, end));
       }
       promises.push(promise);
     }

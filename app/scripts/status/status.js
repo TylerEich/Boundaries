@@ -26,10 +26,10 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
         scope.$on('load:error', () => {
           pending = 0;
           finished = 0;
+					alert('Directions are not available for this location.');
         });
         
         scope.percentage = function() {
-          console.log(`${(finished + 1) / (pending + 1) * 100}%`);
           return `${(finished + 1) / (pending + 1) * 100}%`;
         }
       }

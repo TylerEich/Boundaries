@@ -5,9 +5,7 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
     return {
       restrict: 'A',
       link: function(scope, elem, attr) {
-        var focusOn = $parse(attr.focusOn);
-
-        scope.$watch(focusOn, function(newVal) {
+				attr.$observe('focusOn', function(newVal) {
           if (newVal === undefined) {
             return;
           }
@@ -17,7 +15,7 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
           } else {
             elem[0].blur();
           }
-        });
+				});
       }
     };
   })
@@ -71,9 +69,9 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
   })
   .controller('SearchCtrl', function($scope, $sce, $sessionStorage, SearchSvc) {
     function throttledSearch(newVal) {
-      if (!newVal) {
-        return;
-      } else if (!resolved) {
+			// console.log('newVal:', newVal, 'queue:', queue, 'resolved:', resolved, 'last:', last);
+			if (!resolved) {
+				// console.log('Queueing newVal because not resolved. Exiting.', newVal);
         queue = newVal;
         return;
       }
@@ -86,9 +84,10 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
         .then(function() {
           resolved = true;
 
-          if (queue !== last) {
+          if (typeof queue === 'string' && queue !== last) {
+						// console.log('Searching with queued value.', queue);
             throttledSearch(queue);
-            queue = '';
+            queue = false;
           }
         });
     }
@@ -127,13 +126,11 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
     }
 
     var resolved = true,
-      queue = '',
+      queue = false,
       last = '';
 
-    $scope.$tempStorage = $sessionStorage.$default({
-      query: '',
-      active: -1
-    });
+    $scope.query = '';
+		$scope.active = -1;
         
     $scope.keydown = function(e) {
       var enter = (e.which === 13),
@@ -143,23 +140,27 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
       if (enter || up || down) {
         e.preventDefault();
       } else {
-        $scope.$tempStorage.active = 0;
+        $scope.active = 0;
         return;
       }
 
-      if ($scope.suggestions[$scope.$tempStorage.active]) {
+      if ($scope.suggestions[$scope.active]) {
         if (enter) {
-          $scope.loadOnMap($scope.suggestions[$scope.$tempStorage.active].reference);
-          $scope.show.header = '';
-        } else if (up && $scope.$tempStorage.active > -1) {
-          $scope.$tempStorage.active--;
-        } else if (down && $scope.$tempStorage.active < $scope.suggestions.length - 1) {
-          $scope.$tempStorage.active++;
+          $scope.loadOnMap($scope.suggestions[$scope.active].reference);
+          $scope.focus = false;
+        } else if (up && $scope.active > -1) {
+          $scope.active--;
+        } else if (down && $scope.active < $scope.suggestions.length - 1) {
+          $scope.active++;
         }
       }
     };
 
-    $scope.loadOnMap = SearchSvc.loadPlaceFromReference;
+		$scope.focus = false;
+    $scope.loadOnMap = function(reference) {
+			SearchSvc.loadPlaceFromReference(reference);
+			$scope.focus = false;
+		};
 
-    $scope.$watch('$tempStorage.query', throttledSearch);
+    $scope.$watch('query', throttledSearch);
   });

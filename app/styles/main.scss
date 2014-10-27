@@ -80,31 +80,61 @@ footer {
   }
 }
 
+#search, #status {
+	transition: $transition;
+}
+#search.focus {
+	& input {
+		opacity: 1;
+	}
+	
+	& ~ #status {
+		opacity: 0;
+	}
+}
+#status {
+	opacity: 1;
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+	
+	padding: $navbar-padding ($navbar-padding / 2);
+	pointer-events: none;
+}
 #search {
-  display: flex;
-  flex-direction: column;
   
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
+//  position: absolute;
+//  top: 0;
+//  right: 0;
+//  left: 0;
   
+	color: $text-color;
+	
+	display: block;
   padding: $navbar-padding ($navbar-padding / 2);
-  background: $navbar-color;
+  background: transparentize($navbar-color, 0.25);
   
 //  margin-left: calc((-100% + #{$navbar-size * 2}) / 2);
 //  margin-top: $navbar-padding;
   z-index: 1;
   
-  input[type="text"],
-  input[type="search"] {
+  input {
+		width: 100%;
+		opacity: 0;
+		color: $text-color;
+		display: inline-block;
+		text-align: center;
     font-size: inherit;
     display: block;
-    height: 3rem;
-    border-radius: $border-radius;
-    border: $button-border;
+		background: transparent;
+    line-height: 1.25;
+//    border-radius: $border-radius;
+//    border: $button-border;
+		border: none;
     outline: none;
-    padding: $button-padding;
+//    padding: $button-padding;
+		padding: 0;
     margin: 0 ($button-padding / 2);
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -114,19 +144,23 @@ footer {
     margin: $button-padding ($button-padding / 2);
     margin-bottom: 0;
     
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+		width: 100%;
+//    flex-grow: 1;
+//    display: flex;
+//    flex-direction: column;
     
     .suggestion {
       color: $text-color;
       cursor: pointer;
-      padding: $button-padding;
+			line-height: 1.25;
+      padding: $button-padding / 2;
       
-      background: $button-color;
-      border: $button-border;
+      background: transparent;
+//      border: $button-border;
+			border: none;
+			border-top: 1px solid transparentize($text-color, 0.5);
 //        border-bottom: none;
-      border-radius: 0;
+//      border-radius: $border-radius;
       
       display: flex;
       
@@ -134,13 +168,14 @@ footer {
       
       transition: $transition;
       
-      &.first {
-        border-top-left-radius: $border-radius !important;
-        border-top-right-radius: $border-radius !important;
-      }
+//      &.first {
+//        border-top-left-radius: $border-radius !important;
+//        border-top-right-radius: $border-radius !important;
+//      }
       &.last {
-        border-bottom-right-radius: $border-radius !important;
-        border-bottom-left-radius: $border-radius !important;
+				border-bottom: 1px solid transparentize($text-color, 0.5);
+//        border-bottom-right-radius: $border-radius !important;
+//        border-bottom-left-radius: $border-radius !important;
 //          border-bottom: $button-border;
       }
       
@@ -167,7 +202,7 @@ footer {
       &:active,
       &.active,
       &:hover {
-        background: $button-highlight-color;
+        background: transparentize($text-color, 0.75);
       }
     }
   }
@@ -359,21 +394,21 @@ main {
     height: 1rem;
     width: 1rem;
   }
-  #status {
+  #top-overlay {
     color: $text-color;
     text-align: center;
     line-height: 1;
-    padding: $button-padding;
+//    padding: $button-padding;
     position: absolute;
     top: 0;
     width: 100%;
-    height: $navbar-size / 2;
-    background: transparentize($navbar-color, 0.25);
+//    height: $navbar-size / 2;
+//    background: transparentize($navbar-color, 0.25);
     z-index: 1;
     pointer-events: auto;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+//    overflow: hidden;
+//    text-overflow: ellipsis;
 //    status-bar {
 //      display: block;
 //      position: absolute;
