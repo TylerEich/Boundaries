@@ -1,7 +1,7 @@
 var upperCase = require('upper-case');
 
 /**
- * Check if a string is uppercased.
+ * Check if a string is upper case.
  *
  * @param  {String}  string
  * @return {Boolean}

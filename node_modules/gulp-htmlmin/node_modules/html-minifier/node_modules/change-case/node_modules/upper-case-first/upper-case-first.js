@@ -1,11 +1,15 @@
 /**
  * Uppercase the first character of a string.
  *
- * @param  {String} string
+ * @param  {String} str
  * @return {String}
  */
-module.exports = function (string) {
-  string = '' + string;
+module.exports = function (str) {
+  if (str == null) {
+    return '';
+  }
 
-  return string.charAt(0).toUpperCase() + string.substr(1);
+  str = String(str);
+
+  return str.charAt(0).toUpperCase() + str.substr(1);
 };

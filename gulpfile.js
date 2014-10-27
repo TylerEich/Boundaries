@@ -70,7 +70,7 @@ var karmaConfFiles = [
 ];
 
 var karmaConf = {
-  browsers: ['Chrome'],
+  browsers: ['ChromeCanary'],
   frameworks: ['jasmine'],
   reporters: ['osx', 'mocha'],
   logLevel: 'WARN',
@@ -116,6 +116,7 @@ var tasks = {
   'build:js': function() {
     var changed = require('gulp-changed'),
       sourcemaps = require('gulp-sourcemaps'),
+	  to5 = require('gulp-6to5'),
       traceur = require('gulp-traceur');
           
       jsAppFiles[1] = unitTestFiles[0];
@@ -123,9 +124,10 @@ var tasks = {
     return gulp.src(jsAppFiles.concat(unitTestFiles))
       .pipe(changed('build/scripts'))
       .pipe(sourcemaps.init())
-        .pipe(traceur({
-          sourceMap: true
-        }))
+	  .pipe(to5())
+        // .pipe(traceur({
+        //   sourceMap: true
+        // }))
       .pipe(sourcemaps.write('../sourcemaps'))
       .pipe(gulp.dest('build/scripts'))
       .on('error', errorHandler);
@@ -188,6 +190,7 @@ var tasks = {
       sourcemaps = require('gulp-sourcemaps'),
       ngAnnotate = require('gulp-ng-annotate'),
       traceur = require('gulp-traceur'),
+	  to5 = require('gulp-6to5'),
       uglify = require('gulp-uglify'),
       filesize = require('gulp-filesize'),
       concat = require('gulp-concat'),
@@ -204,11 +207,13 @@ var tasks = {
 
     return gulp.src(jsBuildFiles)
       .pipe(sourcemaps.init())
-        .pipe(concat('script.min.js'))
-        .pipe(ngAnnotate())
-        .pipe(traceur({
-          sourceMap: true
-        }))
+      	.pipe(concat('script.min.js'))
+		.pipe(to5())
+	    .pipe(ngAnnotate())
+		
+        // .pipe(traceur({
+        //   sourceMap: true
+        // }))
         .pipe(uglify())
       .pipe(sourcemaps.write('sourcemaps'))
       .pipe(insert.prepend(copyright))
@@ -320,7 +325,7 @@ gulp.task('server', ['build:html'], function() {
   gulp.src('build/index.html')
     .pipe(openUrl('', {
       url: 'http://localhost:8080/build/',
-      app: 'Google Chrome'
+      app: 'Google Chrome Canary'
     }))
     .pipe(openUrl('', {
       url: 'http://localhost:8080/build/',
@@ -338,7 +343,7 @@ gulp.task('server:dist', ['dist:html'], function() {
   gulp.src('index.html')
     .pipe(openUrl('', {
       url: 'http://localhost:8080/',
-      app: 'Google Chrome'
+      app: 'Google Chrome Canary'
     }))
     .pipe(openUrl('', {
       url: 'http://localhost:8080/',

@@ -20,5 +20,6 @@ describe('param case', function () {
 
   it('should param case param cased strings', function () {
     assert.equal(paramCase('TestString'), 'test-string');
+    assert.equal(paramCase('testString1_2_3'), 'test-string-1-2-3');
   });
 });

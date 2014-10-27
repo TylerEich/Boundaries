@@ -20,5 +20,6 @@ describe('title case', function () {
 
   it('should title case pascal cased strings', function () {
     assert.equal(titleCase('TestString'), 'Test String');
+    assert.equal(titleCase('TestString1_2_3'), 'Test String 1 2 3');
   });
 });

@@ -1,1 +1,0 @@
-{"version":3,"file":"mode/mode.js","names":[],"mappings":"","sources":["mode/mode.js"],"sourcesContent":["angular.module('bndry.mode', [])\n  .controller('ModeCtrl', function($scope) {\n    $scope.rigid = false;\n    $scope.polygon = false;\n    \n    \n  });"],"sourceRoot":"/source/"}

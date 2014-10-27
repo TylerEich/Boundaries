@@ -20,5 +20,6 @@ describe('dot case', function () {
 
   it('should dot case dot cased strings', function () {
     assert.equal(dotCase('TestString'), 'test.string');
+    assert.equal(dotCase('TestString1_2_3'), 'test.string.1.2.3');
   });
 });

@@ -20,5 +20,6 @@ describe('path case', function () {
 
   it('should path case path cased strings', function () {
     assert.equal(pathCase('TestString'), 'test/string');
+    assert.equal(pathCase('TestString1_2_3'), 'test/string/1/2/3');
   });
 });
