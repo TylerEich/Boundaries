@@ -17,13 +17,20 @@ angular.module('bndry.geo', ['bndry.map'])
     };
   })
   .service('GeocodeSvc', function($q, MapSvc) {
-    this.geocode = function(location) {
+    this.geocode = function(location, bounds) {
       var geocoder = new MapSvc.Geocoder();
       var deferred = $q.defer();
-
-      geocoder.geocode({
-        location: location
-      }, function(results, status) {
+			
+			var request = {};
+			
+			if (bounds) {
+				request.bounds = location;
+			} else {
+				request.location = location;
+			}
+			
+			
+      geocoder.geocode(request, function(results, status) {
         if (status === MapSvc.GeocoderStatus.OK) {
           deferred.resolve(results);
         } else {

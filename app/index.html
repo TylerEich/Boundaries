@@ -126,7 +126,8 @@
     <main ng-controller="MapCtrl" ng-cloak>
       <div id="top-overlay">
 	      <nav id="search" ng-controller="SearchCtrl" ng-class="{focus: focus}">
-	        <input type="search" placeholder="Search" ng-model="query" ng-keydown="keydown($event)" ng-focus="focus = true" focus-on="focus">
+	        <input type="text" placeholder="Search" ng-model="query" ng-keydown="keydown($event)" ng-focus="focus = true" focus-on="focus">
+					<button ng-click="query ? query = '' : focus = false">{{ query ? '&#x232B;' : '&#x00D7;' }}</button>
 	        <div id="suggestions" class="group vertical" ng-mousemove="mousemove(); active = -1" ng-show="focus">
 	          <div class="suggestion" ng-repeat="suggestion in suggestions" ng-bind-html="suggestion.description" ng-class="{ 'error': suggestion.error, 'active': $index === active, 'empty': !query, first: $first, last: $last }" ng-click="loadOnMap(suggestion.reference)">
 	          </div>
@@ -240,7 +241,7 @@
 
     <!-- inject:css -->
     <!-- endinject -->
-    
+    <script defer src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js"></script>
     <script defer src="app/bower_components/traceur-runtime/traceur-runtime.min.js"></script>  
     
     <script src="//maps.googleapis.com/maps/api/js?libraries=geometry,places&sensor=false"></script>

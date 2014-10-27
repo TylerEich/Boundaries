@@ -86,4 +86,5 @@ angular
   window.addEventListener('orientationchange', function() {
     window.scrollTo(0,0);
   });
+	FastClick.attach(document.body);
 });

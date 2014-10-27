@@ -37,42 +37,77 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
   })
   .controller('StatusCtrl', function($scope, $timeout, MapSvc, GeocodeSvc) {
     var locality = '';
+		var lastBounds;
     
     $scope.locality = function() {
       return locality;
     };
 
     $scope.$on('map:idle', function() {
+			if (lastBounds && MapSvc.map.getBounds().equals(lastBounds)) {
+				return;
+			}
       GeocodeSvc.geocode(MapSvc.map.getCenter())
         .then(function(results) {
-          console.info(results);
+          console.info(angular.toJson(results, true));
           
-          var localityOptions = [
-            'administrative_area_level_3',
-            'administrative_area_level_2',
-            'administrative_area_level_1',
-            'country'
-          ];
+          var localityTypes = [
+						'locality',
+						'administrative_area_level_1',
+						'country'
+					];
+						//
+						// [
+						// 	'locality'
+						// ],
+						// [
+						// 	'administrative_area_level_1',
+						// 	'administrative_area_level_2',
+						// 	'administrative_area_level_3'
+						// ],
+						// [
+						// 	'country'
+						// ]
+						//             'administrative_area_level_3',
+						//             'administrative_area_level_2',
+						//             'administrative_area_level_1',
+						//             'country'
+						//           ];
           
           locality = '';
-          results.forEach(function(result) {
-            if (locality) {
-              return;
-            }
-            
-            for (var i = 0; i < localityOptions.length; i++) {
-              if (result.types.indexOf(localityOptions[i]) > -1) {
-                locality = result.formatted_address;
-              }
-
-              if (locality) {
-                return false;
-              }
-            }
-          });
-        },
-        function() {
-          locality = 'Unknown Locality';
-        });
+					
+					if (results.length < 1) {
+						locality = 'Unknown Locality';
+						return;
+					}
+					for (var type of localityTypes) {
+						for (var result of results) {
+							if (result.types.indexOf(type) > -1) {
+								console.log('Found '+type+' in result', result);
+								locality = result.formatted_address;
+								return;
+							}
+						}
+					}
+        //   results.forEach(function(result) {
+        //     if (locality) {
+        //       return;
+        //     }
+        //
+        //     for (var i = 0; i < localityOptions.length; i++) {
+        //       if (result.types.indexOf(localityOptions[i]) > -1) {
+        //         locality = result.formatted_address;
+        //       }
+        //
+        //       if (locality) {
+        //         return false;
+        //       }
+        //     }
+        //   });
+        // },
+        // function() {
+        //   locality = 'Unknown Locality';
+        // });
+			});
     });
   });
