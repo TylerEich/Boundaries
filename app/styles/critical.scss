@@ -47,9 +47,9 @@ body {
   
   display: flex;
   flex-direction: column;
-//  flex-wrap: wrap;
+  flex-wrap: wrap;
   
-  @media (min-aspect-ratio: 1/1) {
+  @media (orientation: landscape) and (max-width: 50rem) {
     flex-direction: row;
   }
 }

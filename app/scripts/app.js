@@ -88,3 +88,4 @@ angular
   });
 	FastClick.attach(document.body);
 });
+

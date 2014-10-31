@@ -48,9 +48,7 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
 				return;
 			}
       GeocodeSvc.geocode(MapSvc.map.getCenter())
-        .then(function(results) {
-          console.info(angular.toJson(results, true));
-          
+        .then(function(results) {          
           var localityTypes = [
 						'locality',
 						'administrative_area_level_1',

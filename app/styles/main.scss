@@ -46,6 +46,44 @@ $input-text-color: #000;
   }
 }
 
+@media (orientation: landscape) and (min-width: 50rem) {
+	header, footer {
+		width: 20rem;
+	}
+	header {
+		flex: 1 0 50%;
+	}
+	footer {
+		flex: 0 1 10rem;
+		order: 2;
+	}
+	main {
+		order: 3;
+		min-height: 100%;
+		width: calc(100% - 20rem);
+	}
+	
+	nav.collapsed {
+		display: none;
+	}
+	header > nav.expanded:not(.ng-hide-animate),
+	footer > nav.expanded:not(.ng-hide-animate) {
+		display: flex !important;
+	}
+	
+	nav.expanded button:only-child {
+		flex: none;
+		width: 50%;
+		margin: 0 auto;
+	}
+}
+
+#full-logo {
+	height: 3rem;
+	* {
+		stroke-width: 0;
+	}
+}
 header, footer {
   position: relative;
 
@@ -55,8 +93,8 @@ header, footer {
   
   display: flex;
   flex-wrap: wrap;
-  
-  @media (min-aspect-ratio: 1/1) {
+	
+  @media (orientation: portrait) {
     max-height: 100%;
     min-width: $button-size;
   }
@@ -65,6 +103,17 @@ header, footer {
 .loader {
   color: $text-color;
   font-size: 2rem;
+}
+
+@media (orientation: landscape) and (min-width: 50rem){
+	header {
+		align-content: flex-start;
+		align-items: flex-start;
+	}
+	footer {
+		align-content: flex-end;
+		align-items: flex-end;
+	}
 }
 
 footer {
@@ -83,18 +132,18 @@ footer {
 #search, #status {
 	transition: $transition;
 }
-#search.focus {
+#search:not(.focus) {
 	& input,
 	& button {
-		opacity: 1;
+		opacity: 0;
 	}
 	
 	& ~ #status {
-		opacity: 0;
+		opacity: 1;
 	}
 }
 #status {
-	opacity: 1;
+	opacity: 0;
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -112,29 +161,43 @@ footer {
 //  right: 0;
 //  left: 0;
   
+	margin: 0 auto;
+
+	max-width: 25rem;
+	width: 100%;
+	
+	position: relative;
 	color: $text-color;
 	
 	display: block;
   padding: $navbar-padding ($navbar-padding / 2);
-  background: transparentize($navbar-color, 0.25);
+//  background: transparentize($navbar-color, 0.25);
   
 //  margin-left: calc((-100% + #{$navbar-size * 2}) / 2);
 //  margin-top: $navbar-padding;
   z-index: 1;
   
 	button {
-		background: $button-color;
-		border: 1px solid $text-color;
-		width: 1.25rem;
+		position: absolute;
+		right: 0;
+		top: 0;
+		margin: $navbar-padding ($navbar-padding / 2);
+		background: transparent;
+		border: 1px solid transparentize($text-color, 0.5);
+		width: $button-size / 2;
+		height: 1.25rem;
 	}
   input {
-		width: 100%;
-		opacity: 0;
+//		position: absolute;
+//		left: 0;
+//		top: 0;
+		
+		width: calc(100% - #{2 * $button-size});
+//		margin-left: $button-size;
 		color: $text-color;
-		display: inline-block;
 		text-align: center;
     font-size: inherit;
-    display: block;
+    display: inline-block;
 		background: transparent;
     line-height: 1.25;
 //    border-radius: $border-radius;
@@ -150,9 +213,6 @@ footer {
   
   #suggestions {
 //    margin: $button-padding ($button-padding / 2);
-    margin-bottom: 0;
-    
-		width: 100%;
 //    flex-grow: 1;
 //    display: flex;
 //    flex-direction: column;
@@ -177,7 +237,7 @@ footer {
       transition: $transition;
       
       &.first {
-				margin-top: $button-padding / 2;
+				margin-top: $button-padding;
 //        border-top-left-radius: $border-radius !important;
 //        border-top-right-radius: $border-radius !important;
       }
@@ -223,7 +283,7 @@ svg {
   stroke-width: 4px;
   stroke-linejoin: round;
   stroke-linecap: round;
-  width: 3rem;
+  width: 100%;
   max-height: 100%;
   
   * {
@@ -236,8 +296,130 @@ nav {
   flex-grow: 1;
   justify-content: space-between;
   
-  @media (min-aspect-ratio: 1/1) {
+	padding: $navbar-padding;
+	
+  @media (orientation: landscape) and (max-width: 50rem) {
     flex-direction: column;
+  }	
+	
+  button {
+    font-size: 1rem;
+    font-weight: bold;
+    
+    flex-grow: 1;
+    
+    color: $text-color;
+    
+    height: $button-size;
+    min-width: $button-size;
+    
+    padding: 0;
+    margin: 0 ($button-padding / 2);
+    
+    border-radius: $border-radius;
+    border: $button-border;
+    
+    background: $button-color;
+    
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    transition: $transition;
+    
+    outline: none;
+    
+    @media (orientation: landscape) and (max-width: 50rem) {
+      width: $button-size;
+      min-height: $button-size;
+      
+      margin: ($button-padding / 2) 0;
+    }
+    
+    &:hover svg {
+      fill: $text-color;
+      stroke: $text-color;
+    }
+    &.active, &.active:hover {
+      background: $button-active-color;
+      border: 1px solid $button-active-color;
+      svg {
+        fill: $text-color;
+        stroke: $text-color;
+      }
+    }
+    
+    &.group {
+      border-radius: 0;
+      margin: 0;
+      &.first {
+        @media (orientation: portrait), (min-width: 50rem) {
+          margin-left: $button-padding / 2;
+          
+          border-top-left-radius: $border-radius;
+          border-bottom-left-radius: $border-radius;
+        }
+        
+        @media (orientation: landscape) and (max-width: 50rem) {
+          margin-top: $button-padding / 2;
+          
+          border-top-left-radius: $border-radius;
+          border-top-right-radius: $border-radius;
+        }
+      }
+      &.last {
+        @media (orientation: portrait), (min-width: 50rem) {
+          margin-right: $button-padding / 2;
+          
+          border-top-right-radius: $border-radius;
+          border-bottom-right-radius: $border-radius;
+        }
+        
+        @media (orientation: landscape) and (max-width: 50rem) {
+          margin-bottom: $button-padding / 2;
+          
+          border-bottom-right-radius: $border-radius;
+          border-bottom-left-radius: $border-radius;
+        }
+      }
+    }
+    
+    &:hover {
+      background: $button-highlight-color;
+      cursor: pointer;
+    }
+    
+    &.accent {
+      background: $accent-color;
+      border: 1px solid $accent-highlight-color;
+      svg {
+        fill: $text-color;
+      }
+      
+      &:hover {
+        background: $accent-highlight-color;
+      }
+    }
+  }
+  
+  hr {
+    width: 1px;
+    height: $navbar-size / 2;
+    
+    background: transparentize(white, 0.75);
+    
+    flex-grow: 0;
+    flex-shrink: 1;
+    
+    border: none;
+    
+    margin: $button-padding ($button-padding / 2);
+    
+    @media (orientation: landscape) and (max-width: 50rem) {
+      width: $navbar-size / 2;
+      height: 1px;
+      
+      margin: ($button-padding / 2) $button-padding;
+    }
   }
 }
 
@@ -247,145 +429,15 @@ nav {
   display: flex;
   flex-wrap: wrap;
   
-  @media (max-aspect-ratio: 1/1) {
+  @media (orientation: portrait) {
     padding: $navbar-padding ($navbar-padding / 2);
     padding-bottom: 0;
     
     width: 100%;
   }
-  @media (min-aspect-ratio: 1/1) {
+  @media (orientation: landscape) {
     padding: ($navbar-padding / 2) $navbar-padding;
     padding-right: 0;
-  }
-    
-  nav {
-    padding-bottom: $navbar-padding;
-    
-    @media (min-aspect-ratio: 1/1) {
-      padding-bottom: 0;
-      padding-right: $navbar-padding;
-    }
-  }
-  nav {
-    button {
-      font-size: 1rem;
-      font-weight: bold;
-      
-      flex-grow: 1;
-      
-      color: $text-color;
-      
-      height: $button-size;
-      min-width: $button-size;
-      
-      padding: 0;
-      margin: 0 ($button-padding / 2);
-      
-      border-radius: $border-radius;
-      border: $button-border;
-      
-      background: $button-color;
-      
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      
-      transition: $transition;
-      
-      outline: none;
-      
-      @media (min-aspect-ratio: 1/1) {
-        width: $button-size;
-        min-height: $button-size;
-        
-        margin: ($button-padding / 2) 0;
-      }
-      
-      &:hover svg {
-        fill: $text-color;
-        stroke: $text-color;
-      }
-      &.active, &.active:hover {
-        background: $button-active-color;
-        border: 1px solid $button-active-color;
-        svg {
-          fill: $text-color;
-          stroke: $text-color;
-        }
-      }
-      
-      &.group {
-        border-radius: 0;
-        margin: 0;
-        &.first {
-          @media (max-aspect-ratio: 1/1) {
-            margin-left: $button-padding / 2;
-            
-            border-top-left-radius: $border-radius;
-            border-bottom-left-radius: $border-radius;
-          }
-          
-          @media (min-aspect-ratio: 1/1) {
-            margin-top: $button-padding / 2;
-            
-            border-top-left-radius: $border-radius;
-            border-top-right-radius: $border-radius;
-          }
-        }
-        &.last {
-          @media (max-aspect-ratio: 1/1) {
-            margin-right: $button-padding / 2;
-            
-            border-top-right-radius: $border-radius;
-            border-bottom-right-radius: $border-radius;
-          }
-          
-          @media (min-aspect-ratio: 1/1) {
-            margin-bottom: $button-padding / 2;
-            
-            border-bottom-right-radius: $border-radius;
-            border-bottom-left-radius: $border-radius;
-          }
-        }
-      }
-      
-      &:hover {
-        background: $button-highlight-color;
-        cursor: pointer;
-      }
-      
-      &.accent {
-        background: $accent-color;
-        border: 1px solid $accent-highlight-color;
-        svg {
-          fill: $text-color;
-        }
-        
-        &:hover {
-          background: $accent-highlight-color;
-        }
-      }
-    }
-    
-    hr {
-      width: 1px;
-      height: $navbar-size / 2;
-      
-      background: transparentize(white, 0.75);
-      
-      flex-grow: 0;
-      flex-shrink: 1;
-      
-      border: none;
-      
-      margin: $button-padding ($button-padding / 2);
-      
-      @media (min-aspect-ratio: 1/1) {
-        width: $navbar-size / 2;
-        height: 1px;
-        
-        margin: ($button-padding / 2) $button-padding;
-      }
-    }
   }
 }
 
@@ -393,6 +445,11 @@ main {
   flex: 1;
   height: 100%;
   position: relative;
+	
+	@media (orientation: landscape) and (min-width: 50rem) {
+		flex: none;
+	}
+	
   #map_canvas {
     height: 100%;
     width: 100%;
@@ -411,6 +468,7 @@ main {
     position: absolute;
     top: 0;
     width: 100%;
+		background: transparentize($navbar-color, 0.25);
 //    height: $navbar-size / 2;
 //    background: transparentize($navbar-color, 0.25);
     z-index: 1;
@@ -434,6 +492,39 @@ main {
 //      }
 //    }
   }
+}
+
+#save {
+	flex-wrap: wrap;
+	position: relative;
+	align-content: space-around;
+	height: $navbar-size;
+	button {
+		position: absolute;
+		right: 0;
+		top: 0;
+		margin: $navbar-padding;
+		float: right;
+	}
+	input {
+		flex: none;
+		height: 1.5rem;
+		font-size: 0.75rem;
+		width: calc(100% - #{$navbar-padding + $button-size});
+		padding: 0.25rem 0.5rem;
+		border: $input-border;
+		background: $input-background;
+		margin: 0;
+		outline: none;
+	}
+	input:first-of-type {
+		border-top-left-radius: $border-radius;
+		border-top-right-radius: $border-radius;
+	}
+	input:last-of-type {
+		border-bottom-left-radius: $border-radius;
+		border-bottom-right-radius: $border-radius;
+	}
 }
 
 .slide {

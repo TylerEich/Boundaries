@@ -159,8 +159,10 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
     }
   })
   .controller('ImageCtrl', function($scope, ImageSvc) {
-    $scope.locality = '';
-    $scope.number = '';
+    $scope.data = {
+			locality: '',
+			number: ''
+		};
     
     $scope.downloadPdf = () => {
       var locality = prompt('Locality (for example, the name of the city)', '');

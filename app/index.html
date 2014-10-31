@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="bndry">
+<html>
   <head>
     <meta charset="utf-8">
     <title>Boundaries</title>
@@ -21,11 +21,11 @@
     <!-- iPad Landscape (Retina) -->
     <link href="apple-touch-startup-image/ipad_landscape.png" media="(device-width: 768px) and (device-height: 1024px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image">
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        
+    <script src="//cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
     <!-- inject:critical:css -->
     <!-- endinject -->
   </head>
-  <body ng-controller="MasterCtrl">
+  <body ng-app="bndry" ng-controller="MasterCtrl">
     <svg id="spritesheet" style="display: none;">
       <symbol id="flex-nofill" viewBox="0 0 64 64">
         <path d="m12,12c0,0 48,0 20,20c-20,20 20,20 20,20" fill="none" stroke-opacity="0.5" />
@@ -66,74 +66,82 @@
         </g>
       </svg>
     </div>
-    <header no-scroll ng-cloak>
-      <div ui-view="header" ng-controller="ShapeCtrl" class="slide" ng-class="{left: top && bottom, right: !top && !bottom}">
-        <nav>
-          <!-- <button ng-click="setShowHeader('search')" ng-class="{ active: show.header === 'search' }">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
-                <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
-            </svg>
-          </button> -->
-          <button ng-click="setShowHeader('color')" ng-class="{ active: show.header === 'color' }" class="group first">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <!-- <circle ng-attr-fill="{{ fillColorWithOffset(1) }}" stroke-width="3" r="9" cx="18.5" cy="45.5" /> -->
-              <!-- <circle ng-attr-fill="{{ fillColorWithOffset(2) }}" stroke-width="3" r="9" cx="45.5" cy="45.5" /> -->
-              <circle ng-attr-fill="{{ fillActiveColor() }}" stroke-width="4" r="22" cy="32" cx="32" />
-            </svg>
-          </button>
-          <button ng-click="setShowHeader('shape')" ng-class="{ active: show.header === 'shape' }" class="group last">
-              <svg xmlns="http://www.w3.org/2000/svg">
-                <use ng-xlink-href="#{{$storage.rigid ? 'rigid' : 'flex'}}-{{$storage.fill ? 'fill' : 'nofill'}}" xlink:href="" />
-              </svg>
-          </button>
-          <button ng-click="toggleForceCreateNewDrawing()" ng-class="{ active: shouldCreateNewDrawing() }">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <path d="M 32,10 L 32,54 M 10,32 L 54,32" />
-            </svg>
-          </button>
-        </nav>
-        <nav ng-show="show.header === 'color'" ng-controller="ColorCtrl">
-          <button ng-repeat="color in $storage.colors track by $index" ng-click="setActiveColorIndex($index)" ng-class="{ active: activeColorIndex() === $index, first: $first, last: $last }" class="group">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <circle ng-attr-fill="{{ fillColor($index) }}" stroke-width="4" r="22" cy="32" cx="32" />
-            </svg>
-          </button>
-        </nav>
-        <nav ng-show="show.header === 'shape'" ng-controller="ShapeCtrl">
-          <button ng-click="$storage.rigid = true; $storage.fill = false;" ng-class="{ active: $storage.rigid && !$storage.fill }" class="group first">
+    <header ng-controller="ShapeCtrl" no-scroll ng-cloak>
+			<nav id="full-logo" class="expanded">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 64">
+			    <path d="M31.942,-0.552 C14.42,-0.552 0,13.725 0,31.519 C0,49.314 14.42,63.62 31.942,63.62 C49.464,63.62 63.856,49.314 63.856,31.519 C63.856,13.725 49.464,-0.552 31.942,-0.552 z M31.942,3.615 C47.557,3.615 60.026,16.176 60.026,31.519 C60.026,46.862 47.557,59.454 31.942,59.454 C16.326,59.454 3.858,46.862 3.858,31.519 C3.858,16.176 16.326,3.615 31.942,3.615 z M46.557,25.669 C46.401,24.939 46.235,24.219 46.057,23.514 C45.809,23.164 45.556,22.816 45.303,22.47 C45.55,22.376 45.8,22.282 46.044,22.192 C46.007,21.867 45.963,21.544 45.922,21.228 C45.31,21.539 44.678,21.862 44.021,22.198 C44.331,22.829 44.634,23.476 44.931,24.131 C44.856,24.562 44.778,25.001 44.694,25.445 C45.328,25.519 45.95,25.594 46.557,25.669 z M55.679,31.18 C55.107,31.877 54.434,32.614 53.681,33.383 C53.668,33.847 53.653,34.313 53.633,34.775 C53.349,35.174 53.056,35.577 52.746,35.982 C52.451,34.78 52.116,33.528 51.732,32.252 C51.301,31.573 50.841,30.88 50.357,30.177 C49.222,29.895 47.992,29.606 46.695,29.311 C46.31,28.945 45.916,28.579 45.516,28.208 C45.325,28.323 45.134,28.438 44.944,28.555 C45.244,29.286 45.537,30.017 45.819,30.748 C46.26,30.509 46.691,30.27 47.111,30.038 C47.68,30.524 48.23,31.006 48.759,31.478 C47.198,32.57 45.475,33.717 43.658,34.875 C42.795,32.98 41.845,31.006 40.847,29.044 C40.64,29.077 40.434,29.112 40.227,29.145 C41.257,31.48 42.241,33.835 43.098,36.07 C44.043,35.594 44.965,35.12 45.856,34.649 C45.55,35.705 45.222,36.759 44.878,37.788 C43.937,38.669 42.964,39.541 41.983,40.391 C42.03,41.588 42.054,42.729 42.052,43.785 C41.504,44.16 40.96,44.521 40.416,44.874 C39.3,46.372 38.196,47.671 37.148,48.671 C36.27,48.786 35.394,48.891 34.524,48.989 C33.871,47.968 33.098,46.571 32.254,44.911 C32.454,44.152 32.666,43.34 32.882,42.483 C32.351,40.988 31.789,39.36 31.217,37.659 C29.312,37.776 27.418,37.878 25.573,37.961 C24.507,36.955 23.451,35.93 22.421,34.902 C22.555,33.252 22.725,31.564 22.922,29.89 C23.923,28.641 24.958,27.389 26,26.159 C27.965,25.796 29.973,25.443 31.966,25.111 C32.092,25.622 32.217,26.141 32.341,26.662 C33.161,27.186 33.983,27.717 34.806,28.251 C35.119,27.814 35.429,27.381 35.734,26.953 C36.982,27.275 38.218,27.603 39.434,27.931 C39.743,27.745 40.053,27.558 40.356,27.373 C40.482,26.917 40.6,26.465 40.72,26.019 C39.894,25.864 39.059,25.711 38.214,25.558 C37.93,25.092 37.642,24.628 37.358,24.17 C37.154,24.074 36.954,23.975 36.754,23.877 C36.598,24.442 36.438,25.021 36.272,25.607 C35.888,25.137 35.503,24.672 35.119,24.215 C35.138,23.832 35.157,23.456 35.172,23.084 C34.669,22.706 34.165,22.333 33.668,21.971 C33.37,21.832 33.073,21.696 32.777,21.561 C32.805,21.919 32.829,22.283 32.858,22.651 C33.48,23.045 34.109,23.446 34.74,23.856 C34.421,24.207 34.099,24.567 33.774,24.929 C33.314,24.345 32.858,23.771 32.411,23.209 C32.085,22.857 31.765,22.511 31.448,22.171 C30.702,22.515 29.95,22.868 29.199,23.228 C28.661,24.002 28.115,24.802 27.573,25.617 C26.775,25.503 25.989,25.395 25.211,25.29 C25.199,24.324 25.197,23.381 25.205,22.476 C26.184,22.516 27.176,22.562 28.182,22.615 C27.88,22.138 27.584,21.673 27.294,21.222 C27.122,20.852 26.953,20.491 26.787,20.139 C27.537,19.909 28.288,19.684 29.036,19.469 C29.461,18.992 29.88,18.533 30.293,18.094 C30.621,18.072 30.951,18.05 31.278,18.028 C31.214,17.784 31.15,17.544 31.086,17.312 C31.3,17.095 31.51,16.886 31.718,16.68 C31.872,17.021 32.031,17.375 32.191,17.746 C33.101,17.763 34.014,17.788 34.921,17.819 C35.152,17.302 35.372,16.814 35.584,16.358 C35.928,16.445 36.272,16.538 36.619,16.628 C36.475,16.304 36.331,15.997 36.19,15.702 C36.691,15.599 37.181,15.501 37.669,15.407 C37.491,15.277 37.316,15.15 37.14,15.028 C36.703,15.098 36.262,15.173 35.812,15.249 C35.624,14.989 35.437,14.743 35.255,14.511 C35.23,14.509 35.208,14.507 35.184,14.507 C35.193,14.49 35.202,14.475 35.212,14.456 C35.137,14.359 35.059,14.266 34.983,14.177 C35.152,14.107 35.321,14.041 35.484,13.976 C35.615,13.753 35.724,13.586 35.843,13.403 C35.677,13.391 35.512,13.376 35.35,13.364 C35.118,13.506 34.877,13.664 34.63,13.834 C34.433,14.091 34.226,14.378 34.011,14.689 C34.28,14.863 34.551,15.043 34.827,15.234 C34.601,15.69 34.364,16.195 34.114,16.739 C33.707,16.855 33.298,16.972 32.885,17.095 C32.65,16.531 32.419,16.006 32.2,15.526 C31.736,15.707 31.26,15.894 30.784,16.09 C30.56,15.995 30.343,15.904 30.125,15.812 C30.175,15.332 30.227,14.892 30.282,14.5 C30.681,14.316 31.072,14.147 31.454,13.989 C31.784,13.572 32.097,13.225 32.387,12.958 C33.128,12.807 33.838,12.685 34.516,12.585 C36.237,12.663 38.035,12.788 39.854,12.941 C42.376,12.855 45.433,12.748 46.782,12.682 C42.695,9.464 37.551,7.529 31.947,7.529 C26.231,7.529 20.987,9.533 16.864,12.866 C17.14,12.905 17.415,12.947 17.694,12.986 C17.858,13.396 18.045,13.841 18.265,14.337 C18.335,14.592 18.413,14.862 18.499,15.143 C18.063,15.56 17.636,16.009 17.215,16.485 C17.128,16.72 17.044,16.959 16.962,17.206 C16.644,17.386 16.333,17.569 16.024,17.755 C15.822,18.424 15.636,19.133 15.463,19.868 C15.082,19.812 14.711,19.76 14.348,19.711 C14.095,18.247 13.946,16.986 13.831,15.806 C12.716,17.089 11.721,18.478 10.896,19.978 C11.018,19.876 11.134,19.774 11.259,19.673 C11.579,21.293 11.969,23.07 12.49,25.007 C11.437,25.685 10.489,26.359 9.673,27.01 C9.079,27.561 8.566,28.1 8.125,28.617 C8.008,29.574 7.93,30.542 7.93,31.53 C7.93,33.576 8.215,35.555 8.696,37.452 C9.122,37.606 9.587,37.758 10.102,37.909 C10.886,38.806 11.783,39.716 12.768,40.616 C12.984,41.26 13.212,41.893 13.452,42.511 C14.731,43.309 16.129,44.08 17.584,44.803 C17.143,46.167 16.806,47.353 16.552,48.376 C15.986,48.392 15.436,48.405 14.891,48.417 C19.242,52.807 25.274,55.529 31.948,55.529 C44.988,55.529 55.576,45.135 55.93,32.189 C55.845,31.852 55.773,31.523 55.679,31.18 z M25.6,15.701 C25.975,15.414 26.35,15.142 26.717,14.887 C26.731,14.698 26.748,14.517 26.767,14.344 C27.131,14.2 27.493,14.062 27.85,13.934 C28.28,14.501 28.772,15.203 29.309,16.02 C29.139,16.196 28.967,16.377 28.795,16.565 C28.214,16.761 27.628,16.967 27.042,17.178 C27.111,16.542 27.186,15.954 27.266,15.421 C27.04,15.782 26.811,16.167 26.578,16.573 C26.177,16.585 25.774,16.602 25.378,16.617 C25.45,16.297 25.524,15.992 25.6,15.701 z M43.217,46.509 C42.908,46.415 42.592,46.317 42.273,46.217 C42.436,45.53 42.586,44.78 42.724,43.988 C43.38,43.536 44.036,43.072 44.684,42.596 C44.715,43.006 44.74,43.405 44.759,43.796 C44.259,44.77 43.743,45.683 43.217,46.509 z M40.541,23.681 C41.072,23.836 41.604,23.994 42.127,24.153 C42.317,23.811 42.502,23.471 42.683,23.139 C41.432,22.472 40.156,21.82 38.88,21.193 C38.542,21.793 38.186,22.415 37.827,23.056 C38.011,23.359 38.196,23.667 38.38,23.976 C39.112,23.875 39.83,23.775 40.541,23.681 z" />
+			    <path d="M96.958,29.105 L96.958,17.266 L106.868,17.266 Q108.485,17.266 109.919,17.449 Q111.353,17.631 112.449,18.257 Q113.544,18.883 114.17,20.03 Q114.796,21.178 114.796,23.16 Q114.796,26.132 112.944,27.619 Q111.093,29.105 106.868,29.105 z M92.004,13.094 L92.004,50.333 L109.997,50.333 Q112.762,50.333 114.874,49.42 Q116.986,48.507 118.42,47.021 Q119.855,45.534 120.585,43.605 Q121.315,41.675 121.315,39.641 Q121.315,36.199 119.49,33.799 Q117.664,31.4 114.222,30.67 L114.222,30.566 Q116.882,29.523 118.316,27.358 Q119.75,25.194 119.75,22.221 Q119.75,19.404 118.473,17.475 Q117.195,15.545 115.369,14.45 Q114.535,13.928 113.361,13.667 Q112.188,13.406 110.832,13.276 Q109.476,13.146 108.094,13.12 Q106.712,13.094 105.512,13.094 z M96.958,46.16 L96.958,33.278 L108.276,33.278 Q109.841,33.278 111.301,33.565 Q112.762,33.852 113.883,34.556 Q115.004,35.26 115.682,36.459 Q116.36,37.659 116.36,39.484 Q116.36,42.614 114.509,44.387 Q112.657,46.16 109.371,46.16 z M125.54,36.877 Q125.54,33.904 126.374,31.322 Q127.209,28.74 128.878,26.837 Q130.547,24.933 132.998,23.838 Q135.449,22.742 138.631,22.742 Q141.864,22.742 144.29,23.838 Q146.715,24.933 148.384,26.837 Q150.053,28.74 150.887,31.322 Q151.722,33.904 151.722,36.877 Q151.722,39.849 150.887,42.405 Q150.053,44.961 148.384,46.864 Q146.715,48.768 144.29,49.837 Q141.864,50.906 138.631,50.906 Q135.449,50.906 132.998,49.837 Q130.547,48.768 128.878,46.864 Q127.209,44.961 126.374,42.405 Q125.54,39.849 125.54,36.877 z M130.234,36.877 Q130.234,39.328 130.886,41.232 Q131.538,43.135 132.685,44.413 Q133.833,45.691 135.371,46.369 Q136.91,47.047 138.631,47.047 Q140.352,47.047 141.891,46.369 Q143.429,45.691 144.577,44.413 Q145.724,43.135 146.376,41.232 Q147.028,39.328 147.028,36.877 Q147.028,34.425 146.376,32.522 Q145.724,30.618 144.577,29.314 Q143.429,28.01 141.891,27.332 Q140.352,26.654 138.631,26.654 Q136.91,26.654 135.371,27.332 Q133.833,28.01 132.685,29.314 Q131.538,30.618 130.886,32.522 Q130.234,34.425 130.234,36.877 z M175.088,50.333 L175.088,46.056 L174.983,46.056 Q173.575,48.559 171.385,49.733 Q169.194,50.906 166.221,50.906 Q163.561,50.906 161.788,50.202 Q160.015,49.498 158.919,48.194 Q157.824,46.89 157.381,45.091 Q156.938,43.292 156.938,41.101 L156.938,23.368 L161.371,23.368 L161.371,41.623 Q161.371,44.126 162.831,45.587 Q164.291,47.047 166.847,47.047 Q168.881,47.047 170.368,46.421 Q171.854,45.795 172.845,44.648 Q173.836,43.5 174.331,41.962 Q174.827,40.423 174.827,38.598 L174.827,23.368 L179.26,23.368 L179.26,50.333 z M190.109,23.368 L190.109,27.645 L190.213,27.645 Q192.977,22.742 198.975,22.742 Q201.635,22.742 203.408,23.473 Q205.182,24.203 206.277,25.507 Q207.372,26.81 207.815,28.61 Q208.259,30.409 208.259,32.6 L208.259,50.333 L203.826,50.333 L203.826,32.078 Q203.826,29.575 202.365,28.114 Q200.905,26.654 198.349,26.654 Q196.315,26.654 194.829,27.28 Q193.342,27.906 192.351,29.053 Q191.36,30.201 190.865,31.739 Q190.369,33.278 190.369,35.103 L190.369,50.333 L185.936,50.333 L185.936,23.368 z M234.597,50.333 L234.597,46.682 L234.493,46.682 Q233.398,48.925 231.051,49.916 Q228.704,50.906 225.887,50.906 Q222.758,50.906 220.437,49.759 Q218.116,48.612 216.578,46.682 Q215.039,44.752 214.257,42.196 Q213.474,39.641 213.474,36.772 Q213.474,33.904 214.231,31.348 Q214.987,28.792 216.525,26.889 Q218.064,24.985 220.385,23.864 Q222.706,22.742 225.783,22.742 Q226.826,22.742 228.026,22.951 Q229.225,23.16 230.425,23.655 Q231.625,24.151 232.694,24.959 Q233.763,25.767 234.493,26.967 L234.597,26.967 L234.597,13.094 L239.031,13.094 L239.031,50.333 z M218.168,37.085 Q218.168,38.963 218.664,40.762 Q219.159,42.562 220.176,43.97 Q221.193,45.378 222.784,46.212 Q224.375,47.047 226.513,47.047 Q228.756,47.047 230.321,46.16 Q231.885,45.274 232.876,43.839 Q233.867,42.405 234.311,40.58 Q234.754,38.754 234.754,36.877 Q234.754,34.895 234.284,33.043 Q233.815,31.192 232.798,29.783 Q231.781,28.375 230.164,27.515 Q228.547,26.654 226.253,26.654 Q224.01,26.654 222.445,27.541 Q220.88,28.427 219.942,29.888 Q219.003,31.348 218.586,33.226 Q218.168,35.103 218.168,37.085 z M262.553,40.945 Q262.553,41.884 262.083,42.953 Q261.614,44.022 260.623,44.935 Q259.632,45.847 258.068,46.447 Q256.503,47.047 254.312,47.047 Q253.269,47.047 252.33,46.838 Q251.392,46.63 250.687,46.16 Q249.983,45.691 249.54,44.935 Q249.097,44.178 249.097,43.083 Q249.097,41.414 249.853,40.449 Q250.609,39.484 251.809,38.963 Q253.008,38.441 254.521,38.207 Q256.033,37.972 257.52,37.789 Q259.006,37.607 260.362,37.32 Q261.718,37.033 262.553,36.407 z M269.75,46.786 Q268.968,47.047 268.394,47.047 Q267.351,47.047 267.169,46.317 Q266.986,45.587 266.986,44.022 L266.986,30.148 Q266.986,27.801 266.099,26.341 Q265.213,24.881 263.752,24.072 Q262.292,23.264 260.493,23.003 Q258.693,22.742 256.868,22.742 Q254.573,22.742 252.565,23.212 Q250.557,23.681 248.992,24.75 Q247.428,25.82 246.489,27.541 Q245.55,29.262 245.446,31.765 L249.879,31.765 Q250.036,28.792 251.913,27.723 Q253.791,26.654 256.607,26.654 Q257.65,26.654 258.719,26.81 Q259.789,26.967 260.649,27.436 Q261.51,27.906 262.057,28.792 Q262.605,29.679 262.605,31.139 Q262.605,32.391 261.875,33.043 Q261.145,33.695 259.893,34.034 Q258.641,34.373 256.998,34.556 Q255.355,34.738 253.53,35.103 Q251.809,35.416 250.166,35.886 Q248.523,36.355 247.245,37.268 Q245.967,38.18 245.185,39.641 Q244.403,41.101 244.403,43.396 Q244.403,45.43 245.107,46.864 Q245.811,48.299 247.01,49.185 Q248.21,50.072 249.853,50.489 Q251.496,50.906 253.321,50.906 Q256.138,50.906 258.563,49.942 Q260.988,48.977 262.814,46.786 Q262.814,48.977 263.831,49.942 Q264.848,50.906 266.569,50.906 Q268.603,50.906 269.75,50.228 z M277.887,23.368 L277.887,29.053 L277.991,29.053 Q279.608,25.767 281.955,24.203 Q284.302,22.638 287.901,22.742 L287.901,27.436 Q285.241,27.436 283.363,28.167 Q281.485,28.897 280.338,30.305 Q279.191,31.713 278.669,33.721 Q278.147,35.729 278.147,38.337 L278.147,50.333 L273.714,50.333 L273.714,23.368 z M295.933,23.368 L295.933,50.333 L291.499,50.333 L291.499,23.368 z M291.499,18.518 L291.499,13.094 L295.933,13.094 L295.933,18.518 z M325.818,41.779 Q324.931,46.317 321.906,48.612 Q318.881,50.906 314.291,50.906 Q311.058,50.906 308.685,49.863 Q306.312,48.82 304.695,46.943 Q303.078,45.065 302.27,42.457 Q301.461,39.849 301.357,36.772 Q301.357,33.695 302.296,31.139 Q303.234,28.584 304.929,26.706 Q306.625,24.829 308.945,23.785 Q311.266,22.742 314.031,22.742 Q317.629,22.742 320.002,24.229 Q322.376,25.715 323.81,28.01 Q325.244,30.305 325.792,33.017 Q326.339,35.729 326.235,38.18 L306.051,38.18 Q305.999,39.954 306.468,41.544 Q306.937,43.135 307.981,44.361 Q309.024,45.587 310.641,46.317 Q312.257,47.047 314.448,47.047 Q317.264,47.047 319.064,45.743 Q320.863,44.439 321.437,41.779 L325.818,41.779 z M321.541,34.269 Q321.437,32.704 320.837,31.296 Q320.237,29.888 319.22,28.871 Q318.203,27.854 316.821,27.254 Q315.439,26.654 313.77,26.654 Q312.049,26.654 310.667,27.254 Q309.284,27.854 308.293,28.897 Q307.303,29.94 306.729,31.322 Q306.155,32.704 306.051,34.269 L321.541,34.269 z M333.537,41.831 Q333.589,43.292 334.215,44.309 Q334.841,45.326 335.858,45.926 Q336.875,46.525 338.153,46.786 Q339.43,47.047 340.786,47.047 Q341.83,47.047 342.977,46.89 Q344.124,46.734 345.089,46.317 Q346.054,45.9 346.68,45.091 Q347.306,44.283 347.306,43.031 Q347.306,41.31 346.002,40.423 Q344.698,39.537 342.742,38.989 Q340.786,38.441 338.492,37.998 Q336.197,37.555 334.241,36.746 Q332.285,35.938 330.981,34.477 Q329.677,33.017 329.677,30.409 Q329.677,28.375 330.59,26.915 Q331.503,25.454 332.937,24.542 Q334.371,23.629 336.171,23.186 Q337.97,22.742 339.743,22.742 Q342.038,22.742 343.968,23.134 Q345.898,23.525 347.384,24.49 Q348.871,25.454 349.757,27.097 Q350.644,28.74 350.8,31.192 L346.367,31.192 Q346.263,29.888 345.689,29.027 Q345.115,28.167 344.229,27.645 Q343.342,27.123 342.273,26.889 Q341.204,26.654 340.108,26.654 Q339.118,26.654 338.1,26.81 Q337.083,26.967 336.249,27.358 Q335.414,27.749 334.893,28.401 Q334.371,29.053 334.371,30.096 Q334.371,31.244 335.18,32 Q335.988,32.756 337.24,33.252 Q338.492,33.747 340.056,34.086 Q341.621,34.425 343.186,34.79 Q344.855,35.155 346.445,35.677 Q348.036,36.199 349.262,37.059 Q350.487,37.92 351.244,39.224 Q352,40.527 352,42.457 Q352,44.909 350.983,46.525 Q349.966,48.142 348.323,49.133 Q346.68,50.124 344.62,50.515 Q342.56,50.906 340.526,50.906 Q338.283,50.906 336.249,50.437 Q334.215,49.968 332.65,48.898 Q331.086,47.829 330.147,46.082 Q329.208,44.335 329.104,41.831 L333.537,41.831 z"/>
+        </svg>
+			</nav>
+      <nav class="collapsed">
+        <button ng-click="setShowHeader('color')" ng-class="{ active: show.header === 'color' }" class="group first">
+					<svg viewBox="0 0 64 64">
+            <circle ng-attr-fill="{{ fillActiveColor() }}" stroke-width="4" r="22" cy="32" cx="32" />
+          </svg>
+        </button>
+        <button ng-click="setShowHeader('shape')" ng-class="{ active: show.header === 'shape' }" class="group last">
             <svg xmlns="http://www.w3.org/2000/svg">
-              <use xlink:href="#rigid-nofill" />
+              <use ng-xlink-href="#{{$storage.rigid ? 'rigid' : 'flex'}}-{{$storage.fill ? 'fill' : 'nofill'}}" xlink:href="" />
             </svg>
-          </button>
-          <button ng-click="$storage.rigid = false; $storage.fill = false;" ng-class="{ active: !$storage.rigid && !$storage.fill }" class="group">
-            <svg xmlns="http://www.w3.org/2000/svg">
-              <use xlink:href="#flex-nofill">
-            </svg>
-          </button>
-          <button ng-click="$storage.rigid = true; $storage.fill = true;" ng-class="{ active: $storage.rigid && $storage.fill }" class="group">
-            <svg xmlns="http://www.w3.org/2000/svg">
-              <use xlink:href="#rigid-fill">
-            </svg>
-          </button>
-          <button ng-click="$storage.rigid = false; $storage.fill = true;" ng-class="{ active: !$storage.rigid && $storage.fill }" class="group last">
-            <svg xmlns="http://www.w3.org/2000/svg">
-              <use xlink:href="#flex-fill">
-            </svg>
-          </button>
-        </nav>
-      </div>
+        </button>
+        <button ng-click="toggleForceCreateNewDrawing()" ng-class="{ active: shouldCreateNewDrawing() }">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <path d="M 32,10 L 32,54 M 10,32 L 54,32" />
+          </svg>
+        </button>
+      </nav>
+      <nav class="expanded" ng-show="show.header === 'color'" ng-controller="ColorCtrl">
+        <button ng-repeat="color in $storage.colors track by $index" ng-click="setActiveColorIndex($index)" ng-class="{ active: activeColorIndex() === $index, first: $first, last: $last }" class="group">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <circle ng-attr-fill="{{ fillColor($index) }}" stroke-width="4" r="22" cy="32" cx="32" />
+          </svg>
+        </button>
+      </nav>
+      <nav class="expanded" ng-show="show.header === 'shape'" ng-controller="ShapeCtrl">
+        <button ng-click="$storage.rigid = true; $storage.fill = false;" ng-class="{ active: $storage.rigid && !$storage.fill }" class="group first">
+          <svg xmlns="http://www.w3.org/2000/svg">
+            <use xlink:href="#rigid-nofill" />
+          </svg>
+        </button>
+        <button ng-click="$storage.rigid = false; $storage.fill = false;" ng-class="{ active: !$storage.rigid && !$storage.fill }" class="group">
+          <svg xmlns="http://www.w3.org/2000/svg">
+            <use xlink:href="#flex-nofill">
+          </svg>
+        </button>
+        <button ng-click="$storage.rigid = true; $storage.fill = true;" ng-class="{ active: $storage.rigid && $storage.fill }" class="group">
+          <svg xmlns="http://www.w3.org/2000/svg">
+            <use xlink:href="#rigid-fill">
+          </svg>
+        </button>
+        <button ng-click="$storage.rigid = false; $storage.fill = true;" ng-class="{ active: !$storage.rigid && $storage.fill }" class="group last">
+          <svg xmlns="http://www.w3.org/2000/svg">
+            <use xlink:href="#flex-fill">
+          </svg>
+        </button>
+      </nav>
+			<nav class="expanded ng-hide">
+        <button ng-click="toggleForceCreateNewDrawing()" ng-class="{ active: shouldCreateNewDrawing() }">
+          <svg id="plus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <path d="M 32,10 L 32,54 M 10,32 L 54,32" />
+          </svg>
+        </button>
+			</nav>
     </header>
     <main ng-controller="MapCtrl" ng-cloak>
       <div id="top-overlay">
 	      <nav id="search" ng-controller="SearchCtrl" ng-class="{focus: focus}">
 	        <input type="text" placeholder="Search" ng-model="query" ng-keydown="keydown($event)" ng-focus="focus = true" focus-on="focus">
-					<button ng-click="query ? query = '' : focus = false">{{ query ? '&#x232B;' : '&#x00D7;' }}</button>
+					<button ng-click="query ? query = '' : focus = false"><!-- {{ query ? '&#x232B;' : '&#x00D7;' }} -->
+						<svg viewBox="0 0 64 64">
+							<path d="M10,10 L54,54 M54,10 L10,54">
+						</svg>
+					</button>
 	        <div id="suggestions" class="group vertical" ng-mousemove="mousemove(); active = -1" ng-show="focus">
 	          <div class="suggestion" ng-repeat="suggestion in suggestions" ng-bind-html="suggestion.description" ng-class="{ 'error': suggestion.error, 'active': $index === active, 'empty': !query, first: $first, last: $last }" ng-click="loadOnMap(suggestion.reference)">
 	          </div>
 	        </div>
 	      </nav>
-				
+
         <div id="status" ng-controller="StatusCtrl">
 					<svg id="spotlight" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
 	          <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
@@ -141,9 +149,8 @@
 					<span ng-bind="locality()"></span>
 				</div>
         <status-bar></status-bar>
-        <!-- <progress max="1"></progress> -->
       </div>
-      
+
       <div id="map_canvas"></div>
       <div ng-controller="DrawingCtrl">
         <div ng-repeat="drawing in drawings track by $index"
@@ -155,94 +162,102 @@
               'map-dragend': 'marker.dragend($params, $parent.$index, $index)'}"></div>
         </div>
       </div>
-      <!-- <div id="map_canvas"
-      ui-map="map"
-      ui-options="options"
-      ui-event="{'map-click': 'map_click($params)', 'map-center_changed': 'map_center_changed()', 'map-zoom_changed': 'map_zoom_changed()', 'map-idle': 'map_idle()', 'map-maptypeid_changed': 'map_maptypeid_changed()'}"></div> -->
     </main>
     <footer no-scroll ng-cloak>
-      <div ui-view="footer" class="slide" ng-class="{left: top && bottom, right: !top && !bottom}">
-        <nav id="map-types" ng-controller="MapActionCtrl" ng-show="show.footer === 'mapTypes'">
-          <button class="group first" ng-click="setMapTypeId('custom')">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <path d="m 31.863047,9.0466683 c -1.8557,0.01676 -2.758389,1.7892397 -3.116583,3.3615407 -1.293216,3.974797 -2.586433,7.949594 -3.879649,11.924391 -4.815644,0.01814 -9.638851,-0.101542 -14.449712,0.0039 -2.5347644,0.332049 -3.3439605,4.047578 -1.1752076,5.402114 3.7468716,2.703 7.4937426,5.406 11.2406136,8.109 -1.454512,4.596015 -3.060239,9.153085 -4.418766,13.773831 -0.418825,2.478518 2.792674,4.351153 4.745257,2.770394 3.731324,-2.718535 7.462648,-5.437069 11.193972,-8.155604 3.818049,2.768835 7.61245,5.571967 11.445262,8.319391 2.085283,1.367023 5.079013,-0.77478 4.453173,-3.189999 -1.422485,-4.516731 -2.924783,-9.010222 -4.377972,-13.518013 3.887493,-2.846449 7.861414,-5.586666 11.694128,-8.500459 1.856434,-1.758876 0.323852,-5.238895 -2.225894,-5.061145 -4.617513,0.01553 -9.235027,0.03107 -13.85254,0.0466 C 37.614078,19.759157 36.22098,15.133973 34.61219,10.593356 34.081401,9.6118431 32.977456,8.9911623 31.863047,9.0466683 z" />
-            </svg>
-          </button>
-          <button class="group" ng-click="setMapTypeId('ROADMAP')">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <circle fill="transparent" stroke-width="6" cx="32" cy="32" r=21 />
-              <path stroke-width="1" d="M32,11 a 21 21 0 0 0 0 42" />
-            </svg>
-          </button>
-          <button class="group last" ng-click="setMapTypeId('HYBRID')">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 20,29 12,12 12,-12" />
-              <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 32,11 0,29" />
-              <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 11,53 42,0" />
-            </svg>
-          </button>
-        </nav>
-        <nav>
-          <!-- <button class="accent">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <rect x="8" y="12" width="48" height="6" ry="3" />
-              <rect x="8" y="29" width="48" height="6" ry="3" />
-              <rect x="8" y="46" width="48" height="6" ry="3" />
-            </svg>
-          </button>
-          <hr> -->
-          <!-- <button ng-click="setShowHeader('action')" ng-class="{ active: show.header === 'action' }" class="group last">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <circle r="4.5" cy="32" cx="12.5" />
-              <circle r="4.5" cy="32" cx="32" />
-              <circle r="4.5" cy="32" cx="51.5" />
-            </svg>
-          </button> -->
-          <button ng-controller="ActionCtrl" ng-click="clear()" class="trigger">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <path d="M10,10 L54,54 M10,54 L54,10" />
-            </svg>
-          </button>
-          <button ng-controller="ActionCtrl" ng-click="undo()" class="trigger">
-            Undo
-          </button>
-          <button ng-controller="ActionCtrl" ng-click="redo()" class="trigger">
-            Redo
-          </button>
-          
-          <button ng-click="setShowFooter('mapTypes')">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <circle fill="transparent" stroke-width="6" cx="32" cy="32" r=21 />
-              <path stroke-width="1" d="M32,11 a 21 21 0 0 0 0 42" />
-            </svg>
-          </button>
-          <!-- <button></button> -->
-          <button ng-controller="ImageCtrl" ng-click="downloadPdf()">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-              <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 20,29 12,12 12,-12" />
-              <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 32,11 0,29" />
-              <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 11,53 42,0" />
-            </svg>
-          </button>
-        </nav>
-        <!-- <nav ng-show="show.header === 'action'" ng-controller="ActionCtrl">
-          <button ng-click="clear()" class="group trigger first">
-            X
-          </button>
-          <button ng-click="undo()" class="group trigger">
-            &#x2190;
-          </button>
-          <button ng-click="redo()" class="group trigger last">
-            &#x2192;
-          </button>
-        </nav> -->
-      </div>
+      <nav class="expanded" id="map-types" ng-controller="MapActionCtrl" ng-show="show.footer === 'mapTypes'">
+        <button class="group first" ng-class="{ active: getMapTypeId() === 'custom' }" ng-click="setMapTypeId('custom')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+				    <path d="M10,17 L54,17 L54,47 L10,47 L10,17 z" fill-opacity="0" />
+				    <path d="M17,24 L35,24 M47,24 L41,24 M43,40 L21,40" fill-opacity="0" stroke-width="2" />
+          </svg>
+        </button>
+        <button class="group" ng-class="{ active: getMapTypeId() === mapTypeId.ROADMAP }" ng-click="setMapTypeId(mapTypeId.ROADMAP)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <path d="M10,10 L10,48 L24.5,54 L39.5,48 L54,54 L54,16 L39.5,10 L24.5,16 L10,10 z M24.5,54 L24.5,16 M39.5,48 L39.5,10" fill-opacity="0" />
+          </svg>
+        </button>
+        <button class="group last" ng-class="{ active: getMapTypeId() === mapTypeId.HYBRID }" ng-click="setMapTypeId(mapTypeId.HYBRID)">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+			      <path d="M18,14 L22,10 L28,16 L30,20 L28,22 L24,20 L18,14 z M54,42 L48,36 L44,34 L42,36 L44,40 L50,46 L54,42 z M36,34 L30,28 L36,22 L42,28 L36,34 z" />
+						<path d="M32,54 C19.85,54 10,44.15 10,32 M20,32 C20,38.627 25.373,44 32,44" fill-opacity="0" />
+          </svg>
+        </button>
+      </nav>
+			<nav class="expanded" id="action" ng-controller="ActionCtrl" ng-show="show.footer === 'action'">
+        <button ng-click="clear()" class="trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <path d="M10,54 L54,10 M54,54 L10,10" />
+          </svg>
+        </button>
+        <button class="group first" ng-click="undo()" class="trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+						<path d="M36,18 C45.941,18 54,26.059 54,36 C54,45.941 45.941,54 36,54 M10,18 L36,18 M18,26 L10,18 L18,10 M36,54 L22,54" fill-opacity="0" />
+          </svg>
+        </button>
+        <button class="group last" ng-click="redo()" class="trigger">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <path d="M28,18 C18.059,18 10,26.059 10,36 C10,45.941 18.059,54 28,54 M54,18 L28,18 M46,26 L54,18 L46,10 M28,54 L42,54" fill-opacity="0" />
+          </svg>
+        </button>
+			</nav>
+			<nav class="expanded" id="save" ng-controller="ImageCtrl">
+				<input type="text" placeholder="Locality" ng-model="data.locality">
+				<input type="text" placeholder="Number" ng-model="data.number">
+				<button>
+					Save
+				</button>
+			</nav>
+      <nav class="collapsed">
+				<button ng-click="setShowFooter('action')">
+					Action
+				</button>
+        <!-- <button ng-controller="ActionCtrl" ng-click="clear()" class="trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <path d="M16.444,47.556 L47.556,16.444 M47.556,47.556 L16.444,16.444" />
+          </svg>
+        </button>
+        <button ng-controller="ActionCtrl" ng-click="undo()" class="trigger">
+          Undo
+        </button>
+        <button ng-controller="ActionCtrl" ng-click="redo()" class="trigger">
+          Redo
+        </button> -->
+
+        <button ng-click="setShowFooter('mapTypes')">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <circle fill="transparent" stroke-width="6" cx="32" cy="32" r=21 />
+            <path stroke-width="1" d="M32,11 a 21 21 0 0 0 0 42" />
+          </svg>
+        </button>
+        <button ng-controller="ImageCtrl" ng-click="downloadPdf()">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 20,29 12,12 12,-12" />
+            <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 32,11 0,29" />
+            <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 11,53 42,0" />
+          </svg>
+        </button>
+      </nav>
+      <!-- 
+				SKIP
+				
+				
+				<nav ng-show="show.header === 'action'" ng-controller="ActionCtrl">
+        <button ng-click="clear()" class="group trigger first">
+          X
+        </button>
+        <button ng-click="undo()" class="group trigger">
+          &#x2190;
+        </button>
+        <button ng-click="redo()" class="group trigger last">
+          &#x2192;
+        </button>
+      </nav> -->
     </footer>
 
     <!-- inject:css -->
     <!-- endinject -->
-    <script defer src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js"></script>
-    <script defer src="app/bower_components/traceur-runtime/traceur-runtime.min.js"></script>  
+		
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js"></script>
     
     <script src="//maps.googleapis.com/maps/api/js?libraries=geometry,places&sensor=false"></script>
     

@@ -146,7 +146,7 @@ var tasks = {
         outputStyle: 'compressed',
         errLogToConsole: true
       }))
-      .pipe(prefix('last 2 versions'))
+      // .pipe(prefix('last 2 versions'))
       .pipe(rename({
         suffix: '.min'
       }))

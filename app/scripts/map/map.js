@@ -163,13 +163,18 @@ angular.module('bndry.map', ['ngStorage'])
   });
   MapSvc.map.mapTypes.set('custom', customMapStyle);
 })
-  .controller('MapActionCtrl', function($scope, MapSvc) {
-    $scope.setMapTypeId = function(mapTypeId) {
-      if (mapTypeId in MapSvc.MapTypeId) {
-        console.log(mapTypeId, 'in MapSvc.mapTypeId');
-        mapTypeId = MapSvc.MapTypeId[mapTypeId];
-      }
-      
-      MapSvc.map.setMapTypeId(mapTypeId);
-    };
-  });
+.controller('MapActionCtrl', function($scope, MapSvc) {
+	$scope.mapTypeId = MapSvc.MapTypeId;
+  $scope.setMapTypeId = function(mapTypeId) {
+    // if (mapTypeId in MapSvc.MapTypeId) {
+    //   console.log(mapTypeId, 'in MapSvc.mapTypeId');
+    //   mapTypeId = MapSvc.MapTypeId[mapTypeId];
+    // }
+    
+    MapSvc.map.setMapTypeId(mapTypeId);
+  };
+	$scope.getMapTypeId = () => {
+		console.log(MapSvc.map.getMapTypeId());
+		return MapSvc.map.getMapTypeId();
+	};
+});
