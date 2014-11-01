@@ -1,21 +1,37 @@
 /* jslint camelcase: false */
 
 angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
-  .directive('focusOn', function($parse) {
+  .directive('focusOn', function($parse, $timeout) {
     return {
       restrict: 'A',
       link: function(scope, elem, attr) {
-				attr.$observe('focusOn', function(newVal) {
+				var value = $parse(attr.focusOn);
+				
+				scope.$watch(value.bind(null, scope), function(newVal) {
           if (newVal === undefined) {
             return;
           }
-
+										
           if (newVal) {
             elem[0].focus();
           } else {
             elem[0].blur();
           }
 				});
+				// attr.$observe('focusOn', function(newVal) {
+				//           if (newVal === undefined) {
+				//             return;
+				//           }
+				//
+				// 	elem = elem[0];
+				//
+				// 	console.log(newVal ? 'Focus!' : 'Blur!');
+				//           if (newVal) {
+				//             $timeout(elem.focus.bind(elem), 10);
+				//           } else {
+				//             $timeout(elem.blur.bind(elem), 10);
+				//           }
+				// });
       }
     };
   })
@@ -127,7 +143,8 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
 
     var resolved = true,
       queue = false,
-      last = '';
+      last = '',
+			focus = false;
 
     $scope.query = '';
 		$scope.active = -1;
@@ -147,7 +164,7 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
       if ($scope.suggestions[$scope.active]) {
         if (enter) {
           $scope.loadOnMap($scope.suggestions[$scope.active].reference);
-          $scope.focus = false;
+          $scope.focus(false);
         } else if (up && $scope.active > -1) {
           $scope.active--;
         } else if (down && $scope.active < $scope.suggestions.length - 1) {
@@ -156,7 +173,13 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
       }
     };
 
-		$scope.focus = false;
+		$scope.focus = (value) => {
+			if (value !== undefined) {
+				focus = Boolean(value);
+			}
+			
+			return focus;
+		};
     $scope.loadOnMap = function(reference) {
 			SearchSvc.loadPlaceFromReference(reference);
 			$scope.focus = false;

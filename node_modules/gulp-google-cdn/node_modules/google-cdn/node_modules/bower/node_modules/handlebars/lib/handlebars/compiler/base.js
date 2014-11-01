@@ -1,21 +1,18 @@
-var handlebars = require("./parser");
+import parser from "./parser";
+import AST from "./ast";
+module Helpers from "./helpers";
+import { extend } from "../utils";
 
-exports.attach = function(Handlebars) {
+export { parser };
 
-// BEGIN(BROWSER)
+var yy = {};
+extend(yy, Helpers, AST);
 
-Handlebars.Parser = handlebars;
-
-Handlebars.parse = function(input) {
-
+export function parse(input) {
   // Just return if an already-compile AST was passed in.
-  if(input.constructor === Handlebars.AST.ProgramNode) { return input; }
+  if (input.constructor === AST.ProgramNode) { return input; }
 
-  Handlebars.Parser.yy = Handlebars.AST;
-  return Handlebars.Parser.parse(input);
-};
+  parser.yy = yy;
 
-// END(BROWSER)
-
-return Handlebars;
-};
+  return parser.parse(input);
+}

@@ -81,7 +81,6 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
 					for (var type of localityTypes) {
 						for (var result of results) {
 							if (result.types.indexOf(type) > -1) {
-								console.log('Found '+type+' in result', result);
 								locality = result.formatted_address;
 								return;
 							}

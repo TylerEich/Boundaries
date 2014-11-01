@@ -2,7 +2,7 @@
 
 angular
 .module('bndry', [
-  'ngTouch',
+  // 'ngTouch',
   'ngStorage',
   'ui.map',
   'ngAnimate',

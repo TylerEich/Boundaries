@@ -26,7 +26,6 @@ var unitTestFiles = [
   ],
 
   // Build files
-  traceurRuntime = 'app/bower_components/traceur-runtime/traceur-runtime.min.js',
   bowerBuildFiles = [
     'app/bower_components/*/*.js',
     '!app/bower_components/*/*.min.js',
@@ -110,14 +109,14 @@ function clean(glob) {
     .pipe(gulpClean());
 }
 var tasks = {
-  'test': test.bind(null, true, karmaConfFiles.concat(traceurRuntime, jsBuildFiles, unitTestBuildFiles)),
-  'test:once': test.bind(null, false, karmaConfFiles.concat(traceurRuntime, jsBuildFiles, unitTestBuildFiles)),
-  'test:dist': test.bind(null, false, karmaConfFiles.concat(traceurRuntime, 'dist/script.min.js', unitTestBuildFiles)),
+  'test': test.bind(null, true, karmaConfFiles.concat(jsBuildFiles, unitTestBuildFiles)),
+  'test:once': test.bind(null, false, karmaConfFiles.concat(jsBuildFiles, unitTestBuildFiles)),
+  'test:dist': test.bind(null, false, karmaConfFiles.concat('dist/script.min.js', unitTestBuildFiles)),
   'build:js': function() {
     var changed = require('gulp-changed'),
       sourcemaps = require('gulp-sourcemaps'),
-	  to5 = require('gulp-6to5'),
-      traceur = require('gulp-traceur');
+		  to5 = require('gulp-6to5');
+      // traceur = require('gulp-traceur');
           
       jsAppFiles[1] = unitTestFiles[0];
     
@@ -146,7 +145,7 @@ var tasks = {
         outputStyle: 'compressed',
         errLogToConsole: true
       }))
-      // .pipe(prefix('last 2 versions'))
+      .pipe(prefix('last 2 versions'))
       .pipe(rename({
         suffix: '.min'
       }))
@@ -189,8 +188,7 @@ var tasks = {
     var util = require('util'),
       sourcemaps = require('gulp-sourcemaps'),
       ngAnnotate = require('gulp-ng-annotate'),
-      traceur = require('gulp-traceur'),
-	  to5 = require('gulp-6to5'),
+		  to5 = require('gulp-6to5'),
       uglify = require('gulp-uglify'),
       filesize = require('gulp-filesize'),
       concat = require('gulp-concat'),
@@ -208,8 +206,8 @@ var tasks = {
     return gulp.src(jsBuildFiles)
       .pipe(sourcemaps.init())
       	.pipe(concat('script.min.js'))
-		.pipe(to5())
-	    .pipe(ngAnnotate())
+				.pipe(to5())
+		    .pipe(ngAnnotate())
 		
         // .pipe(traceur({
         //   sourceMap: true
@@ -221,14 +219,19 @@ var tasks = {
       .pipe(filesize());
   },
   'dist:html': function() {
-    var googleCdn = require('gulp-google-cdn'),
+    var cdnizer = require('gulp-cdnizer'), //googleCdn = require('gulp-google-cdn'),
+			googleData = require('google-cdn-data'),
+			cdnjsData = require('cdnjs-cdn-data'),
       extend = require('util')._extend,
+			foreach = require('gulp-foreach'),
       changed = require('gulp-changed'),
       htmlmin = require('gulp-htmlmin'),
       filesize = require('gulp-filesize'),
       replace = require('gulp-replace'),
       inject = require('gulp-inject');
 
+		var data = extend(googleData, cdnjsData);
+		
     return gulp.src('app/index.html')
       .pipe(inject(gulp.src(bowerDistFiles.concat('dist/script.min.js'), {
         read: false
@@ -247,6 +250,38 @@ var tasks = {
       }), {
         addRootSlash: false
       }))
+			.pipe(replace(/app\/bower_components\/(.+?)\/.+?.js/g, function(match, p1) {
+				console.log(match, p1);
+				var version = require('./app/bower_components/' + p1 + '/bower.json').version;
+				console.log('Version:', version);
+				console.log('Is in data?:', p1 in data);
+				
+				if (p1 in data) {
+					var item = data[p1];
+					return item.url(version);
+				} else {
+					return match;
+				}
+			}))
+			.pipe(htmlmin({
+				removeComments: true,
+				removeCommentsFromCDATA: true,
+				removeCDATASectionsFromCDATA: true,
+				collapseWhitespace: true,
+				collapseBooleanAttributes: true,
+				removeAttributeQuotes: true,
+				removeRedundantAttributes: true,
+				useShortDoctype: true,
+				removeEmptyAttributes: true,
+				removeScriptTypeAttributes: true,
+				removeStyleLinkTypeAttributes: true,
+				removeOptionalTags: true,
+				removeIgnored: true,
+				keepClosingSlash: true,
+				caseSensitive: true,
+				minifyCSS: true
+				// minifyURLs: true
+			}))
       // .pipe(googleCdn(require('./bower.json'), {
       //   componentsPath: 'app/bower_components',
       //   cdn: extend(require('cdnjs-cdn-data'), require('google-cdn-data'))

@@ -174,7 +174,6 @@ angular.module('bndry.map', ['ngStorage'])
     MapSvc.map.setMapTypeId(mapTypeId);
   };
 	$scope.getMapTypeId = () => {
-		console.log(MapSvc.map.getMapTypeId());
 		return MapSvc.map.getMapTypeId();
 	};
 });

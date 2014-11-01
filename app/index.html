@@ -21,9 +21,9 @@
     <!-- iPad Landscape (Retina) -->
     <link href="apple-touch-startup-image/ipad_landscape.png" media="(device-width: 768px) and (device-height: 1024px) and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image">
     <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-    <script src="//cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
     <!-- inject:critical:css -->
     <!-- endinject -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
   </head>
   <body ng-app="bndry" ng-controller="MasterCtrl">
     <svg id="spritesheet" style="display: none;">
@@ -128,21 +128,21 @@
 			</nav>
     </header>
     <main ng-controller="MapCtrl" ng-cloak>
-      <div id="top-overlay">
-	      <nav id="search" ng-controller="SearchCtrl" ng-class="{focus: focus}">
-	        <input type="text" placeholder="Search" ng-model="query" ng-keydown="keydown($event)" ng-focus="focus = true" focus-on="focus">
-					<button ng-click="query ? query = '' : focus = false"><!-- {{ query ? '&#x232B;' : '&#x00D7;' }} -->
+      <div id="top-overlay" ng-controller="SearchCtrl">
+	      <nav id="search" ng-class="{focus: focus()}">
+	        <input type="text" placeholder="Search" ng-model="query" ng-keydown="keydown($event)" ng-focus="focus(true)" focus-on="focus()" ng-blur="focus(false)" ng-model-options="{updateOn: 'default blur', debounce: {blur: 1}}">
+					<button ng-click="query ? query = '' : focus(false)"><!-- {{ query ? '&#x232B;' : '&#x00D7;' }} -->
 						<svg viewBox="0 0 64 64">
-							<path d="M10,10 L54,54 M54,10 L10,54">
+							<path d="M10,10 L54,54 M54,10 L10,54" stroke-width="8px">
 						</svg>
 					</button>
-	        <div id="suggestions" class="group vertical" ng-mousemove="mousemove(); active = -1" ng-show="focus">
+	        <div id="suggestions" class="group vertical" ng-mousemove="mousemove(); active = -1" ng-show="focus()">
 	          <div class="suggestion" ng-repeat="suggestion in suggestions" ng-bind-html="suggestion.description" ng-class="{ 'error': suggestion.error, 'active': $index === active, 'empty': !query, first: $first, last: $last }" ng-click="loadOnMap(suggestion.reference)">
 	          </div>
 	        </div>
 	      </nav>
 
-        <div id="status" ng-controller="StatusCtrl">
+        <div id="status" ng-controller="StatusCtrl" ng-hide="focus()" ng-click="focus(true)">
 					<svg id="spotlight" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
 	          <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
 	        </svg>
