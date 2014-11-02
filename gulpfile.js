@@ -30,7 +30,7 @@ var unitTestFiles = [
     'app/bower_components/*/*.js',
     '!app/bower_components/*/*.min.js',
     '!app/bower_components/*/Gruntfile.js',
-    '!app/bower_components/angular/*',
+    // '!app/bower_components/angular/*',
     '!app/bower_components/angular-ui-utils/*ieshiv*',
     '!app/bower_components/angular-mocks/*',
     '!app/bower_components/angular-resource/*',
