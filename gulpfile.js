@@ -27,10 +27,10 @@ var unitTestFiles = [
 
   // Build files
   bowerBuildFiles = [
+		'app/bower_components/angular/angular.js',
     'app/bower_components/*/*.js',
     '!app/bower_components/*/*.min.js',
     '!app/bower_components/*/Gruntfile.js',
-    // '!app/bower_components/angular/*',
     '!app/bower_components/angular-ui-utils/*ieshiv*',
     '!app/bower_components/angular-mocks/*',
     '!app/bower_components/angular-resource/*',
@@ -115,15 +115,29 @@ var tasks = {
   'build:js': function() {
     var changed = require('gulp-changed'),
       sourcemaps = require('gulp-sourcemaps'),
+			replace = require('gulp-replace'),
 		  to5 = require('gulp-6to5');
       // traceur = require('gulp-traceur');
           
       jsAppFiles[1] = unitTestFiles[0];
     
+		// function forOf(string) {
+		// 	var pattern = /for\s*?\((var)?\s+?(.+?)\s+?of\s+?(.+?)\s*?\{/g;
+		// 	return string.replace(pattern, function(match, hasVar, iterator, iterable) {
+		// 		var iteratorName = '_' + Math.random().toString(36).substring(7);
+		// 		`var ${iterator};for(var ${iteratorName} = 0; ${iteratorName} < ${iterable}.length; ${iteratorName}++) { ${iterator} = ${iterable}[${iteratorName}]`;
+		// 	});
+		// }
     return gulp.src(jsAppFiles.concat(unitTestFiles))
       .pipe(changed('build/scripts'))
+			.pipe(replace(/for\s*?\((var)?\s+?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, iterator, iterable) {
+				var iteratorName = '_' + Math.random().toString(36).substring(7);
+				return 'var ' + iterator + ';for(var ' + iteratorName + ' = 0; ' + iteratorName + ' < ' + iterable + '.length; ' + iteratorName + '++) { ' + iterator + ' = ' + iterable + '[' + iteratorName + ']';
+				// return `var ${iterator};for(var ${iteratorName} = 0; ${iteratorName} < ${iterable}.length; ${iteratorName}++) { ${iterator} = ${iterable}[${iteratorName}]`;
+			}))
+			
       .pipe(sourcemaps.init())
-	  .pipe(to5())
+		  .pipe(to5())
         // .pipe(traceur({
         //   sourceMap: true
         // }))
