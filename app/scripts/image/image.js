@@ -168,15 +168,15 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
 		};
     
     $scope.downloadPdf = () => {
-      // var locality = prompt('Locality (for example, the name of the city)', '');
-      // if (locality === null) {
-      //   return;
-      // }
-      // var number = prompt('Territory number (for example, MR-1056)', '');
-      // if (number === null) {
-      //   return;
-      // }
+      var locality = prompt('Locality (for example, the name of the city)', '');
+      if (locality === null) {
+        return;
+      }
+      var number = prompt('Territory number (for example, MR-1056)', '');
+      if (number === null) {
+        return;
+      }
 
-			ImageSvc.generatePdf($scope.data.locality, $scope.data.number, ImageSvc.generateUrl());
+			ImageSvc.generatePdf(locality, number, ImageSvc.generateUrl());
     };
   });

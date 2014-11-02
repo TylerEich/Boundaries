@@ -186,7 +186,8 @@
 			<nav class="expanded" id="action" ng-controller="ActionCtrl" ng-show="show.footer === 'action'">
         <button ng-click="clear()" class="trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <path d="M10,54 L54,10 M54,54 L10,10" />
+            <!-- <path d="M10,54 L54,10 M54,54 L10,10" /> -->
+				    <path d="M14,14 L50,14 M38,14 L36,10 L28,10 L26,14 M48,20 L16,20 L20,54 L44,54 L48,20 z" />
           </svg>
         </button>
         <button class="group first" ng-click="undo()" class="trigger">
@@ -200,33 +201,32 @@
           </svg>
         </button>
 			</nav>
-			<nav class="expanded" id="save" ng-controller="ImageCtrl">
+			<!-- <nav class="expanded" id="save" ng-controller="ImageCtrl">
 				<input type="text" placeholder="Locality" ng-model="data.locality">
 				<input type="text" placeholder="Number" ng-model="data.number">
 				<button ng-click="downloadPdf()">
 					Save
 				</button>
-			</nav>
+			</nav> -->
       <nav class="collapsed">
-				<button ng-click="setShowFooter('action')">
+				<!-- <button ng-click="setShowFooter('action')">
 					Action
-				</button>
-        <!-- <button ng-controller="ActionCtrl" ng-click="clear()" class="trigger">
+				</button> -->
+        <button ng-controller="ActionCtrl" ng-click="clear()" ng-class="{last: !hasUndo() && !hasRedo()}" class="group first trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <path d="M16.444,47.556 L47.556,16.444 M47.556,47.556 L16.444,16.444" />
+            <path d="M14,14 L50,14 M38,14 L36,10 L28,10 L26,14 M48,20 L16,20 L20,54 L44,54 L48,20 z" />
           </svg>
         </button>
-        <button ng-controller="ActionCtrl" ng-click="undo()" class="trigger">
+        <button ng-controller="ActionCtrl" ng-show="hasUndo()" ng-click="undo()" ng-class="{last: !hasRedo()}" class="group trigger">
           Undo
         </button>
-        <button ng-controller="ActionCtrl" ng-click="redo()" class="trigger">
+        <button ng-controller="ActionCtrl" ng-show="hasRedo()" ng-click="redo()" class="group last trigger">
           Redo
-        </button> -->
+        </button>
 
         <button ng-click="setShowFooter('mapTypes')">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <circle fill="transparent" stroke-width="6" cx="32" cy="32" r=21 />
-            <path stroke-width="1" d="M32,11 a 21 21 0 0 0 0 42" />
+            <path d="M10,10 L10,48 L24.5,54 L39.5,48 L54,54 L54,16 L39.5,10 L24.5,16 L10,10 z M24.5,54 L24.5,16 M39.5,48 L39.5,10" fill-opacity="0" />
           </svg>
         </button>
         <button ng-controller="ImageCtrl" ng-click="downloadPdf()">
