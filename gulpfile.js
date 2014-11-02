@@ -36,7 +36,7 @@ var unitTestFiles = [
     '!app/bower_components/angular-resource/*',
     '!app/bower_components/angular-scenario/*'
   ],
-  bowerDistFiles = bowerBuildFiles.slice(1),
+  bowerDistFiles = bowerBuildFiles.slice(2),
   jsBuildFiles = [
     'build/scripts/*/**.js',
     '!build/scripts/*/**Spec.js',
@@ -220,7 +220,7 @@ var tasks = {
     return gulp.src(jsBuildFiles)
       .pipe(sourcemaps.init())
       	.pipe(concat('script.min.js'))
-				.pipe(to5())
+				// .pipe(to5())
 		    .pipe(ngAnnotate())
 		
         // .pipe(traceur({
@@ -233,7 +233,7 @@ var tasks = {
       .pipe(filesize());
   },
   'dist:html': function() {
-    var cdnizer = require('gulp-cdnizer'), //googleCdn = require('gulp-google-cdn'),
+    var cdnizer = require('gulp-cdnizer'),
 			googleData = require('google-cdn-data'),
 			cdnjsData = require('cdnjs-cdn-data'),
       extend = require('util')._extend,
@@ -303,41 +303,6 @@ var tasks = {
       .pipe(gulp.dest('.'));
   }
 };
-
-
-
-gulp.task('6to5', function() {
-  var util = require('util'),
-    sourcemaps = require('gulp-sourcemaps'),
-    ngAnnotate = require('gulp-ng-annotate'),
-    to5 = require('gulp-6to5'),
-    uglify = require('gulp-uglify'),
-    filesize = require('gulp-filesize'),
-    concat = require('gulp-concat'),
-    insert = require('gulp-insert');
-
-  var pkg = require('./package.json'),
-    copyright = util.format('/*\n %s v%s\n (c) 2013-%s %s %s\n License: %s\n*/\n',
-      pkg.name,
-      pkg.version,
-      new Date().getFullYear(),
-      pkg.author,
-      pkg.homepage,
-      pkg.license);
-
-  return gulp.src(jsBuildFiles)
-    .pipe(sourcemaps.init())
-      .pipe(to5())
-      .pipe(concat('script.min.js'))
-      .pipe(ngAnnotate())
-
-      .pipe(uglify())
-    .pipe(sourcemaps.write('sourcemaps'))
-    .pipe(insert.prepend(copyright))
-    .pipe(gulp.dest('dist'))
-    .pipe(filesize());
-});
-
 
 
 // Test tasks
