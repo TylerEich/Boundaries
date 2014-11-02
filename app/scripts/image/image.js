@@ -1,9 +1,8 @@
 angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry.color'])
-  .service('ImageSvc', function($http, $document, $localStorage, MapSvc, DrawingSvc, ColorSvc) {
+  .service('ImageSvc', function($rootScope, $http, $document, $localStorage, MapSvc, DrawingSvc, ColorSvc) {
     var self = this;
     
     self.pxSize = function(maxWidth, maxHeight) {
-      // var ratio = $localStorage.width / $localStorage.height;
       var ratio = 3.5 / 5;
       return {
         ratio: ratio,
@@ -74,7 +73,6 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
 
         encodedPath = MapSvc.geometry.encoding.encodePath(polyPath);
         color = $localStorage.colors[drawing.colorIndex];
-        debugger;
         hex = '0x' + ColorSvc.convert.rgba(color).to.hex32();
 
         // If drawing is polygon, use 'fillcolor'
@@ -119,7 +117,6 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
       if (!imageUrl) {
         imageUrl = self.generateUrl();
       }
-      console.info(imageUrl);
       
       var legend = [];
       for (var color of ColorSvc.colors) {
@@ -156,6 +153,12 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
       document.body.appendChild(form);
       form.submit();
       document.body.removeChild(form);
+			
+			$rootScope.$emit('territory:save', {
+				locality: locality,
+				number: number,
+				drawings: DrawingSvc.drawingsToGeoJson(DrawingSvc.drawings)
+			});
     }
   })
   .controller('ImageCtrl', function($scope, ImageSvc) {
@@ -165,15 +168,15 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
 		};
     
     $scope.downloadPdf = () => {
-      var locality = prompt('Locality (for example, the name of the city)', '');
-      if (locality === null) {
-        return;
-      }
-      var number = prompt('Territory number (for example, MR-1056)', '');
-      if (number === null) {
-        return;
-      }
-      
-      ImageSvc.generatePdf(locality, number, ImageSvc.generateUrl());
+      // var locality = prompt('Locality (for example, the name of the city)', '');
+      // if (locality === null) {
+      //   return;
+      // }
+      // var number = prompt('Territory number (for example, MR-1056)', '');
+      // if (number === null) {
+      //   return;
+      // }
+
+			ImageSvc.generatePdf($scope.data.locality, $scope.data.number, ImageSvc.generateUrl());
     };
   });

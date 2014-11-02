@@ -130,9 +130,10 @@ var tasks = {
 		// }
     return gulp.src(jsAppFiles.concat(unitTestFiles))
       .pipe(changed('build/scripts'))
-			.pipe(replace(/for\s*?\((var)?\s+?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, iterator, iterable) {
-				var iteratorName = '_' + Math.random().toString(36).substring(7);
-				return 'var ' + iterator + ';for(var ' + iteratorName + ' = 0; ' + iteratorName + ' < ' + iterable + '.length; ' + iteratorName + '++) { ' + iterator + ' = ' + iterable + '[' + iteratorName + ']';
+			.pipe(replace(/for\s*?\((var\s+?)?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, item, iterable) {				
+				var i = '_' + Math.random().toString(36).substring(7);
+				
+				return (hasVar ? ('var ' + item + ';') : '') + 'for(var ' + i + ' = 0; ' + i + ' < ' + iterable + '.length; ' + i + '++) { ' + item + ' = ' + iterable + '[' + i + ']';
 				// return `var ${iterator};for(var ${iteratorName} = 0; ${iteratorName} < ${iterable}.length; ${iteratorName}++) { ${iterator} = ${iterable}[${iteratorName}]`;
 			}))
 			

@@ -691,9 +691,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
           
           pathsToAdd.push(pathChunk);
         }
-        
-        console.log(pathsToAdd);
-        
+                
         addNodesToDrawing.bind(null, drawing, 0, nodesToAdd, pathsToAdd)();
         
         return drawing;
@@ -830,7 +828,6 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
             if (didCreateNewDrawing) {
               DrawingSvc.removeDrawing(drawings, drawingIndex, 1);
               activeDrawingIndex(drawingIndex - 1);
-              debugger;
             }
           }.bind(null, drawings, drawing, drawingIndex, nodeIndex, createNewDrawing),
           
