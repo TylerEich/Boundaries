@@ -212,15 +212,41 @@ describe('Image', function() {
     'map': {}
   };
 
+  beforeEach(module('bndry.drawing', function($provide) {
+    $provide.value('MapSvc', MockMapSvc);
+  }));
   beforeEach(module('bndry.image', function($provide) {
     $provide.value('MapSvc', MockMapSvc);
   }));
   
-  beforeEach(inject(function(_ImageSvc_) {
+  beforeEach(inject(function(_ImageSvc_, $rootScope, DrawingSvc) {
     ImageSvc = _ImageSvc_;
+		spyOn($rootScope, '$broadcast');
+		
+		DrawingSvc.drawings = DrawingSvc.geoJsonToDrawings('{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"LineString","coordinates":[[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0]]},"properties":{"colorIndex":1,"rigid":false,"fill":false,"nodes":[{"lat":0,"lng":1,"index":0},{"lat":1,"lng":0,"index":13}]}}]}');
   }));
 
-  it('generates valid URLs', function() {
-    expect(ImageSvc).toBeTruthy();
-  });
+	describe('Pixel dimensions', function() {
+	  it('Portrait', function() {
+	    expect(ImageSvc.pxSize(640, 640, 3.5/5)).toEqual({
+	    	ratio: 3.5/5,
+				width: 448,
+				height: 640
+	    });
+	  });
+		
+	  it('Landscape', function() {
+	    expect(ImageSvc.pxSize(640, 640, 5/3.5)).toEqual({
+	    	ratio: 5/3.5,
+				width: 640,
+				height: 448
+	    });
+	  });
+	});
+	
+	describe('URLs', function() {
+		it('Generates valid URLs', function() {
+			expect(ImageSvc.generateUrl()).toMatch(/(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/);
+		});
+	});
 });

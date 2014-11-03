@@ -2,8 +2,7 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
   .service('ImageSvc', function($rootScope, $http, $document, $localStorage, MapSvc, DrawingSvc, ColorSvc) {
     var self = this;
     
-    self.pxSize = function(maxWidth, maxHeight) {
-      var ratio = 3.5 / 5;
+    self.pxSize = function(maxWidth, maxHeight, ratio) {
       return {
         ratio: ratio,
         width: (ratio >= 1) ? maxWidth : Math.round(ratio * maxWidth),
@@ -18,8 +17,6 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
       var path = 'https://maps.googleapis.com/maps/api/staticmap';
 
       var params = [];
-
-      var pxSize = self.pxSize(640, 640);
 
       // Generate style from map styling and drawings
       var i, j;
@@ -98,14 +95,11 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
       var computeHeading = MapSvc.geometry.spherical.computeHeading;
       var heading = Math.abs(computeHeading(northEast, southWest) + computeHeading(southWest, northEast)) / 2;
 
-      // Check orientation
-      if ((45 <= heading && heading < 135) === (pxSize.ratio >= 1)) {
-        // Landscape
-        params.push('size=' + pxSize.height + 'x' + pxSize.width);
-      } else {
-        // Portrait
-        params.push('size=' + pxSize.width + 'x' + pxSize.height);
-      }
+			var ratio = (45 <= heading && heading < 135) ? 3.5/5 : 5/3.5;
+			var pxSize = self.pxSize(640, 640, ratio);
+			
+      // Landscape
+      params.push('size=' + pxSize.height + 'x' + pxSize.width);
 
       params.push('format=jpg');
       params.push('scale=2');

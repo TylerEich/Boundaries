@@ -1,3 +1,4 @@
+// istanbul ignore next
 angular.module('bndry.history', [])
   .service('HistorySvc', function() {
     /* jshint quotmark:true */

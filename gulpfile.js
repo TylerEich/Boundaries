@@ -71,7 +71,24 @@ var karmaConfFiles = [
 var karmaConf = {
   browsers: ['ChromeCanary'],
   frameworks: ['jasmine'],
-  reporters: ['osx', 'mocha'],
+  reporters: ['osx', 'mocha', 'coverage'],
+	preprocessors: {
+		'./build/scripts/*/!(*Spec).js': ['coverage']
+	},
+	coverageReporter: {
+		reporters: [
+			{
+				type: 'text-summary'
+			},
+			{
+				type: 'text'
+			},
+			{
+				type: 'html',
+				dir: 'coverage/'
+			}
+		]
+	},
   logLevel: 'WARN',
   files: karmaConfFiles,
   exclude: ['app/bower_components/angular-scenario/angular-scenario.js']
@@ -95,6 +112,7 @@ function test(watch, files, done) {
   var karmaServer = require('karma').server;
 
   karmaConf.files = files;
+	karmaConf.autoWatch = watch;
   karmaConf.singleRun = !watch;
 
   karmaServer.start(karmaConf, done);
