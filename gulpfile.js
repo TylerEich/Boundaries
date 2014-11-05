@@ -38,11 +38,10 @@ var unitTestFiles = [
   bowerDistFiles = bowerBuildFiles.slice(2),
   jsBuildFiles = [
     'build/scripts/*/**.js',
-    '!build/scripts/*/**Spec.js',
     'build/scripts/app.js'
   ],
   unitTestBuildFiles = [
-    'build/scripts/*/**/*Spec.js'
+    'build/test/**.js'
   ],
   // htmlBuildFiles = [
   //   'build/*.html',
@@ -72,7 +71,7 @@ var karmaConf = {
   frameworks: ['jasmine'],
   reporters: ['osx', 'mocha', 'coverage'],
 	preprocessors: {
-		'./build/scripts/*/!(*Spec).js': ['coverage']
+		'./build/scripts/*/**.js': ['coverage']
 	},
 	coverageReporter: {
 		reporters: [
@@ -125,32 +124,36 @@ function clean(glob) {
   })
     .pipe(gulpClean());
 }
+
+function build(files, dir) {
+  var changed = require('gulp-changed'),
+    sourcemaps = require('gulp-sourcemaps'),
+		replace = require('gulp-replace'),
+	  to5 = require('gulp-6to5');
+  
+  return gulp.src(files)
+    .pipe(changed(dir))
+		
+		// Replace for-of with for(;;) loop
+		.pipe(replace(/for\s*?\((var\s+?)?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, item, iterable) {				
+			var i = '_' + Math.random().toString(36).substring(7);
+			
+			return (hasVar ? ('var ' + item + ';') : '') + 'for(var ' + i + ' = 0; ' + i + ' < ' + iterable + '.length; ' + i + '++) { ' + item + ' = ' + iterable + '[' + i + ']';
+		}))
+		
+    .pipe(sourcemaps.init())
+		  .pipe(to5())
+    .pipe(sourcemaps.write('../sourcemaps'))
+    .pipe(gulp.dest(dir))
+    .on('error', errorHandler);
+}
+
 var tasks = {
   'test': test.bind(null, true, karmaConfFiles.concat(jsBuildFiles, unitTestBuildFiles)),
   'test:once': test.bind(null, false, karmaConfFiles.concat(jsBuildFiles, unitTestBuildFiles)),
   'test:dist': test.bind(null, false, karmaConfFiles.concat('dist/script.min.js', unitTestBuildFiles)),
-  'build:js': function() {
-    var changed = require('gulp-changed'),
-      sourcemaps = require('gulp-sourcemaps'),
-			replace = require('gulp-replace'),
-		  to5 = require('gulp-6to5');
-    
-    return gulp.src(jsAppFiles.concat(unitTestFiles))
-      .pipe(changed('build'))
-			
-			// Replace for-of with for(;;) loop
-			.pipe(replace(/for\s*?\((var\s+?)?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, item, iterable) {				
-				var i = '_' + Math.random().toString(36).substring(7);
-				
-				return (hasVar ? ('var ' + item + ';') : '') + 'for(var ' + i + ' = 0; ' + i + ' < ' + iterable + '.length; ' + i + '++) { ' + item + ' = ' + iterable + '[' + i + ']';
-			}))
-			
-      .pipe(sourcemaps.init())
-			  .pipe(to5())
-      .pipe(sourcemaps.write('../sourcemaps'))
-      .pipe(gulp.dest('build'))
-      .on('error', errorHandler);
-  },
+  'build:js': build.bind(null, jsAppFiles, 'build/scripts'),
+	'build:test': build.bind(null, unitTestFiles, 'build/test'),
   'build:css': function() {
     var changed = require('gulp-changed'),
       sass = require('gulp-sass'),
@@ -317,8 +320,9 @@ gulp.task('test:once', ['build:js'], tasks['test:once']);
 gulp.task('test:dist', ['dist:js'], tasks['test:dist']);
 
 // Build tasks
-gulp.task('build', ['build:html']);
+gulp.task('build', ['build:html', 'build:test']);
 gulp.task('build:js', tasks['build:js']);
+gulp.task('build:test', ['build:js'], tasks['build:test']);
 gulp.task('build:css', tasks['build:css']);
 gulp.task('build:html', ['build:js', 'build:css'], tasks['build:html']);
 
