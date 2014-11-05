@@ -5,19 +5,12 @@ angular.module('bndry.territory', ['ngStorage', 'bndry.map'])
 		territoryBounds: []
 	});
 	
-	MapSvc.map.data.setStyle(function(feature) {
-		var colorIndex = feature.getProperty('colorIndex');
-		
-		var color = ColorSvc.colors[colorIndex];
-		var hex = ColorSvc.convert.rgba(color).to.hex24();
-		
-		console.log(colorIndex, hex);
-		
-		return {
-			strokeColor: hex,
-			strokeOpacity: 0.5,
-			strokeWeight: 5
-		}
+	
+	MapSvc.map.data.addListener('mouseover', function(event) {
+	   MapSvc.map.data.overrideStyle(event.feature, {strokeOpacity: 1, strokeWeight: 20});
+	});
+	MapSvc.map.data.addListener('mouseout', function(event) {
+	   MapSvc.map.data.revertStyle(/*event.feature*/);
 	});
 	
 	$rootScope.$on('territory:save', function(e, data) {

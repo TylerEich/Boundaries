@@ -16,7 +16,8 @@ angular
   'bndry.map',
   'bndry.shape',
   'bndry.search',
-  'bndry.status'
+  'bndry.status',
+	'bndry.territory'
   // 'bndry.settings'
 ])
 .config(function($compileProvider) {

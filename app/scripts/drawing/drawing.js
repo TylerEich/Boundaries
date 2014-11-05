@@ -753,7 +753,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   self.activeDrawingIndex = -1;
 })
 // Controllers
-.controller('DrawingCtrl', function($scope, $localStorage, $timeout, DrawingSvc, ColorSvc, ShapeSvc, HistorySvc) {
+.controller('DrawingCtrl', function($scope, $localStorage, $timeout, MapSvc, DrawingSvc, ColorSvc, ShapeSvc, HistorySvc) {
   $scope.$storage = $localStorage.$default({
     drawings: [],
     rigid: false,
@@ -781,13 +781,32 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
   var drawings = $scope.drawings = DrawingSvc.drawings = [];
   
   // Load last saved drawings from geoJson in localStorage
-  var storedDrawings = DrawingSvc.geoJsonToDrawings(
-    localStorage.geoJson || DrawingSvc.drawingsToGeoJson(drawings)
-  );
-  for (var storedDrawing of storedDrawings) {
-    drawings.push(storedDrawing);
-  }
+  // var storedDrawings = DrawingSvc.geoJsonToDrawings(
+  //   localStorage.geoJson || DrawingSvc.drawingsToGeoJson(drawings)
+  // );
+  // for (var storedDrawing of storedDrawings) {
+  //   drawings.push(storedDrawing);
+  // }
+	
+	MapSvc.map.data.setStyle(function(feature) {
+		var colorIndex = feature.getProperty('colorIndex');
+		
+		var color = ColorSvc.colors[colorIndex];
+		var hex = ColorSvc.convert.rgba(color).to.hex24();
+		
+		console.log(colorIndex, hex);
+		
+		return {
+			strokeColor: hex,
+			strokeOpacity: 0.5,
+			strokeWeight: 5
+		};
+	});
   
+	if (localStorage.geoJson)	MapSvc.map.data.addGeoJson(JSON.parse(localStorage.geoJson));
+	
+	console.log('ReadyState:', document.readyState);
+	
   function activeDrawingIndex(value) {
     if (typeof value === 'number') {
       DrawingSvc.activeDrawingIndex = value;
