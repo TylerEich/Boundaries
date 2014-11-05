@@ -19,11 +19,8 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
       var params = [];
 
       // Generate style from map styling and drawings
-      var i, j;
-      var rule, urlRule, styler, key, value;
-      for (i = 0; i < $localStorage.style.length; i++) {
-        rule = $localStorage.style[i];
-        urlRule = [];
+      for (var rule in $localStorage.style) {
+        var urlRule = [];
 
         // Add selectors to urlRule
         if ('featureType' in rule && rule.featureType !== 'all') {
@@ -34,11 +31,9 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
         }
 
         // Loop through every styler, add to urlRule
-        for (j = 0; j < rule.stylers.length; j++) {
-          styler = rule.stylers[j];
-
-          for (key in styler) {
-            value = styler[key];
+        for (var styler in rule.stylers) {
+          for (var key in styler) {
+            var value = styler[key];
 
             if (key === 'color') {
               value = '0x' + value.substring(1);
@@ -48,11 +43,11 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
           }
         }
 
-        urlRule = urlRule.join('|');
+        var urlParamText = urlRule.join('|');
 
-        // Add urlRule to params if not empty string
-        if (urlRule !== '') {
-          params.push('style=' + urlRule);
+        // Add urlParamText to params if not empty string
+        if (urlParamText !== '') {
+          params.push('style=' + urlParamText);
         }
       }
 

@@ -5,13 +5,12 @@ var gulp = require('gulp'),
 
 // Test files
 var unitTestFiles = [
-  'app/scripts/**/*Spec.js'
+  'app/test/**.js'
 ],
 
   // App files
   jsAppFiles = [
     'app/scripts/*/**.js',
-    '!app/scripts/*/**Spec.js',
     'app/scripts/app.js'
   ],
   htmlAppFiles = [
@@ -135,33 +134,21 @@ var tasks = {
       sourcemaps = require('gulp-sourcemaps'),
 			replace = require('gulp-replace'),
 		  to5 = require('gulp-6to5');
-      // traceur = require('gulp-traceur');
-          
-      jsAppFiles[1] = unitTestFiles[0];
     
-		// function forOf(string) {
-		// 	var pattern = /for\s*?\((var)?\s+?(.+?)\s+?of\s+?(.+?)\s*?\{/g;
-		// 	return string.replace(pattern, function(match, hasVar, iterator, iterable) {
-		// 		var iteratorName = '_' + Math.random().toString(36).substring(7);
-		// 		`var ${iterator};for(var ${iteratorName} = 0; ${iteratorName} < ${iterable}.length; ${iteratorName}++) { ${iterator} = ${iterable}[${iteratorName}]`;
-		// 	});
-		// }
     return gulp.src(jsAppFiles.concat(unitTestFiles))
-      .pipe(changed('build/scripts'))
+      .pipe(changed('build'))
+			
+			// Replace for-of with for(;;) loop
 			.pipe(replace(/for\s*?\((var\s+?)?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, item, iterable) {				
 				var i = '_' + Math.random().toString(36).substring(7);
 				
 				return (hasVar ? ('var ' + item + ';') : '') + 'for(var ' + i + ' = 0; ' + i + ' < ' + iterable + '.length; ' + i + '++) { ' + item + ' = ' + iterable + '[' + i + ']';
-				// return `var ${iterator};for(var ${iteratorName} = 0; ${iteratorName} < ${iterable}.length; ${iteratorName}++) { ${iterator} = ${iterable}[${iteratorName}]`;
 			}))
 			
       .pipe(sourcemaps.init())
-		  .pipe(to5())
-        // .pipe(traceur({
-        //   sourceMap: true
-        // }))
+			  .pipe(to5())
       .pipe(sourcemaps.write('../sourcemaps'))
-      .pipe(gulp.dest('build/scripts'))
+      .pipe(gulp.dest('build'))
       .on('error', errorHandler);
   },
   'build:css': function() {
@@ -327,10 +314,10 @@ var tasks = {
 // Test tasks
 gulp.task('test', ['build:js'], tasks['test']);
 gulp.task('test:once', ['build:js'], tasks['test:once']);
-gulp.task('test:dist', ['dist:js']/*['6to5']*/, tasks['test:dist']);
+gulp.task('test:dist', ['dist:js'], tasks['test:dist']);
 
 // Build tasks
-gulp.task('build', ['build:html', 'test:once']);
+gulp.task('build', ['build:html']);
 gulp.task('build:js', tasks['build:js']);
 gulp.task('build:css', tasks['build:css']);
 gulp.task('build:html', ['build:js', 'build:css'], tasks['build:html']);
@@ -385,7 +372,7 @@ gulp.task('server:dist', ['dist:html'], function() {
 });
 
 // Default
-gulp.task('default', ['server'], function(done) {
+gulp.task('default', ['clean', 'build', 'server'], function(done) {
   tasks['test'](function(exitCode) {
     console.log('Karma exited with code ' + exitCode);
     if (exitCode === 0) {

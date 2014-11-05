@@ -166,7 +166,7 @@ Supported formats: rgba, hsla, hex24, hex32
     
     $scope.fillColor = function(index) {
       if (index === undefined) {
-        index = ColorSvc.activeColorIndex;
+        index = ColorSvc.activeColorIndex();
       }
       var color = ColorSvc.colors[index];
       return '#' + ColorSvc.convert.rgba(color).to.hex24();
