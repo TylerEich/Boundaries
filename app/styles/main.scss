@@ -319,7 +319,7 @@ nav {
     font-size: 1rem;
     font-weight: bold;
     
-    flex-grow: 1;
+    flex: 1;
     
     color: $text-color;
     
@@ -360,6 +360,21 @@ nav {
         stroke: $text-color;
       }
     }
+		
+		&.ng-hide.ng-hide-add,//:not(.ng-hide-add-active),
+		&.ng-hide.ng-hide-remove:not(.ng-hide-remove-active) {
+			display: block !important;
+			margin: 0;
+			border-left: 0;
+			border-right: 0;
+			flex: 0.00001;
+			min-width: 0;
+			svg {
+				transition: $transition;
+				width: 0;
+				opacity: 0;
+			}
+		}
     
     &.group {
       border-radius: 0;

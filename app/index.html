@@ -192,12 +192,14 @@
         </button>
         <button class="group first" ng-click="undo()" class="trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-						<path d="M36,18 C45.941,18 54,26.059 54,36 C54,45.941 45.941,54 36,54 M10,18 L36,18 M18,26 L10,18 L18,10 M36,54 L22,54" fill-opacity="0" />
+						<path d="M32,54 C44.15,54 54,44.15 54,32 C54,19.85 44.15,10 32,10 C25.645,10 19.92,12.694 15.904,17.003" fill-opacity="0" />
+						<path d="M22,23 L10,23 L10,11 L22,23 z" />
           </svg>
         </button>
         <button class="group last" ng-click="redo()" class="trigger">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <path d="M28,18 C18.059,18 10,26.059 10,36 C10,45.941 18.059,54 28,54 M54,18 L28,18 M46,26 L54,18 L46,10 M28,54 L42,54" fill-opacity="0" />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <path d="M32,54 C19.85,54 10,44.15 10,32 C10,19.85 19.85,10 32,10 C38.355,10 44.08,12.694 48.096,17.003" fill-opacity="0"/>
+						<path d="M42,23 L54,23 L54,11 L42,23 z" />
           </svg>
         </button>
 			</nav>
@@ -227,10 +229,16 @@
           </svg>
         </button>
         <button ng-controller="ActionCtrl" ng-show="hasUndo()" ng-click="undo()" ng-class="{last: !hasRedo()}" class="group trigger">
-          Undo
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+						<path d="M32,54 C44.15,54 54,44.15 54,32 C54,19.85 44.15,10 32,10 C25.645,10 19.92,12.694 15.904,17.003" fill-opacity="0" />
+						<path d="M22,23 L10,23 L10,11 L22,23 z" />
+          </svg>
         </button>
         <button ng-controller="ActionCtrl" ng-show="hasRedo()" ng-click="redo()" class="group last trigger">
-          Redo
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+            <path d="M32,54 C19.85,54 10,44.15 10,32 C10,19.85 19.85,10 32,10 C38.355,10 44.08,12.694 48.096,17.003" fill-opacity="0" />
+						<path d="M42,23 L54,23 L54,11 L42,23 z" />
+					</svg>
         </button>
 
         <button ng-click="setShowFooter('mapTypes')">

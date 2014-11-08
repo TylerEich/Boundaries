@@ -37,11 +37,11 @@ var unitTestFiles = [
   ],
   bowerDistFiles = bowerBuildFiles.slice(2),
   jsBuildFiles = [
-    'build/scripts/*/**.js',
+    'build/scripts/**/*.js',
     'build/scripts/app.js'
   ],
   unitTestBuildFiles = [
-    'build/test/**.js'
+    'build/test/**/*.js'
   ],
   // htmlBuildFiles = [
   //   'build/*.html',
@@ -198,6 +198,7 @@ var tasks = {
   },
   'clean:css': clean.bind(null, 'build/styles/*'),
   'clean:js': clean.bind(null, 'build/scripts/**/*'),
+	'clean:test': clean.bind(null, 'build/tests/**/*'),
   'dist:css': function() {
     var concat = require('gulp-concat');
 
@@ -213,7 +214,7 @@ var tasks = {
       ngAnnotate = require('gulp-ng-annotate'),
 		  to5 = require('gulp-6to5'),
       uglify = require('gulp-uglify'),
-      filesize = require('gulp-filesize'),
+      // filesize = require('gulp-filesize'),
       concat = require('gulp-concat'),
       insert = require('gulp-insert');
 
@@ -238,8 +239,8 @@ var tasks = {
         .pipe(uglify())
       .pipe(sourcemaps.write('sourcemaps'))
       .pipe(insert.prepend(copyright))
-      .pipe(gulp.dest('dist'))
-      .pipe(filesize());
+      .pipe(gulp.dest('dist'));
+      // .pipe(filesize());
   },
   'dist:html': function() {
     var cdnizer = require('gulp-cdnizer'),
@@ -320,7 +321,7 @@ gulp.task('test:once', ['build:js'], tasks['test:once']);
 gulp.task('test:dist', ['dist:js'], tasks['test:dist']);
 
 // Build tasks
-gulp.task('build', ['build:html', 'build:test']);
+gulp.task('build', ['clean', 'build:html', 'build:test']);
 gulp.task('build:js', tasks['build:js']);
 gulp.task('build:test', ['build:js'], tasks['build:test']);
 gulp.task('build:css', tasks['build:css']);
@@ -332,7 +333,7 @@ gulp.task('clean:css', tasks['clean:css']);
 gulp.task('clean:js', tasks['clean:js']);
 
 // Distribution tasks
-gulp.task('dist', ['dist:html', 'test:dist']);
+gulp.task('dist', ['clean', 'build', 'dist:html', 'test:dist']);
 gulp.task('dist:html', ['build:html', 'dist:css', 'dist:js'], tasks['dist:html']);
 gulp.task('dist:css', ['clean:css', 'build:css'], tasks['dist:css']);
 gulp.task('dist:js', ['clean:js', 'build:js'], tasks['dist:js']);
@@ -384,12 +385,11 @@ gulp.task('default', ['clean', 'build', 'server'], function(done) {
     }
   });
   
-  gulp.watch('app/**/*', ['build:html']);
+  gulp.watch('app/scripts/**/*', ['build:js']);
+	gulp.watch('app/tests/**/*', ['build:test']);
+	gulp.watch('app/styles/**/*', ['build:css']);
+	gulp.watch('app/index.html', ['build:html']);
 
-  gulp.watch('app/**').on('change', function(file) {
-    gulp.src(file.path)
-      .pipe(connect.reload());
-  });
   gulp.watch('build/**').on('change', function(file) {
     gulp.src(file.path)
       .pipe(connect.reload());
