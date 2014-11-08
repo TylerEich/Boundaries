@@ -311,6 +311,11 @@ nav {
   
 	padding: $navbar-padding;
 	
+	&.ng-hide-add,
+	&.ng-hide-remove {
+		display: flex !important;
+		flex-grow: 0;
+	}
   @media (orientation: landscape) and (max-width: 50rem) {
     flex-direction: column;
   }	

@@ -22,6 +22,33 @@ angular
 .config(function($compileProvider) {
 	$compileProvider.debugInfoEnabled(false);
 })
+.directive('onActivate', function($parse) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attr) {
+			var hasTouch = false;
+			var handler = $parse(attr.onActivate);
+			
+			element.one('mousedown', function() {
+				if (!hasTouch) {
+					element.on('click', function(event) {
+						console.log('click');
+						scope.$apply(handler(scope, {$event:event}));
+					});
+				}
+			});
+			element.one('touchstart', function() {
+				console.log('touchStart');
+				hasTouch = true;
+				
+				element.on('touchend', function(event) {
+					console.log('touchEnd');
+					scope.$apply(handler(scope, {$event:event}));
+				});
+			});
+		}
+	}
+})
 .directive('ngXlinkHref', function() {
   return {
     priority: 99,
@@ -86,6 +113,6 @@ angular
   window.addEventListener('orientationchange', function() {
     window.scrollTo(0,0);
   });
-	FastClick.attach(document.body);
+	// FastClick.attach(document.body);
 });
 

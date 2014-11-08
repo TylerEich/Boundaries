@@ -74,53 +74,53 @@
         </svg>
 			</nav>
       <nav class="collapsed">
-        <button ng-click="setShowHeader('color')" ng-class="{ active: show.header === 'color' }" class="group first">
+        <button on-activate="setShowHeader('color')" ng-class="{ active: show.header === 'color' }" class="group first">
 					<svg viewBox="0 0 64 64">
             <circle ng-attr-fill="{{ fillActiveColor() }}" stroke-width="4" r="22" cy="32" cx="32" />
           </svg>
         </button>
-        <button ng-click="setShowHeader('shape')" ng-class="{ active: show.header === 'shape' }" class="group last">
+        <button on-activate="setShowHeader('shape')" ng-class="{ active: show.header === 'shape' }" class="group last">
             <svg xmlns="http://www.w3.org/2000/svg">
               <use ng-xlink-href="#{{$storage.rigid ? 'rigid' : 'flex'}}-{{$storage.fill ? 'fill' : 'nofill'}}" xlink:href="" />
             </svg>
         </button>
-        <button ng-click="toggleForceCreateNewDrawing()" ng-class="{ active: shouldCreateNewDrawing() }">
+        <button on-activate="toggleForceCreateNewDrawing()" ng-class="{ active: shouldCreateNewDrawing() }">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path d="M 32,10 L 32,54 M 10,32 L 54,32" />
           </svg>
         </button>
       </nav>
       <nav class="expanded" ng-show="show.header === 'color'" ng-controller="ColorCtrl">
-        <button ng-repeat="color in $storage.colors track by $index" ng-click="setActiveColorIndex($index)" ng-class="{ active: activeColorIndex() === $index, first: $first, last: $last }" class="group">
+        <button ng-repeat="color in $storage.colors track by $index" on-activate="setActiveColorIndex($index)" ng-class="{ active: activeColorIndex() === $index, first: $first, last: $last }" class="group">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <circle ng-attr-fill="{{ fillColor($index) }}" stroke-width="4" r="22" cy="32" cx="32" />
           </svg>
         </button>
       </nav>
       <nav class="expanded" ng-show="show.header === 'shape'" ng-controller="ShapeCtrl">
-        <button ng-click="$storage.rigid = true; $storage.fill = false;" ng-class="{ active: $storage.rigid && !$storage.fill }" class="group first">
+        <button on-activate="$storage.rigid = true; $storage.fill = false;" ng-class="{ active: $storage.rigid && !$storage.fill }" class="group first">
           <svg xmlns="http://www.w3.org/2000/svg">
             <use xlink:href="#rigid-nofill" />
           </svg>
         </button>
-        <button ng-click="$storage.rigid = false; $storage.fill = false;" ng-class="{ active: !$storage.rigid && !$storage.fill }" class="group">
+        <button on-activate="$storage.rigid = false; $storage.fill = false;" ng-class="{ active: !$storage.rigid && !$storage.fill }" class="group">
           <svg xmlns="http://www.w3.org/2000/svg">
             <use xlink:href="#flex-nofill">
           </svg>
         </button>
-        <button ng-click="$storage.rigid = true; $storage.fill = true;" ng-class="{ active: $storage.rigid && $storage.fill }" class="group">
+        <button on-activate="$storage.rigid = true; $storage.fill = true;" ng-class="{ active: $storage.rigid && $storage.fill }" class="group">
           <svg xmlns="http://www.w3.org/2000/svg">
             <use xlink:href="#rigid-fill">
           </svg>
         </button>
-        <button ng-click="$storage.rigid = false; $storage.fill = true;" ng-class="{ active: !$storage.rigid && $storage.fill }" class="group last">
+        <button on-activate="$storage.rigid = false; $storage.fill = true;" ng-class="{ active: !$storage.rigid && $storage.fill }" class="group last">
           <svg xmlns="http://www.w3.org/2000/svg">
             <use xlink:href="#flex-fill">
           </svg>
         </button>
       </nav>
 			<nav class="expanded ng-hide">
-        <button ng-click="toggleForceCreateNewDrawing()" ng-class="{ active: shouldCreateNewDrawing() }">
+        <button on-activate="toggleForceCreateNewDrawing()" ng-class="{ active: shouldCreateNewDrawing() }">
           <svg id="plus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path d="M 32,10 L 32,54 M 10,32 L 54,32" />
           </svg>
@@ -131,18 +131,18 @@
       <div id="top-overlay" ng-controller="SearchCtrl">
 	      <nav id="search" ng-class="{focus: focus()}">
 	        <input type="text" placeholder="Search" ng-model="query" ng-keydown="keydown($event)" ng-focus="focus(true)" focus-on="focus()" ng-blur="focus(false)" ng-model-options="{updateOn: 'default blur', debounce: {blur: 1}}">
-					<button ng-click="query ? query = '' : focus(false)"><!-- {{ query ? '&#x232B;' : '&#x00D7;' }} -->
+					<button on-activate="query ? query = '' : focus(false)"><!-- {{ query ? '&#x232B;' : '&#x00D7;' }} -->
 						<svg viewBox="0 0 64 64">
 							<path d="M10,10 L54,54 M54,10 L10,54" stroke-width="8px">
 						</svg>
 					</button>
 	        <div id="suggestions" class="group vertical" ng-mousemove="mousemove(); active = -1" ng-show="focus()">
-	          <div class="suggestion" ng-repeat="suggestion in suggestions" ng-bind-html="suggestion.description" ng-class="{ 'error': suggestion.error, 'active': $index === active, 'empty': !query, first: $first, last: $last }" ng-click="loadOnMap(suggestion.reference)">
+	          <div class="suggestion" ng-repeat="suggestion in suggestions" ng-bind-html="suggestion.description" ng-class="{ 'error': suggestion.error, 'active': $index === active, 'empty': !query, first: $first, last: $last }" on-activate="loadOnMap(suggestion.reference)">
 	          </div>
 	        </div>
 	      </nav>
 
-        <div id="status" ng-controller="StatusCtrl" ng-hide="focus()" ng-click="focus(true)">
+        <div id="status" ng-controller="StatusCtrl" ng-hide="focus()" on-activate="focus(true)">
 					<svg id="spotlight" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 64 64" enable-background="new 0 0 64 64">
 	          <path d="m54.599,48.236l-10.545,-10.545c1.836,-2.973 2.946,-6.441 2.946,-10.191c0,-10.77 -8.73,-19.5 -19.5,-19.5s-19.5,8.73 -19.5,19.5s8.73,19.5 19.5,19.5c3.75,0 7.218,-1.11 10.188,-2.943l10.548,10.545c1.758,1.758 4.605,1.758 6.363,0s1.758,-4.608 0,-6.366zm-27.099,-7.236c-7.455,0 -13.5,-6.045 -13.5,-13.5s6.045,-13.5 13.5,-13.5s13.5,6.045 13.5,13.5s-6.045,13.5 -13.5,13.5z" />
 	        </svg>
@@ -165,18 +165,18 @@
     </main>
     <footer no-scroll ng-cloak>
       <nav class="expanded" id="map-types" ng-controller="MapActionCtrl" ng-show="show.footer === 'mapTypes'">
-        <button class="group first" ng-class="{ active: getMapTypeId() === 'custom' }" ng-click="setMapTypeId('custom')">
+        <button class="group first" ng-class="{ active: getMapTypeId() === 'custom' }" on-activate="setMapTypeId('custom')">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 				    <path d="M10,17 L54,17 L54,47 L10,47 L10,17 z" fill-opacity="0" />
 				    <path d="M17,24 L35,24 M47,24 L41,24 M43,40 L21,40" fill-opacity="0" stroke-width="2" />
           </svg>
         </button>
-        <button class="group" ng-class="{ active: getMapTypeId() === mapTypeId.ROADMAP }" ng-click="setMapTypeId(mapTypeId.ROADMAP)">
+        <button class="group" ng-class="{ active: getMapTypeId() === mapTypeId.ROADMAP }" on-activate="setMapTypeId(mapTypeId.ROADMAP)">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path d="M10,10 L10,48 L24.5,54 L39.5,48 L54,54 L54,16 L39.5,10 L24.5,16 L10,10 z M24.5,54 L24.5,16 M39.5,48 L39.5,10" fill-opacity="0" />
           </svg>
         </button>
-        <button class="group last" ng-class="{ active: getMapTypeId() === mapTypeId.HYBRID }" ng-click="setMapTypeId(mapTypeId.HYBRID)">
+        <button class="group last" ng-class="{ active: getMapTypeId() === mapTypeId.HYBRID }" on-activate="setMapTypeId(mapTypeId.HYBRID)">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 			      <path d="M18,14 L22,10 L28,16 L30,20 L28,22 L24,20 L18,14 z M54,42 L48,36 L44,34 L42,36 L44,40 L50,46 L54,42 z M36,34 L30,28 L36,22 L42,28 L36,34 z" />
 						<path d="M32,54 C19.85,54 10,44.15 10,32 M20,32 C20,38.627 25.373,44 32,44" fill-opacity="0" />
@@ -184,19 +184,19 @@
         </button>
       </nav>
 			<nav class="expanded" id="action" ng-controller="ActionCtrl" ng-show="show.footer === 'action'">
-        <button ng-click="clear()" class="trigger">
+        <button on-activate="clear()" class="trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <!-- <path d="M10,54 L54,10 M54,54 L10,10" /> -->
 				    <path d="M14,14 L50,14 M38,14 L36,10 L28,10 L26,14 M48,20 L16,20 L20,54 L44,54 L48,20 z" />
           </svg>
         </button>
-        <button class="group first" ng-click="undo()" class="trigger">
+        <button class="group first" on-activate="undo()" class="trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 						<path d="M32,54 C44.15,54 54,44.15 54,32 C54,19.85 44.15,10 32,10 C25.645,10 19.92,12.694 15.904,17.003" fill-opacity="0" />
 						<path d="M22,23 L10,23 L10,11 L22,23 z" />
           </svg>
         </button>
-        <button class="group last" ng-click="redo()" class="trigger">
+        <button class="group last" on-activate="redo()" class="trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path d="M32,54 C19.85,54 10,44.15 10,32 C10,19.85 19.85,10 32,10 C38.355,10 44.08,12.694 48.096,17.003" fill-opacity="0"/>
 						<path d="M42,23 L54,23 L54,11 L42,23 z" />
@@ -206,12 +206,12 @@
 			<!-- <nav class="expanded" id="save" ng-controller="ImageCtrl">
 				<input type="text" placeholder="Locality" ng-model="data.locality">
 				<input type="text" placeholder="Number" ng-model="data.number">
-				<button ng-click="downloadPdf()">
+				<button on-activate="downloadPdf()">
 					Save
 				</button>
 			</nav> -->
 			<nav class="ng-hide expanded">
-        <button ng-controller="ImageCtrl" ng-click="downloadPdf()">
+        <button ng-controller="ImageCtrl" on-activate="downloadPdf()">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 20,29 12,12 12,-12" />
             <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 32,11 0,29" />
@@ -220,33 +220,33 @@
         </button>
 			</nav>
       <nav class="collapsed">
-				<!-- <button ng-click="setShowFooter('action')">
+				<!-- <button on-activate="setShowFooter('action')">
 					Action
 				</button> -->
-        <button ng-controller="ActionCtrl" ng-click="clear()" ng-class="{last: !hasUndo() && !hasRedo()}" class="group first trigger">
+        <button ng-controller="ActionCtrl" on-activate="clear()" ng-class="{last: !hasUndo() && !hasRedo()}" class="group first trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path d="M14,14 L50,14 M38,14 L36,10 L28,10 L26,14 M48,20 L16,20 L20,54 L44,54 L48,20 z" />
           </svg>
         </button>
-        <button ng-controller="ActionCtrl" ng-show="hasUndo()" ng-click="undo()" ng-class="{last: !hasRedo()}" class="group trigger">
+        <button ng-controller="ActionCtrl" ng-show="hasUndo()" on-activate="undo()" ng-class="{last: !hasRedo()}" class="group trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 						<path d="M32,54 C44.15,54 54,44.15 54,32 C54,19.85 44.15,10 32,10 C25.645,10 19.92,12.694 15.904,17.003" fill-opacity="0" />
 						<path d="M22,23 L10,23 L10,11 L22,23 z" />
           </svg>
         </button>
-        <button ng-controller="ActionCtrl" ng-show="hasRedo()" ng-click="redo()" class="group last trigger">
+        <button ng-controller="ActionCtrl" ng-show="hasRedo()" on-activate="redo()" class="group last trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path d="M32,54 C19.85,54 10,44.15 10,32 C10,19.85 19.85,10 32,10 C38.355,10 44.08,12.694 48.096,17.003" fill-opacity="0" />
 						<path d="M42,23 L54,23 L54,11 L42,23 z" />
 					</svg>
         </button>
 
-        <button ng-click="setShowFooter('mapTypes')">
+        <button on-activate="setShowFooter('mapTypes')">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path d="M10,10 L10,48 L24.5,54 L39.5,48 L54,54 L54,16 L39.5,10 L24.5,16 L10,10 z M24.5,54 L24.5,16 M39.5,48 L39.5,10" fill-opacity="0" />
           </svg>
         </button>
-        <button ng-controller="ImageCtrl" ng-click="downloadPdf()">
+        <button ng-controller="ImageCtrl" on-activate="downloadPdf()">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 20,29 12,12 12,-12" />
             <path style="fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" d="m 32,11 0,29" />
@@ -259,13 +259,13 @@
 				
 				
 				<nav ng-show="show.header === 'action'" ng-controller="ActionCtrl">
-        <button ng-click="clear()" class="group trigger first">
+        <button on-activate="clear()" class="group trigger first">
           X
         </button>
-        <button ng-click="undo()" class="group trigger">
+        <button on-activate="undo()" class="group trigger">
           &#x2190;
         </button>
-        <button ng-click="redo()" class="group trigger last">
+        <button on-activate="redo()" class="group trigger last">
           &#x2192;
         </button>
       </nav> -->
