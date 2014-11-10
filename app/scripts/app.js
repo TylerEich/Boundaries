@@ -33,7 +33,7 @@ angular
 				if (!hasTouch) {
 					element.on('click', function(event) {
 						console.log('click');
-						scope.$apply(handler(scope, {$event:event}));
+						scope.$evalAsync(handler(scope, {$event:event}));
 					});
 				}
 			});
@@ -43,7 +43,7 @@ angular
 				
 				element.on('touchend', function(event) {
 					console.log('touchEnd');
-					scope.$apply(handler(scope, {$event:event}));
+					scope.$evalAsync(handler(scope, {$event:event}));
 				});
 			});
 		}

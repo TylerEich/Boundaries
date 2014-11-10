@@ -48,6 +48,7 @@
     "karma-ng-scenario": "~0.1.0",
     "karma-osx-reporter": "^0.1.0",
     "karma-phantomjs-launcher": "~0.1.4",
+    "run-sequence": "^1.0.1",
     "traceur-runtime": "0.0.43"
   },
   "engines": {

@@ -8,7 +8,7 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
         hide: '@',
         value: '@'
       },
-      template: '<div ng-style="{width: percentage()}" style="height: 100%; position: absolute;" ng-hide="hide"></div>',
+      template: '<div style="height: 100%; width: 100%; position: relative;" ng-hide="indeterminate()"><div class="bar"></div></div>',
       link: function(scope) {
         var pending = 0,
           finished = 0;
@@ -29,9 +29,10 @@ angular.module('bndry.status', ['bndry.map', 'bndry.geo'])
 					alert('Directions are not available for this location.');
         });
         
+				scope.indeterminate = () => (finished >= pending);
         scope.percentage = function() {
           return `${(finished + 1) / (pending + 1) * 100}%`;
-        }
+        };
       }
     };
   })

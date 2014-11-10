@@ -1,0 +1,185 @@
+@import 'variables';
+
+@media (orientation: landscape) and (min-width: 50rem) {
+	header, footer {
+		width: 20rem;
+	}
+	header {
+		flex: 1 0 50%;
+	}
+	footer {
+		flex: 0 1 10rem;
+		order: 2;
+	}
+	main {
+		order: 3;
+		min-height: 100%;
+		width: calc(100% - 20rem);
+	}
+	
+	nav.collapsed {
+		display: none;
+	}
+	header > nav.expanded:not(.ng-hide-animate),
+	footer > nav.expanded:not(.ng-hide-animate) {
+		display: flex !important;
+	}
+	
+	nav.expanded button:only-child {
+		flex: none;
+		width: 50%;
+		margin: 0 auto;
+	}
+}
+
+#full-logo {
+	display: none;
+	@media (orientation: portrait) and (min-width: 50rem) {
+		display: block;
+	}
+	height: 3rem;
+	* {
+		stroke-width: 0;
+	}
+}
+header, footer {
+  position: relative;
+
+	@media (orientation: landscape) and (max-width: 50rem) {
+		max-height: 100%;
+		min-width: $navbar-size;
+	}
+  min-height: $navbar-size;
+  max-width: 100%;
+  background: $navbar-color;
+  
+  display: flex;
+  flex-wrap: wrap;
+	
+  @media (orientation: portrait) {
+    max-height: 100%;
+    min-width: $button-size;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 50rem){
+	header {
+		align-content: flex-start;
+		align-items: flex-start;
+	}
+	footer {
+		align-content: flex-end;
+		align-items: flex-end;
+	}
+}
+
+footer {
+  #logo {
+    margin: auto;
+    height: $navbar-size - 1rem;
+    img {
+      max-height: 100%;
+    }
+  }
+  #text {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+nav {
+  display: flex;
+  flex-grow: 1;
+  justify-content: space-between;
+  
+	padding: $navbar-padding;
+	
+	@media (min-width: 50rem) {
+		.close {
+			display: none;
+		}
+	}
+	
+	@media (max-width: 50rem) {		
+		&.ng-hide-add,
+		&.ng-hide-remove {
+		  transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1);
+		  transform: translateX(0);
+  
+		  display: flex !important;
+		  pointer-events: none;
+		  position: absolute;
+		  width: 100%;
+			height: 100%;
+		}
+		&.collapsed.ng-hide {
+			transform: translateX(-100%);
+		}
+		&.expanded.ng-hide {
+			transform: translateX(100%);
+		}
+	}
+	//
+//	&.ng-hide-add,
+//	&.ng-hide-remove {
+//		transition: $transition;
+//		display: flex !important;
+//		flex-grow: 0;
+//	}
+  @media (orientation: landscape) and (max-width: 50rem) {
+    flex-direction: column;
+  }	
+  
+  hr {
+    width: 1px;
+    height: $navbar-size / 2;
+    
+    background: transparentize(white, 0.75);
+    
+    flex-grow: 0;
+    flex-shrink: 1;
+    
+    border: none;
+    
+    margin: $button-padding ($button-padding / 2);
+    
+    @media (orientation: landscape) and (max-width: 50rem) {
+      width: $navbar-size / 2;
+      height: 1px;
+      
+      margin: ($button-padding / 2) $button-padding;
+    }
+  }
+}
+
+#save {
+	flex-wrap: wrap;
+	position: relative;
+	align-content: space-around;
+	height: $navbar-size;
+	button {
+		position: absolute;
+		right: 0;
+		top: 0;
+		margin: $navbar-padding;
+		float: right;
+	}
+	input {
+		flex: none;
+		height: 1.5rem;
+		font-size: 0.75rem;
+		width: calc(100% - #{$navbar-padding + $button-size});
+		padding: 0.25rem 0.5rem;
+		border: $input-border;
+		background: $input-background;
+		margin: 0;
+		outline: none;
+	}
+	input:first-of-type {
+		border-top-left-radius: $border-radius;
+		border-top-right-radius: $border-radius;
+	}
+	input:last-of-type {
+		border-bottom-left-radius: $border-radius;
+		border-bottom-right-radius: $border-radius;
+	}
+}

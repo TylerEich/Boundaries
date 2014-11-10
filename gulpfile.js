@@ -5,7 +5,7 @@ var gulp = require('gulp'),
 
 // Test files
 var unitTestFiles = [
-  'app/test/**.js'
+  'app/tests/**.js'
 ],
 
   // App files
@@ -41,7 +41,7 @@ var unitTestFiles = [
     'build/scripts/app.js'
   ],
   unitTestBuildFiles = [
-    'build/test/**/*.js'
+    'build/tests/**/*.js'
   ],
   // htmlBuildFiles = [
   //   'build/*.html',
@@ -71,7 +71,7 @@ var karmaConf = {
   frameworks: ['jasmine'],
   reporters: ['osx', 'mocha', 'coverage'],
 	preprocessors: {
-		'./build/scripts/*/**.js': ['coverage']
+		'./build/(scripts|tests)/*/**.js': ['coverage']
 	},
 	coverageReporter: {
 		reporters: [
@@ -153,7 +153,7 @@ var tasks = {
   'test:once': test.bind(null, false, karmaConfFiles.concat(jsBuildFiles, unitTestBuildFiles)),
   'test:dist': test.bind(null, false, karmaConfFiles.concat('dist/script.min.js', unitTestBuildFiles)),
   'build:js': build.bind(null, jsAppFiles, 'build/scripts'),
-	'build:test': build.bind(null, unitTestFiles, 'build/test'),
+	'build:test': build.bind(null, unitTestFiles, 'build/tests'),
   'build:css': function() {
     var changed = require('gulp-changed'),
       sass = require('gulp-sass'),
@@ -202,7 +202,7 @@ var tasks = {
   'dist:css': function() {
     var concat = require('gulp-concat');
 
-    gulp.src(styleBuildFiles.pop()).pipe(gulp.dest('dist'));
+    gulp.src('build/styles/critical.min.css').pipe(gulp.dest('dist'));
     
     return gulp.src(styleBuildFiles)
       .pipe(concat('style.min.css'))
@@ -316,12 +316,12 @@ var tasks = {
 
 
 // Test tasks
-gulp.task('test', ['build:js'], tasks['test']);
-gulp.task('test:once', ['build:js'], tasks['test:once']);
-gulp.task('test:dist', ['dist:js'], tasks['test:dist']);
+gulp.task('test', ['build:test', 'build:js'], tasks['test']);
+gulp.task('test:once', ['build:test', 'build:js'], tasks['test:once']);
+gulp.task('test:dist', ['build:test', 'dist:js'], tasks['test:dist']);
 
 // Build tasks
-gulp.task('build', ['clean', 'build:html', 'build:test']);
+gulp.task('build', ['build:html', 'build:test']);
 gulp.task('build:js', tasks['build:js']);
 gulp.task('build:test', ['build:js'], tasks['build:test']);
 gulp.task('build:css', tasks['build:css']);
@@ -333,10 +333,10 @@ gulp.task('clean:css', tasks['clean:css']);
 gulp.task('clean:js', tasks['clean:js']);
 
 // Distribution tasks
-gulp.task('dist', ['clean', 'build', 'dist:html', 'test:dist']);
+gulp.task('dist', ['build', 'dist:html', 'test:dist']);
 gulp.task('dist:html', ['build:html', 'dist:css', 'dist:js'], tasks['dist:html']);
-gulp.task('dist:css', ['clean:css', 'build:css'], tasks['dist:css']);
-gulp.task('dist:js', ['clean:js', 'build:js'], tasks['dist:js']);
+gulp.task('dist:css', ['build:css'], tasks['dist:css']);
+gulp.task('dist:js', ['build:js'], tasks['dist:js']);
 
 // Server
 gulp.task('server', ['build:html'], function() {
@@ -377,21 +377,26 @@ gulp.task('server:dist', ['dist:html'], function() {
 });
 
 // Default
-gulp.task('default', ['clean', 'build', 'server'], function(done) {
-  tasks['test'](function(exitCode) {
-    console.log('Karma exited with code ' + exitCode);
-    if (exitCode === 0) {
-      done();
-    }
-  });
-  
-  gulp.watch('app/scripts/**/*', ['build:js']);
-	gulp.watch('app/tests/**/*', ['build:test']);
-	gulp.watch('app/styles/**/*', ['build:css']);
-	gulp.watch('app/index.html', ['build:html']);
+gulp.task('default', function(done) {
+	var sequence = require('run-sequence');
+	
+	sequence('clean', 'build', 'server', function() {
+	  tasks['test'](function(exitCode) {
+	    console.log('Karma exited with code ' + exitCode);
+	    if (exitCode === 0) {
+	      done();
+	    }
+	  });
+		
+	  gulp.watch('app/scripts/**/*', ['build:js']);
+		gulp.watch('app/tests/**/*', ['build:test']);
+		gulp.watch('app/styles/**/*', ['build:css']);
+		gulp.watch('app/index.html', ['build:html']);
 
-  gulp.watch('build/**').on('change', function(file) {
-    gulp.src(file.path)
-      .pipe(connect.reload());
-  });
+	  gulp.watch('build/**').on('change', function(file) {
+	    gulp.src(file.path)
+	      .pipe(connect.reload());
+	  });
+	});
+	
 });
