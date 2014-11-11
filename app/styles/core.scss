@@ -1,5 +1,24 @@
 @import 'variables';
 
+@keyframes empty {
+	
+}
+@keyframes press {
+	from {
+		transform: scale(1);
+	}
+	to {
+		transform: scale(0.75);
+	}
+}
+@keyframes release {
+	from {
+		transform: scale(0.75);
+	}
+	to {
+		transform: scale(1);
+	}
+}
 @keyframes push {
 	0% {
 		transform: scale(1);
@@ -58,14 +77,22 @@ button {
     
     margin: ($button-padding / 2) 0;
   }
-  
+  	
   &:hover svg {
     fill: $text-color;
     stroke: $text-color;
-  }
-	&:not(:active) {
+  }	
+	
+	&.pressed {
 		svg {
-			animation: push 600ms cubic-bezier(0.23, 1, 0.32, 1);
+			animation: press 150ms cubic-bezier(0.23, 1, 0.32, 1);
+			animation-fill-mode: forwards;
+//			transform: scale(0.75);
+		}
+	}
+	&:not(.pressed) {
+		svg {
+			animation: release 300ms cubic-bezier(0.23, 1, 0.32, 1)
 		}
 	}
   &.active, &.active:hover {

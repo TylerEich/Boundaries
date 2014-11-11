@@ -29,20 +29,71 @@ angular
 			var hasTouch = false;
 			var handler = $parse(attr.onActivate);
 			
+			var promise;
+			var finished = 0;
+			var now, then;
+			
+			function whichAnimationEvent(){
+			    var t;
+			    var el = document.createElement('fakeelement');
+			    var transitions = {
+			      'animation':'animationend',
+			      'OAnimation':'oAnimationEnd',
+			      'MozAnimation':'animationend',
+			      'WebkitAnimation':'webkitAnimationEnd'
+			    }
+
+			    for(t in transitions){
+			        if( el.style[t] !== undefined ){
+			            return transitions[t];
+			        }
+			    }
+			}
+			
+			function removeClassIfFinished(element, cName, total) {
+				finished++;
+				if (finished >= total) {
+					element.removeClass(cName);
+					finished = 0;
+				}
+			}
+			
+			element.on(whichAnimationEvent(), function() {
+				removeClassIfFinished(element, 'pressed', 2);
+			});
+			
 			element.one('mousedown', function() {
 				if (!hasTouch) {
+					finished = 0;
+					element.addClass('pressed');
+					
+					element.on('mousedown', function() {
+						finished = 0;
+						element.addClass('pressed');
+					});
+					element.on('mouseup', function() {
+						removeClassIfFinished(element, 'pressed', 2);
+					});
 					element.on('click', function(event) {
-						console.log('click');
 						scope.$evalAsync(handler(scope, {$event:event}));
 					});
 				}
 			});
-			element.one('touchstart', function() {
-				console.log('touchStart');
+			
+			element.one('touchstart', function(event) {
 				hasTouch = true;
+				finished = 0;
 				
+				element.addClass('pressed');
+				
+				element.on('touchstart', function() {
+					finished = 0;
+					element.addClass('pressed');
+				});
+				element.on('touchend touchcancel', function() {
+					removeClassIfFinished(element, 'pressed', 2);
+				});
 				element.on('touchend', function(event) {
-					console.log('touchEnd');
 					scope.$evalAsync(handler(scope, {$event:event}));
 				});
 			});
