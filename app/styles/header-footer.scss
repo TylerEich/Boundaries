@@ -44,6 +44,7 @@
 }
 header, footer {
   position: relative;
+	overflow: hidden;
 
 	@media (orientation: landscape) and (max-width: 50rem) {
 		max-height: 100%;

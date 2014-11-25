@@ -75,7 +75,10 @@ angular
 						removeClassIfFinished(element, 'pressed', 2);
 					});
 					element.on('click', function(event) {
-						scope.$evalAsync(handler(scope, {$event:event}));
+						console.log('Click!', event);
+						scope.$evalAsync(function() {
+							handler(scope, {$event:event});
+						});
 					});
 				}
 			});
@@ -94,7 +97,9 @@ angular
 					removeClassIfFinished(element, 'pressed', 2);
 				});
 				element.on('touchend', function(event) {
-					scope.$evalAsync(handler(scope, {$event:event}));
+					scope.$evalAsync(function() {
+						handler(scope, {$event:event});
+					});
 				});
 			});
 		}

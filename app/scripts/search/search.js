@@ -13,9 +13,15 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
           }
 										
           if (newVal) {
-            elem[0].focus();
+            $timeout(function() {
+							elem[0].focus();
+							// scope.$apply();
+						});
           } else {
-            elem[0].blur();
+            $timeout(function() {
+							elem[0].blur();
+							// scope.$apply();
+						});
           }
 				});
 				// attr.$observe('focusOn', function(newVal) {
@@ -148,6 +154,15 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
 
     $scope.query = '';
 		$scope.active = -1;
+		
+		$scope.focus = (value) => {
+			if (value !== undefined) {
+				focus = Boolean(value);
+			}
+			
+			return focus;
+		};
+		
         
     $scope.keydown = function(e) {
       var enter = (e.which === 13),
@@ -173,16 +188,9 @@ angular.module('bndry.search', ['ngSanitize', 'bndry.map'])
       }
     };
 
-		$scope.focus = (value) => {
-			if (value !== undefined) {
-				focus = Boolean(value);
-			}
-			
-			return focus;
-		};
     $scope.loadOnMap = function(reference) {
 			SearchSvc.loadPlaceFromReference(reference);
-			$scope.focus = false;
+			$scope.focus(false);
 		};
 
     $scope.$watch('query', throttledSearch);

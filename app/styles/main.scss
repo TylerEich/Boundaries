@@ -139,7 +139,9 @@
 		border: none;
 		appearance: none;
 		width: $button-size / 2;
+		min-width: $button-size / 2;
 		height: 1.25rem;
+		min-height: 1.25rem;
 	}
   input {
 //		position: absolute;

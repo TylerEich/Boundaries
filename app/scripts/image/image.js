@@ -19,7 +19,7 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
       var params = [];
 
       // Generate style from map styling and drawings
-      for (var rule in $localStorage.style) {
+      for (var rule of $localStorage.style) {
         var urlRule = [];
 
         // Add selectors to urlRule
@@ -31,7 +31,7 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
         }
 
         // Loop through every styler, add to urlRule
-        for (var styler in rule.stylers) {
+        for (var styler of rule.stylers) {
           for (var key in styler) {
             var value = styler[key];
 

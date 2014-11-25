@@ -5,7 +5,7 @@ var gulp = require('gulp'),
 
 // Test files
 var unitTestFiles = [
-  'app/tests/**.js'
+  'app/tests/**/*.js'
 ],
 
   // App files
@@ -104,7 +104,10 @@ function errorHandler(e) {
 }
 
 // Tests
-function test(watch, files, done) {
+function test(watch, files, done, error) {
+	if (!error) {
+		error = console.error.bind(console);
+	}
   watch = Boolean(watch);
 
   var karmaServer = require('karma').server;
@@ -119,7 +122,7 @@ function test(watch, files, done) {
 function clean(glob) {
   var gulpClean = require('gulp-clean');
 
-  gulp.src(glob, {
+  return gulp.src(glob, {
     read: false
   })
     .pipe(gulpClean());
@@ -323,14 +326,15 @@ gulp.task('test:dist', ['build:test', 'dist:js'], tasks['test:dist']);
 // Build tasks
 gulp.task('build', ['build:html', 'build:test']);
 gulp.task('build:js', tasks['build:js']);
-gulp.task('build:test', ['build:js'], tasks['build:test']);
+gulp.task('build:test', tasks['build:test']);
 gulp.task('build:css', tasks['build:css']);
 gulp.task('build:html', ['build:js', 'build:css'], tasks['build:html']);
 
 // Clean tasks
-gulp.task('clean', ['clean:css', 'clean:js']);
+gulp.task('clean', ['clean:css', 'clean:js', 'clean:test']);
 gulp.task('clean:css', tasks['clean:css']);
 gulp.task('clean:js', tasks['clean:js']);
+gulp.task('clean:test', tasks['clean:test']);
 
 // Distribution tasks
 gulp.task('dist', ['build', 'dist:html', 'test:dist']);
@@ -351,10 +355,6 @@ gulp.task('server', ['build:html'], function() {
     .pipe(openUrl('', {
       url: 'http://localhost:8080/build/',
       app: 'Google Chrome Canary'
-    }))
-    .pipe(openUrl('', {
-      url: 'http://localhost:8080/build/',
-      app: 'Firefox'
     }));
 });
 gulp.task('server:dist', ['dist:html'], function() {
@@ -377,17 +377,10 @@ gulp.task('server:dist', ['dist:html'], function() {
 });
 
 // Default
-gulp.task('default', function(done) {
+gulp.task('default', /*['clean', 'build', 'server'],*/ function(done) {
 	var sequence = require('run-sequence');
 	
 	sequence('clean', 'build', 'server', function() {
-	  tasks['test'](function(exitCode) {
-	    console.log('Karma exited with code ' + exitCode);
-	    if (exitCode === 0) {
-	      done();
-	    }
-	  });
-		
 	  gulp.watch('app/scripts/**/*', ['build:js']);
 		gulp.watch('app/tests/**/*', ['build:test']);
 		gulp.watch('app/styles/**/*', ['build:css']);
@@ -396,6 +389,13 @@ gulp.task('default', function(done) {
 	  gulp.watch('build/**').on('change', function(file) {
 	    gulp.src(file.path)
 	      .pipe(connect.reload());
+	  });
+		
+	  tasks['test'](function(exitCode) {
+	    console.log('Karma exited with code ' + exitCode);
+	    if (exitCode === 0) {
+	      done();
+	    }
 	  });
 	});
 	
