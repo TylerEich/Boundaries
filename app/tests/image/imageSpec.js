@@ -270,9 +270,80 @@ describe('Image', function() {
     $provide.value('MapSvc', MockMapSvc);
   }));
   
-  beforeEach(inject(function(_ImageSvc_, $rootScope, DrawingSvc) {
+  beforeEach(inject(function(_ImageSvc_, $rootScope, $localStorage, DrawingSvc) {
     ImageSvc = _ImageSvc_;
 		spyOn($rootScope, '$broadcast');
+		
+		$localStorage.$default({
+			style: [{
+	      'stylers': [{
+	        'visibility': 'off'
+	      }]
+	    }, {
+	      'featureType': 'landscape',
+	      'stylers': [{
+	        'visibility': 'on'
+	      }, {
+	        'color': '#ffffff'
+	      }]
+	    }, {
+	      'featureType': 'road',
+	      'stylers': [{
+	        'visibility': 'on'
+	      }]
+	    }, {
+	      'elementType': 'geometry.fill',
+	      'stylers': [{
+	        'color': '#ffffff'
+	      }]
+	    }, {
+	      'featureType': 'road',
+	      'elementType': 'geometry.stroke',
+	      'stylers': [{
+	        'color': '#808080'
+	      }]
+	    }, {
+	      'elementType': 'labels.text.stroke',
+	      'stylers': [{
+	        'color': '#ffffff'
+	      }]
+	    }, {
+	      'elementType': 'labels.text.fill',
+	      'stylers': [{
+	        'color': '#000000'
+	      }]
+	    }, {
+	      'featureType': 'water',
+	      'stylers': [{
+	        'visibility': 'on'
+	      }, {
+	        'color': '#40bfbf'
+	      }]
+	    }, {
+	      'featureType': 'water',
+	      'elementType': 'labels.text.stroke',
+	      'stylers': [{
+	        'color': '#ffffff'
+	      }]
+	    }, {
+	      'featureType': 'road.local',
+	      'elementType': 'geometry',
+	      'stylers': [{
+	        'color': '#dfdfdf'
+	      }]
+	    }, {
+	      'featureType': 'road.local',
+	      'elementType': 'geometry.stroke',
+	      'stylers': [{
+	        'visibility': 'off'
+	      }]
+	    }, {
+	      'featureType': 'landscape.man_made',
+	      'stylers': [{
+	        'visibility': 'off'
+	      }]
+	    }]
+		});
 		
 		DrawingSvc.drawings = DrawingSvc.geoJsonToDrawings('{"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"LineString","coordinates":[[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0],[0, 1],[1, 0]]},"properties":{"colorIndex":1,"rigid":false,"fill":false,"nodes":[{"lat":0,"lng":1,"index":0},{"lat":1,"lng":0,"index":13}]}}]}');
   }));

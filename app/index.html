@@ -217,13 +217,13 @@
 				    <path d="M14,14 L50,14 M38,14 L36,10 L28,10 L26,14 M48,20 L16,20 L20,54 L44,54 L48,20 z" fill-opacity="0" />
           </svg>
         </button>
-        <button class="group first" ng-show="hasUndo()" on-activate="undo()" class="trigger">
+        <button class="group first" ng-class="{last: !hasRedo()}" ng-show="hasUndo()" on-activate="undo()" class="trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 						<path d="M32,54 C44.15,54 54,44.15 54,32 C54,19.85 44.15,10 32,10 C25.645,10 19.92,12.694 15.904,17.003" fill-opacity="0" />
 						<path d="M22,23 L10,23 L10,11 L22,23 z" />
           </svg>
         </button>
-        <button class="group last" ng-show="hasRedo()" on-activate="redo()" class="trigger">
+        <button class="group last" ng-class="{first: !hasUndo()}" ng-show="hasRedo()" on-activate="redo()" class="trigger">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
             <path d="M32,54 C19.85,54 10,44.15 10,32 C10,19.85 19.85,10 32,10 C38.355,10 44.08,12.694 48.096,17.003" fill-opacity="0"/>
 						<path d="M42,23 L54,23 L54,11 L42,23 z" />

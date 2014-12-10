@@ -8,7 +8,7 @@
 		flex: 1 0 50%;
 	}
 	footer {
-		flex: 0 1 10rem;
+		flex: 0 1 ($navbar-size * 3);
 		order: 2;
 	}
 	main {
