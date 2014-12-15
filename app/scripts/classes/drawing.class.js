@@ -54,8 +54,6 @@ class Point {
 
 
 
-const NODE_MOVED = 'Node.moved';
-
 class Node extends Point {
   constructor( x, y ) {
     super( x, y );
@@ -65,13 +63,17 @@ class Node extends Point {
   moveTo( x, y ) {
     super.moveTo( x, y );
 
-    emit( 'Node.moved', {
+    emit( Node.event.MOVED, {
       x,
       y,
       context: this
     } );
   }
 }
+
+Node.event = {
+  MOVED: 'Node.moved'
+};
 
 
 
@@ -94,7 +96,7 @@ class Drawing {
 
     this._color = value;
 
-    emit( DRAWING_COLOR_CHANGED, {
+    emit( Drawing.event.COLOR_CHANGED, {
       color: value,
       context: this
     } );
@@ -109,7 +111,7 @@ class Drawing {
 
     this._fill = value;
 
-    emit( DRAWING_FILL_CHANGED, {
+    emit( Drawing.event.FILL_CHANGED, {
       fill: value,
       context: this
     } );
@@ -124,7 +126,7 @@ class Drawing {
 
     this._rigid = value;
 
-    emit( DRAWING_RIGID_CHANGED, {
+    emit( Drawing.event.RIGID_CHANGED, {
       rigid: value,
       context: this
     } );
@@ -162,7 +164,7 @@ class Drawing {
 
     console.assert( this._path.isValid() );
 
-    emit( 'Drawing.pointsRemoved', {
+    emit( Drawing.event.POINTS_REMOVED, {
       start,
       end,
       removedPoints: removedPoints,
@@ -179,7 +181,7 @@ class Drawing {
 
     this._path.splice( atIndex, 0, ...path );
 
-    emit( 'Drawing.pointsAdded', {
+    emit( POINTS_ADDED, {
       atIndex,
       addedPoints: points,
       context: this
@@ -214,5 +216,11 @@ Drawing.event = {
 
 
 
+class DrawingCollection extends Array {
 
-export { Point, Node, Drawing };
+}
+
+
+
+
+export { Point, Node, Drawing, DrawingCollection };

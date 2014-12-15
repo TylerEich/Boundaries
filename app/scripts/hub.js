@@ -1,6 +1,12 @@
-const hub = {};
+const HUB = {};
 
-export function emit({ eventName, data }) {
+export function emit( eventName, { data }) {
+  if ( HUB.hasOwnProperty( eventName ) ) {
+    let handlers = HUB[ eventName ];
+    for ( let handler of handlers ) {
+      handler.bind( context, data );
+    }
+  }
   var handlers = hub[eventName];
 
   if ( handlers !== undefined ) {
