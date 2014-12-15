@@ -360,7 +360,10 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
     
     drawing._poly.setPath(path);
 
-    $rootScope.$broadcast('drawing:change');
+    emit('drawing:nodesRemoved', {
+      drawing,
+      removedNodes
+    });
     
     return removedNodes;
   }
@@ -514,7 +517,7 @@ angular.module('bndry.drawing', ['ngStorage', 'bndry.map', 'bndry.color', 'bndry
       }
     }
     
-    $rootScope.$broadcast('drawing:change');
+    emit('drawing:change');
   }
   
   
