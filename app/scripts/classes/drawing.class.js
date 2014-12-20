@@ -6,7 +6,7 @@ import { emit } from '../hub.js';
 
 
 class Path extends Array {
-  constructor( points = [] ) {
+  constructor( ...points ) {
     super( ...points );
   }
 
@@ -23,6 +23,8 @@ class Path extends Array {
 }
 
 
+
+
 class Point {
   constructor( x, y ) {
     this._x = x;
@@ -33,8 +35,6 @@ class Point {
   moveTo( x, y ) {
     this._x = x;
     this._y = y;
-
-    emit( 'Point.changed', this );
   }
 
 
@@ -60,14 +60,14 @@ class Node extends Point {
   }
 
 
-  moveTo( x, y ) {
+  moveTo({ x, y }) {
     super.moveTo( x, y );
 
     emit( Node.event.MOVED, {
       x,
       y,
       context: this
-    } );
+    });
   }
 }
 
@@ -132,6 +132,13 @@ class Drawing {
     } );
   }
 
+
+  indexOf( point ) {
+    console.assert( node instanceof Point );
+
+    return this._path.indexOf( point );
+  }
+
   removeNodeAtIndex( index ) {
     let start,
       end,
@@ -169,7 +176,7 @@ class Drawing {
       end,
       removedPoints: removedPoints,
       context: this
-    } );
+    });
 
     return removedPoints;
   }
@@ -181,11 +188,13 @@ class Drawing {
 
     this._path.splice( atIndex, 0, ...path );
 
-    emit( POINTS_ADDED, {
+    console.assert( this._path.isValid() );
+
+    emit( Drawing.event.POINTS_ADDED, {
       atIndex,
       addedPoints: points,
       context: this
-    } );
+    });
   }
 
 
@@ -203,6 +212,11 @@ class Drawing {
 
     return positions;
   }
+
+
+  get nodes() {
+    return this._path.filter( point => point instanceof Node );
+  }
 }
 
 Drawing.event = {
@@ -211,7 +225,7 @@ Drawing.event = {
   RIGID_CHANGED: 'Drawing.rigidChanged',
   POINTS_ADDED: 'Drawing.pointsAdded',
   POINTS_REMOVED: 'Drawing.pointsRemoved'
-}
+};
 
 
 
