@@ -134,7 +134,7 @@ class Drawing {
 
 
   indexOf( point ) {
-    console.assert( node instanceof Point );
+    console.assert( point instanceof Point );
 
     return this._path.indexOf( point );
   }
