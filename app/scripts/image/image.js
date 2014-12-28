@@ -158,11 +158,11 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
   
   $scope.downloadPdf = () => {
     var locality = prompt('Locality (for example, the name of the city)', '');
-    if (locality === null) {
+    if (!locality) {
       return;
     }
     var number = prompt('Territory number (for example, MR-1056)', '');
-    if (number === null) {
+    if (!number) {
       return;
     }
 
