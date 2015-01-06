@@ -3,29 +3,47 @@
 
 'use strict';
 
-module.exports = function(config) {
+module.exports = function( config ) {
+  var projectFiles = require( './project-files' );
+
+
+
+
+  var configFiles = [].concat(
+    projectFiles.components.main,
+    projectFiles.build.scripts,
+    projectFiles.build.tests
+  );
+
+
+
+
   config.set({
     // base path, that will be used to resolve files and exclude
     basePath: '',
 
-    // testing framework to use (jasmine/mocha/qunit/...)
-    frameworks: ['jasmine'],
+    // plugins: [
+    //   'karma-chrome-launcher',
+    //   'karma-jasmine',
+    //   'karma-mocha-reporter'
+    // ],
 
-    // list of files / patterns to load in the browser
-    files: [
-      'app/bower_components/angular/angular.js',
-      'app/bower_components/angular-mocks/angular-mocks.js',
-      'app/bower_components/angular-resource/angular-resource.js',
-      'app/bower_components/angular-sanitize/angular-sanitize.js',
-      'app/bower_components/angular-route/angular-route.js',
-      'app/bower_components/ngstorage/ngStorage.js',
-      'app/scripts/*.js',
-      'app/scripts/**/*!(Spec).js',
-      'app/scripts/**/*Spec.js'
+    // testing framework to use (jasmine/mocha/qunit/...)
+    frameworks: [
+      'jasmine'
     ],
 
-    // list of files / patterns to exclude
-    exclude: [],
+    reporters: [
+      'mocha',
+      'growl'
+    ],
+
+    mochaReporter: {
+      output: 'minimal'
+    },
+
+    // list of files / patterns to load in the browser
+    files: configFiles,
 
     // web server port
     port: 8000,
@@ -36,7 +54,7 @@ module.exports = function(config) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: true,
+    autoWatch: false,
 
 
     // Start these browsers, currently available:
@@ -47,13 +65,16 @@ module.exports = function(config) {
     // - Safari (only Mac)
     // - PhantomJS
     // - IE (only Windows)
-    browsers: ['PhantomJS'],
+    browsers: [
+      'Chrome'
+      // 'PhantomJS'
+    ],
 
     // Timeout after 5 seconds
     captureTimeout: 5000,
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
-    singleRun: false
+    singleRun: true
   });
 };

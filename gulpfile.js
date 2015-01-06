@@ -1,96 +1,13 @@
 'use strict';
 
-var gulp = require('gulp'),
-  connect = require('gulp-connect');
 
-// Test files
-var unitTestFiles = [
-  'app/tests/**/*.js'
-],
 
-  // App files
-  jsAppFiles = [
-    'app/scripts/*/**.js',
-    'app/scripts/app.js'
-  ],
-  htmlAppFiles = [
-    '!app/bower_components/**',
-    'app/**/*.html'
-  ],
-  htmlViewFiles = [
-    'app/views/*.html'
-  ],
-  styleAppFiles = [
-    'app/styles/**/*.scss'
-  ],
+var gulp = require( 'gulp' ),
+  projectFiles = require( './project-files' ),
+  connect = require( 'gulp-connect' );
 
-  // Build files
-  bowerBuildFiles = [
-		'app/bower_components/angular/angular.js',
-    'app/bower_components/*/*.js',
-    '!app/bower_components/*/*.min.js',
-    '!app/bower_components/*/Gruntfile.js',
-    '!app/bower_components/angular-ui-utils/*ieshiv*',
-    '!app/bower_components/angular-mocks/*',
-    '!app/bower_components/angular-resource/*',
-    '!app/bower_components/angular-scenario/*'
-  ],
-  bowerDistFiles = bowerBuildFiles.slice(2),
-  jsBuildFiles = [
-    'build/scripts/**/*.js',
-    'build/scripts/app.js'
-  ],
-  unitTestBuildFiles = [
-    'build/tests/**/*.js'
-  ],
-  // htmlBuildFiles = [
-  //   'build/*.html',
-  //   'build/views/*.min.html'
-  // ],
-  // viewBuildFiles = [
-  // 'build/views/*.min.html'
-  // ],
-  styleBuildFiles = [
-    'build/styles/**/*.min.css',
-    'build/styles/critical.min.css'
-  ];
 
-bowerDistFiles[0] = 'app/bower_components/*/*.min.js';
 
-var karmaConfFiles = [
-  'app/bower_components/angular/angular.js',
-  'app/bower_components/angular-mocks/angular-mocks.js',
-  'app/bower_components/angular-resource/angular-resource.js',
-  'app/bower_components/angular-sanitize/angular-sanitize.js',
-  'app/bower_components/angular-route/angular-route.js',
-  'app/bower_components/ngstorage/ngStorage.js'
-];
-
-var karmaConf = {
-  browsers: ['ChromeCanary'],
-  frameworks: ['jasmine'],
-  reporters: ['osx', 'mocha', 'coverage'],
-	preprocessors: {
-		'./build/(scripts|tests)/*/**.js': ['coverage']
-	},
-	coverageReporter: {
-		reporters: [
-			{
-				type: 'text-summary'
-			},
-			{
-				type: 'text'
-			},
-			{
-				type: 'html',
-				dir: 'coverage/'
-			}
-		]
-	},
-  logLevel: 'WARN',
-  files: karmaConfFiles,
-  exclude: ['app/bower_components/angular-scenario/angular-scenario.js']
-};
 
 function deferScript(filepath) {
   return '<script defer src="' + filepath + '"></script>';
@@ -99,24 +16,20 @@ function fileContents(filePath, file) {
   return file.contents.toString('utf8');
 }
 function errorHandler(e) {
-  console.log(e.toString());
+
   this.emit('end');
 }
 
 // Tests
-function test(watch, files, done, error) {
-	if (!error) {
-		error = console.error.bind(console);
-	}
-  watch = Boolean(watch);
+function test( watch, files, done, error ) {
 
-  var karmaServer = require('karma').server;
+  var karmaServer = require( 'karma' ).server;
 
-  karmaConf.files = files;
-	karmaConf.autoWatch = watch;
-  karmaConf.singleRun = !watch;
-
-  karmaServer.start(karmaConf, done);
+  karmaServer.start({
+    configFile: __dirname + '/karma.conf.js',
+    autoWatch: watch,
+    singleRun: !watch
+  }, done );
 }
 
 function clean(glob) {
@@ -146,24 +59,28 @@ function build(files, dir) {
 		
     .pipe(sourcemaps.init())
 		  .pipe(to5())
-    .pipe(sourcemaps.write('../sourcemaps'))
+    .pipe(sourcemaps.write('sourcemaps'))
     .pipe(gulp.dest(dir))
     .on('error', errorHandler);
 }
 
 var tasks = {
-  'test': test.bind(null, true, karmaConfFiles.concat(jsBuildFiles, unitTestBuildFiles)),
-  'test:once': test.bind(null, false, karmaConfFiles.concat(jsBuildFiles, unitTestBuildFiles)),
-  'test:dist': test.bind(null, false, karmaConfFiles.concat('dist/script.min.js', unitTestBuildFiles)),
-  'build:js': build.bind(null, jsAppFiles, 'build/scripts'),
-	'build:test': build.bind(null, unitTestFiles, 'build/tests'),
+  'test': test.bind( null, true ),
+  'test:once': test.bind( null, false ),
+  'test:dist': test.bind( null, false, [].concat(
+    projectFiles.components.main,
+    projectFiles.dist.scripts,
+    projectFiles.src.tests
+  ) ),
+  'build:js': build.bind(null, projectFiles.src.scripts, 'build/scripts'),
+	'build:test': build.bind(null, projectFiles.src.tests, 'build/tests'),
   'build:css': function() {
     var changed = require('gulp-changed'),
       sass = require('gulp-sass'),
       prefix = require('gulp-autoprefixer'),
       rename = require('gulp-rename');
 
-    return gulp.src(styleAppFiles)
+    return gulp.src( projectFiles.src.styles )
       .pipe(changed('build/styles', {
         extension: '.min.css'
       }))
@@ -184,20 +101,34 @@ var tasks = {
       replace = require('gulp-replace'),
       inject = require('gulp-inject');
 
-    return gulp.src('app/index.html')
-      .pipe(inject(gulp.src(bowerBuildFiles.concat(jsBuildFiles), {
-        read: false
-      }), {
-        addRootSlash: true,
-        transform: deferScript
-      }))
-      .pipe(inject(gulp.src(styleBuildFiles, {
-        read: false,
-      }), {
-        addRootSlash: true
-      }))
-      .pipe(replace('app/', '../app/'))
-      .pipe(gulp.dest('build'));
+
+    var scriptFiles = [].concat(
+      projectFiles.components.main,
+      projectFiles.build.scripts
+    );
+
+
+    return gulp.src( projectFiles.src.views )
+      .pipe(
+        inject(
+          gulp.src( scriptFiles, {
+            read: false
+          }), {
+            addRootSlash: true,
+            transform: deferScript
+          }
+        )
+      )
+      .pipe(
+        inject(
+          gulp.src( projectFiles.build.styles, {
+            read: false,
+          }), {
+            addRootSlash: true
+          }
+        )
+      )
+      .pipe(gulp.dest('build/views'));
   },
   'clean:css': clean.bind(null, 'build/styles/*'),
   'clean:js': clean.bind(null, 'build/scripts/**/*'),
@@ -278,10 +209,10 @@ var tasks = {
         addRootSlash: false
       }))
 			.pipe(replace(/app\/bower_components\/(.+?)\/.+?.js/g, function(match, p1) {
-				console.log(match, p1);
+
 				var version = require('./app/bower_components/' + p1 + '/bower.json').version;
-				console.log('Version:', version);
-				console.log('Is in data?:', p1 in data);
+
+
 				
 				if (p1 in data) {
 					var item = data[p1];
@@ -351,9 +282,9 @@ gulp.task('server', ['build:html'], function() {
     livereload: true
   });
 
-  gulp.src('build/index.html')
+  gulp.src('build/views/main.html')
     .pipe(openUrl('', {
-      url: 'http://localhost:8080/build/',
+      url: 'http://localhost:8080/build/views/main.html',
       app: 'Google Chrome Canary'
     }));
 });
@@ -368,35 +299,26 @@ gulp.task('server:dist', ['dist:html'], function() {
   gulp.src('index.html')
     .pipe(openUrl('', {
       url: 'http://localhost:8080/',
-      app: 'Google Chrome Canary'
+      app: 'Google Chrome'
     }))
-    .pipe(openUrl('', {
-      url: 'http://localhost:8080/',
-      app: 'Firefox'
-    }));
 });
 
 // Default
-gulp.task('default', /*['clean', 'build', 'server'],*/ function(done) {
-	var sequence = require('run-sequence');
-	
-	sequence('clean', 'build', 'server', function() {
-	  gulp.watch('app/scripts/**/*', ['build:js']);
-		gulp.watch('app/tests/**/*', ['build:test']);
-		gulp.watch('app/styles/**/*', ['build:css']);
-		gulp.watch('app/index.html', ['build:html']);
+gulp.task('default', ['build', 'server'], function(done) {
+  gulp.watch( projectFiles.src.scripts, [ 'build:js' ] );
+	gulp.watch( projectFiles.src.tests, [ 'build:test' ] );
+	gulp.watch( projectFiles.src.styles, [ 'build:css' ] );
+	gulp.watch( projectFiles.src.views, [ 'build:html' ] );
 
-	  gulp.watch('build/**').on('change', function(file) {
-	    gulp.src(file.path)
-	      .pipe(connect.reload());
-	  });
-		
-	  tasks['test'](function(exitCode) {
-	    console.log('Karma exited with code ' + exitCode);
-	    if (exitCode === 0) {
-	      done();
-	    }
-	  });
-	});
+  gulp.watch('build/**').on('change', function(file) {
+    gulp.src(file.path)
+      .pipe(connect.reload());
+  });
 	
+  tasks[ 'test' ](function( exitCode ) {
+
+    if (exitCode === 0) {
+      done();
+    }
+  });	
 });

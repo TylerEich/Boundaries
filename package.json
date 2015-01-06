@@ -38,7 +38,8 @@
     "gulp-traceur": "^0.8.0",
     "gulp-uglify": "~0.2.1",
     "jshint-stylish": "~0.1.3",
-    "karma": "~0.12.5",
+    "karma": "^0.12.31",
+    "karma-6to5-preprocessor": "^1.0.0",
     "karma-chrome-launcher": "~0.1.3",
     "karma-coverage": "^0.2.6",
     "karma-firefox-launcher": "~0.1.3",
@@ -54,5 +55,7 @@
   "engines": {
     "node": ">=0.10.0"
   },
-  "scripts": {}
+  "scripts": {
+    "test": "gulp test:once"
+  }
 }
