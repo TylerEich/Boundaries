@@ -84,7 +84,9 @@ files.components = {
 
 var components = fs.readdirSync( './bower_components' );
 
-components.forEach(function( folderName ) {
+components.filter(function( folderName ) {
+  return !( folderName[0] === '.' );
+}).forEach(function( folderName ) {
   var folderPath = './bower_components/' + folderName;
 
   // Get fileName minus leading './'
