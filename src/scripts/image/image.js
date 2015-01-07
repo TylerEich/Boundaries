@@ -10,11 +10,6 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
     };
   };
   self.generateUrl = function() {
-    return 'a;sdflskjfl;sfjs';
-
-
-
-
     if (!DrawingSvc.drawings) {
       return;
     }
