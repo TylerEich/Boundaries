@@ -168,6 +168,11 @@ var tasks = {
     return gulp.src( projectFiles.src.scripts )
       .pipe( sourcemaps.init() )
       	.pipe( concat( 'script.min.js' ) )
+        .pipe(replace(/for\s*?\((var\s+?)?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, item, iterable) {       
+          var i = '_' + Math.random().toString(36).substring(7);
+          
+          return (hasVar ? ('var ' + item + ';') : '') + 'for(var ' + i + ' = 0; ' + i + ' < ' + iterable + '.length; ' + i + '++) { ' + item + ' = ' + iterable + '[' + i + ']';
+        }))
 				.pipe( to5() )
 		    .pipe( ngAnnotate() )
         .pipe( uglify() )
