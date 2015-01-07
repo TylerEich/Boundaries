@@ -161,19 +161,15 @@ var tasks = {
         pkg.homepage,
         pkg.license);
 
-    return gulp.src(jsBuildFiles)
-      .pipe(sourcemaps.init())
-      	.pipe(concat('script.min.js'))
-				// .pipe(to5())
-		    .pipe(ngAnnotate())
-		
-        // .pipe(traceur({
-        //   sourceMap: true
-        // }))
+    return gulp.src( projectFiles.src.scripts )
+      .pipe( sourcemaps.init() )
+      	.pipe( concat( 'script.min.js' ) )
+				.pipe( to5() )
+		    .pipe( ngAnnotate() )
         .pipe(uglify())
-      .pipe(sourcemaps.write('sourcemaps'))
-      .pipe(insert.prepend(copyright))
-      .pipe(gulp.dest('dist'));
+      .pipe( sourcemaps.write( 'sourcemaps' ) )
+      .pipe( insert.prepend( copyright ) )
+      .pipe( gulp.dest( 'dist' ) );
       // .pipe(filesize());
   },
   'dist:html': function() {
@@ -191,60 +187,75 @@ var tasks = {
 		var data = extend(googleData, cdnjsData);
 		
     return gulp.src('app/index.html')
-      .pipe(inject(gulp.src(bowerDistFiles.concat('dist/script.min.js'), {
-        read: false
-      }), {
-        addRootSlash: false,
-        transform: deferScript
-      }))
-      .pipe(inject(gulp.src('dist/critical.min.css'), {
-        transform: function(filename, file) {
-          return '<style>' + fileContents.apply(null, arguments) + '</style>';
-        },
-        starttag: '<!-- inject:critical:{{ext}} -->'
-      }))
-      .pipe(inject(gulp.src('dist/style.min.css', {
-        read: false,
-      }), {
-        addRootSlash: false
-      }))
-			.pipe(replace(/app\/bower_components\/(.+?)\/.+?.js/g, function(match, p1) {
+      .pipe(
+        inject(
+          gulp.src(
+            [].concat(
+              projectFiles.components.min,
+              'dist/script.min.js'
+            ), {
+              read: false
+            }
+          ), {
+            addRootSlash: false,
+            transform: deferScript
+          }
+        )
+      )
+      .pipe(
+        inject(
+          gulp.src( 'dist/critical.min.css' ), {
+            transform: function( filePath, file ) {
+              return '<style>' + fileContents( filePath, file ) + '</style>';
+            },
+            starttag: '<!-- inject:critical:{{ext}} -->'
+          }
+        )
+      )
+      .pipe(
+        inject(
+          gulp.src( 'dist/style.min.css', {
+            read: false,
+          }), {
+            addRootSlash: false
+          }
+        )
+      )
+			.pipe(
+        replace( /bower_components\/(.+?)\/.+?.js/g,
+          function( match, p1 ) {
+    				var version = require('bower_components/' + p1 + '/bower.json').version;
 
-				var version = require('./app/bower_components/' + p1 + '/bower.json').version;
-
-
-				
-				if (p1 in data) {
-					var item = data[p1];
-					return item.url(version);
-				} else {
-					return match;
-				}
-			}))
-			.pipe(htmlmin({
-				removeComments: true,
-				removeCommentsFromCDATA: true,
-				removeCDATASectionsFromCDATA: true,
-				collapseWhitespace: true,
-				collapseBooleanAttributes: true,
-				removeAttributeQuotes: true,
-				removeRedundantAttributes: true,
-				useShortDoctype: true,
-				removeEmptyAttributes: true,
-				removeScriptTypeAttributes: true,
-				removeStyleLinkTypeAttributes: true,
-				removeOptionalTags: true,
-				removeIgnored: true,
-				keepClosingSlash: true,
-				caseSensitive: true,
-				minifyCSS: true
-				// minifyURLs: true
-			}))
-      // .pipe(googleCdn(require('./bower.json'), {
-      //   componentsPath: 'app/bower_components',
-      //   cdn: extend(require('cdnjs-cdn-data'), require('google-cdn-data'))
-      // }))
-      .pipe(gulp.dest('.'));
+    				if ( data.hasOwnProperty( p1 ) ) {
+    					var item = data[ p1 ];
+    					return item.url( version );
+    				} else {
+    					return match;
+    				}
+    			}
+        )
+      )
+			.pipe(
+        htmlmin({
+  				removeComments: true,
+  				removeCommentsFromCDATA: true,
+  				removeCDATASectionsFromCDATA: true,
+  				collapseWhitespace: true,
+  				collapseBooleanAttributes: true,
+  				removeAttributeQuotes: true,
+  				removeRedundantAttributes: true,
+  				useShortDoctype: true,
+  				removeEmptyAttributes: true,
+  				removeScriptTypeAttributes: true,
+  				removeStyleLinkTypeAttributes: true,
+  				removeOptionalTags: true,
+  				removeIgnored: true,
+  				keepClosingSlash: true,
+  				caseSensitive: true,
+  				minifyCSS: true
+  			})
+      )
+      .pipe( gulp.dest( 'dist/views' ) );
   }
 };
 
@@ -271,7 +282,7 @@ gulp.task('clean:test', tasks['clean:test']);
 gulp.task('dist', ['build', 'dist:html', 'test:dist']);
 gulp.task('dist:html', ['build:html', 'dist:css', 'dist:js'], tasks['dist:html']);
 gulp.task('dist:css', ['build:css'], tasks['dist:css']);
-gulp.task('dist:js', ['build:js'], tasks['dist:js']);
+gulp.task('dist:js', tasks['dist:js']);
 
 // Server
 gulp.task('server', ['build:html'], function() {

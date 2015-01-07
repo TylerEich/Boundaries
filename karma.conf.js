@@ -92,7 +92,7 @@ module.exports = function( config ) {
     ];
 
     configuration.reporters = [
-      'progress'
+      'mocha'
     ];
   }
 
