@@ -87,7 +87,8 @@ module.exports = function( config ) {
 
   if ( process.env.TRAVIS ) {
     configuration.browsers = [
-      'Chrome_travis_ci'
+      'Chrome_travis_ci',
+      'Firefox'
     ];
 
     configuration.reporters = [
