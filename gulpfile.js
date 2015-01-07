@@ -150,6 +150,7 @@ var tasks = {
     var util = require('util'),
       sourcemaps = require('gulp-sourcemaps'),
       ngAnnotate = require('gulp-ng-annotate'),
+      replace = require('gulp-replace'),
 		  to5 = require('gulp-6to5'),
       uglify = require('gulp-uglify'),
       // filesize = require('gulp-filesize'),
