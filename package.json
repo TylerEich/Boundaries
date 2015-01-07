@@ -12,7 +12,7 @@
     "cdnjs-cdn-data": "^0.1.1",
     "google-cdn-data": "^0.1.6",
     "growly": "^1.1.1",
-    "gulp": "~3.6.1",
+    "gulp": "^3.8.10",
     "gulp-6to5": "^2.0.0",
     "gulp-cdnizer": "^1.0.3",
     "gulp-changed": "~0.3.0",

@@ -16,20 +16,21 @@ function fileContents(filePath, file) {
   return file.contents.toString('utf8');
 }
 function errorHandler(e) {
-
   this.emit('end');
 }
 
 // Tests
-function test( watch, files, done, error ) {
+function test( watch, files ) {
+  console.log( files );
 
   var karmaServer = require( 'karma' ).server;
 
   karmaServer.start({
     configFile: __dirname + '/karma.conf.js',
+    files: files,
     autoWatch: watch,
     singleRun: !watch
-  }, done );
+  });
 }
 
 function clean(glob) {
@@ -70,7 +71,7 @@ var tasks = {
   'test:dist': test.bind( null, false, [].concat(
     projectFiles.components.main,
     projectFiles.dist.scripts,
-    projectFiles.src.tests
+    projectFiles.build.tests
   ) ),
   'build:js': build.bind(null, projectFiles.src.scripts, 'build/scripts'),
 	'build:test': build.bind(null, projectFiles.src.tests, 'build/tests'),
@@ -136,11 +137,12 @@ var tasks = {
   'dist:css': function() {
     var concat = require('gulp-concat');
 
-    gulp.src('build/styles/critical.min.css').pipe(gulp.dest('dist'));
+    gulp.src( 'build/styles/critical.min.css' )
+      .pipe( gulp.dest( 'dist/styles' ) );
     
-    return gulp.src(styleBuildFiles)
-      .pipe(concat('style.min.css'))
-      .pipe(gulp.dest('dist'));
+    return gulp.src( styleBuildFiles )
+      .pipe( concat( 'style.min.css') )
+      .pipe( gulp.dest( 'dist/styles') );
   },
   'dist:js': function() {
     var util = require('util'),
@@ -166,10 +168,10 @@ var tasks = {
       	.pipe( concat( 'script.min.js' ) )
 				.pipe( to5() )
 		    .pipe( ngAnnotate() )
-        .pipe(uglify())
+        .pipe( uglify() )
       .pipe( sourcemaps.write( 'sourcemaps' ) )
       .pipe( insert.prepend( copyright ) )
-      .pipe( gulp.dest( 'dist' ) );
+      .pipe( gulp.dest( 'dist/scripts' ) );
       // .pipe(filesize());
   },
   'dist:html': function() {
