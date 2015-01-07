@@ -30,6 +30,8 @@ function test( watch, files ) {
     files: files,
     autoWatch: watch,
     singleRun: !watch
+  }, function( exitCode ) {
+    process.exit( exitCode );
   });
 }
 
