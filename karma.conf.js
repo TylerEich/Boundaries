@@ -77,8 +77,8 @@ module.exports = function( config ) {
       }
     },
 
-    // Timeout after 5 seconds
-    captureTimeout: 5000,
+    // Timeout after 10 seconds
+    captureTimeout: 10000,
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
@@ -88,6 +88,10 @@ module.exports = function( config ) {
   if ( process.env.TRAVIS ) {
     configuration.browsers = [
       'Chrome_travis_ci'
+    ];
+
+    configuration.reporters = [
+      'progress'
     ];
   }
 
