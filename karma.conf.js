@@ -18,7 +18,7 @@ module.exports = function( config ) {
 
 
 
-  config.set({
+  var configuration = {
     // base path, that will be used to resolve files and exclude
     basePath: '',
 
@@ -70,11 +70,26 @@ module.exports = function( config ) {
       // 'PhantomJS'
     ],
 
+    customLaunchers: {
+      Chrome_travis_ci: {
+        base: 'Chrome',
+        flags: [ '--no-sandbox' ]
+      }
+    },
+
     // Timeout after 5 seconds
     captureTimeout: 5000,
 
     // Continuous Integration mode
     // if true, it capture browsers, run tests and exit
     singleRun: true
-  });
+  };
+
+  if ( process.env.TRAVIS ) {
+    configuration.browsers = [
+      'Chrome_travis_ci'
+    ];
+  }
+
+  config.set();
 };
