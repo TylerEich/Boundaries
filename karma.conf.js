@@ -91,5 +91,5 @@ module.exports = function( config ) {
     ];
   }
 
-  config.set();
+  config.set( configuration );
 };
