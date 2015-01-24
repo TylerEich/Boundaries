@@ -1,10 +1,37 @@
 'use strict';
 
 
-
 var gulp = require( 'gulp' ),
   projectFiles = require( './project-files' ),
-  connect = require( 'gulp-connect' );
+  connect = require( 'gulp-connect' ),
+  sourcemaps = require('gulp-sourcemaps'),
+
+  sass = require('gulp-sass'),
+  prefix = require('gulp-autoprefixer'),
+
+  insert = require('gulp-insert'),
+  filesize = require('gulp-filesize'),
+  changed = require('gulp-changed'),
+  rename = require('gulp-rename'),
+  concat = require('gulp-concat'),
+  replace = require('gulp-replace'),
+  extend = require('util')._extend,
+  foreach = require('gulp-foreach'),
+
+  htmlmin = require('gulp-htmlmin'),
+  cdnizer = require('gulp-cdnizer'),
+  googleData = require('google-cdn-data'),
+  cdnjsData = require('cdnjs-cdn-data'),
+  inject = require('gulp-inject'),
+
+  util = require('util'),
+  ngAnnotate = require('gulp-ng-annotate'),
+  to5 = require('gulp-6to5'),
+  uglify = require('gulp-uglify'),
+  del = require( 'del' ),
+  openUrl = require('gulp-open');
+
+
 
 
 
@@ -21,90 +48,78 @@ function errorHandler(e) {
 
 // Tests
 function test( watch, files ) {
-  console.log( files );
+  var karmaServer = require( 'karma' ).server,
+    config = {
+      configFile: __dirname + '/karma.conf.js',
+      autoWatch: watch,
+      singleRun: !watch
+    };
 
-  var karmaServer = require( 'karma' ).server;
-
-  karmaServer.start({
-    configFile: __dirname + '/karma.conf.js',
-    files: files,
-    autoWatch: watch,
-    singleRun: !watch
-  }, function( exitCode ) {
+  if ( files ) {
+    config.files = files;
+  }
+  
+  karmaServer.start( config, function( exitCode ) {
     process.exit( exitCode );
   });
 }
 
-function clean(glob) {
-  var gulpClean = require('gulp-clean');
-
-  return gulp.src(glob, {
-    read: false
-  })
-    .pipe(gulpClean());
+function clean( glob, done ) {
+  del( glob, done );
 }
 
 function build(files, dir) {
-  var changed = require('gulp-changed'),
-    sourcemaps = require('gulp-sourcemaps'),
-		replace = require('gulp-replace'),
-	  to5 = require('gulp-6to5');
-  
   return gulp.src(files)
     .pipe(changed(dir))
-		
-		// Replace for-of with for(;;) loop
-		.pipe(replace(/for\s*?\((var\s+?)?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, item, iterable) {				
-			var i = '_' + Math.random().toString(36).substring(7);
-			
-			return (hasVar ? ('var ' + item + ';') : '') + 'for(var ' + i + ' = 0; ' + i + ' < ' + iterable + '.length; ' + i + '++) { ' + item + ' = ' + iterable + '[' + i + ']';
-		}))
-		
+    
+    // Replace for-of with for(;;) loop
+    .pipe(replace(/for\s*?\((var\s+?)?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, item, iterable) {       
+      var i = '_' + Math.random().toString(36).substring(7);
+      
+      return (hasVar ? ('var ' + item + ';') : '') + 'for(var ' + i + ' = 0; ' + i + ' < ' + iterable + '.length; ' + i + '++) { ' + item + ' = ' + iterable + '[' + i + ']';
+    }))
+    
     .pipe(sourcemaps.init())
-		  .pipe(to5())
+      .pipe(to5())
     .pipe(sourcemaps.write('sourcemaps'))
     .pipe(gulp.dest(dir))
     .on('error', errorHandler);
 }
 
 var tasks = {
-  'test': test.bind( null, true ),
-  'test:once': test.bind( null, false ),
+  'test': test.bind( null, true, [].concat(
+    projectFiles.components.main,
+    projectFiles.build.scripts,
+    projectFiles.build.tests
+  ) ),
+  'test:once': test.bind( null, false, [].concat(
+    projectFiles.components.main,
+    projectFiles.build.scripts,
+    projectFiles.build.tests
+  ) ),
   'test:dist': test.bind( null, false, [].concat(
     projectFiles.components.main,
     projectFiles.dist.scripts,
     projectFiles.build.tests
   ) ),
   'build:js': build.bind(null, projectFiles.src.scripts, 'build/scripts'),
-	'build:test': build.bind(null, projectFiles.src.tests, 'build/tests'),
+  'build:test': build.bind(null, projectFiles.src.tests, 'build/tests'),
   'build:css': function() {
-    var changed = require('gulp-changed'),
-      sass = require('gulp-sass'),
-      prefix = require('gulp-autoprefixer'),
-      rename = require('gulp-rename');
-
     return gulp.src( projectFiles.src.styles )
-      .pipe(changed('build/styles', {
+      .pipe( changed('build/styles', {
         extension: '.min.css'
-      }))
-      .pipe(sass({
+      }) )
+      .pipe( sass({
         outputStyle: 'compressed',
         errLogToConsole: true
-      }))
-      .pipe(prefix('last 2 versions'))
-      .pipe(rename({
+      }) )
+      .pipe( prefix('last 2 versions') )
+      .pipe( rename({
         suffix: '.min'
-      }))
+      }) )
       .pipe(gulp.dest('build/styles'));
   },
   'build:html': function() {
-    var changed = require('gulp-changed'),
-      htmlmin = require('gulp-htmlmin'),
-      filesize = require('gulp-filesize'),
-      replace = require('gulp-replace'),
-      inject = require('gulp-inject');
-
-
     var scriptFiles = [].concat(
       projectFiles.components.main,
       projectFiles.build.scripts
@@ -133,30 +148,24 @@ var tasks = {
       )
       .pipe(gulp.dest('build/views'));
   },
+  'clean': clean.bind(null, 'build/**/*'),
   'clean:css': clean.bind(null, 'build/styles/*'),
   'clean:js': clean.bind(null, 'build/scripts/**/*'),
-	'clean:test': clean.bind(null, 'build/tests/**/*'),
+  'clean:test': clean.bind(null, 'build/tests/**/*'),
   'dist:css': function() {
-    var concat = require('gulp-concat');
-
-    gulp.src( 'build/styles/critical.min.css' )
+    return gulp.src( [].concat(
+      projectFiles.src.styles,
+      '!critical.min.css'
+    ) )
+      .pipe( sass({
+        outputStyle: 'compressed',
+        errLogToConsole: true
+      }) )
+      .pipe( prefix( 'last 2 versions' ) )
+      .pipe( concat( 'style.min.css' ) )
       .pipe( gulp.dest( 'dist/styles' ) );
-    
-    return gulp.src( styleBuildFiles )
-      .pipe( concat( 'style.min.css') )
-      .pipe( gulp.dest( 'dist/styles') );
   },
   'dist:js': function() {
-    var util = require('util'),
-      sourcemaps = require('gulp-sourcemaps'),
-      ngAnnotate = require('gulp-ng-annotate'),
-      replace = require('gulp-replace'),
-		  to5 = require('gulp-6to5'),
-      uglify = require('gulp-uglify'),
-      // filesize = require('gulp-filesize'),
-      concat = require('gulp-concat'),
-      insert = require('gulp-insert');
-
     var pkg = require('./package.json'),
       copyright = util.format('/*\n %s v%s\n (c) 2013-%s %s %s\n License: %s\n*/\n',
         pkg.name,
@@ -168,14 +177,14 @@ var tasks = {
 
     return gulp.src( projectFiles.src.scripts )
       .pipe( sourcemaps.init() )
-      	.pipe( concat( 'script.min.js' ) )
+        .pipe( concat( 'script.min.js' ) )
         .pipe(replace(/for\s*?\((var\s+?)?(.+?)\s+?of\s+?(.+?)\)\s*?\{/g, function(match, hasVar, item, iterable) {       
           var i = '_' + Math.random().toString(36).substring(7);
           
           return (hasVar ? ('var ' + item + ';') : '') + 'for(var ' + i + ' = 0; ' + i + ' < ' + iterable + '.length; ' + i + '++) { ' + item + ' = ' + iterable + '[' + i + ']';
         }))
-				.pipe( to5() )
-		    .pipe( ngAnnotate() )
+        .pipe( to5() )
+        .pipe( ngAnnotate() )
         .pipe( uglify() )
       .pipe( sourcemaps.write( 'sourcemaps' ) )
       .pipe( insert.prepend( copyright ) )
@@ -183,19 +192,9 @@ var tasks = {
       // .pipe(filesize());
   },
   'dist:html': function() {
-    var cdnizer = require('gulp-cdnizer'),
-			googleData = require('google-cdn-data'),
-			cdnjsData = require('cdnjs-cdn-data'),
-      extend = require('util')._extend,
-			foreach = require('gulp-foreach'),
-      changed = require('gulp-changed'),
-      htmlmin = require('gulp-htmlmin'),
-      filesize = require('gulp-filesize'),
-      replace = require('gulp-replace'),
-      inject = require('gulp-inject');
 
-		var data = extend(googleData, cdnjsData);
-		
+    var data = extend(googleData, cdnjsData);
+    
     return gulp.src('app/index.html')
       .pipe(
         inject(
@@ -231,39 +230,39 @@ var tasks = {
           }
         )
       )
-			.pipe(
+      .pipe(
         replace( /bower_components\/(.+?)\/.+?.js/g,
           function( match, p1 ) {
-    				var version = require('bower_components/' + p1 + '/bower.json').version;
+            var version = require('bower_components/' + p1 + '/bower.json').version;
 
-    				if ( data.hasOwnProperty( p1 ) ) {
-    					var item = data[ p1 ];
-    					return item.url( version );
-    				} else {
-    					return match;
-    				}
-    			}
+            if ( data.hasOwnProperty( p1 ) ) {
+              var item = data[ p1 ];
+              return item.url( version );
+            } else {
+              return match;
+            }
+          }
         )
       )
-			.pipe(
+      .pipe(
         htmlmin({
-  				removeComments: true,
-  				removeCommentsFromCDATA: true,
-  				removeCDATASectionsFromCDATA: true,
-  				collapseWhitespace: true,
-  				collapseBooleanAttributes: true,
-  				removeAttributeQuotes: true,
-  				removeRedundantAttributes: true,
-  				useShortDoctype: true,
-  				removeEmptyAttributes: true,
-  				removeScriptTypeAttributes: true,
-  				removeStyleLinkTypeAttributes: true,
-  				removeOptionalTags: true,
-  				removeIgnored: true,
-  				keepClosingSlash: true,
-  				caseSensitive: true,
-  				minifyCSS: true
-  			})
+          removeComments: true,
+          removeCommentsFromCDATA: true,
+          removeCDATASectionsFromCDATA: true,
+          collapseWhitespace: true,
+          collapseBooleanAttributes: true,
+          removeAttributeQuotes: true,
+          removeRedundantAttributes: true,
+          useShortDoctype: true,
+          removeEmptyAttributes: true,
+          removeScriptTypeAttributes: true,
+          removeStyleLinkTypeAttributes: true,
+          removeOptionalTags: true,
+          removeIgnored: true,
+          keepClosingSlash: true,
+          caseSensitive: true,
+          minifyCSS: true
+        })
       )
       .pipe( gulp.dest( 'dist/views' ) );
   }
@@ -281,9 +280,8 @@ gulp.task('build:js', tasks['build:js']);
 gulp.task('build:test', tasks['build:test']);
 gulp.task('build:css', tasks['build:css']);
 gulp.task('build:html', ['build:js', 'build:css'], tasks['build:html']);
-
 // Clean tasks
-gulp.task('clean', ['clean:css', 'clean:js', 'clean:test']);
+gulp.task('clean', tasks['clean']);
 gulp.task('clean:css', tasks['clean:css']);
 gulp.task('clean:js', tasks['clean:js']);
 gulp.task('clean:test', tasks['clean:test']);
@@ -296,8 +294,6 @@ gulp.task('dist:js', tasks['dist:js']);
 
 // Server
 gulp.task('server', ['build:html'], function() {
-  var openUrl = require('gulp-open');
-
   connect.server({
     root: [__dirname],
     livereload: true
@@ -310,8 +306,6 @@ gulp.task('server', ['build:html'], function() {
     }));
 });
 gulp.task('server:dist', ['dist:html'], function() {
-  var openUrl = require('gulp-open');
-
   connect.server({
     root: [__dirname],
     livereload: true
@@ -325,21 +319,20 @@ gulp.task('server:dist', ['dist:html'], function() {
 });
 
 // Default
-gulp.task('default', ['build', 'server'], function(done) {
+gulp.task('default', [ 'clean', 'build', 'server' ], function( done ) {
   gulp.watch( projectFiles.src.scripts, [ 'build:js' ] );
-	gulp.watch( projectFiles.src.tests, [ 'build:test' ] );
-	gulp.watch( projectFiles.src.styles, [ 'build:css' ] );
-	gulp.watch( projectFiles.src.views, [ 'build:html' ] );
+  gulp.watch( projectFiles.src.tests, [ 'build:test' ] );
+  gulp.watch( projectFiles.src.styles, [ 'build:css' ] );
+  gulp.watch( projectFiles.src.views, [ 'build:html' ] );
 
-  gulp.watch('build/**').on('change', function(file) {
-    gulp.src(file.path)
-      .pipe(connect.reload());
+  gulp.watch( 'build/**' ).on( 'change', function(file) {
+    gulp.src( file.path )
+      .pipe( connect.reload() );
   });
-	
-  tasks[ 'test' ](function( exitCode ) {
-
-    if (exitCode === 0) {
-      done();
-    }
-  });	
+  
+  test( true, [].concat(
+    projectFiles.components.main,
+    projectFiles.build.scripts,
+    projectFiles.build.tests
+  ) );
 });
