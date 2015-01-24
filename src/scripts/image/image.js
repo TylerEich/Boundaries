@@ -54,12 +54,12 @@ angular.module('bndry.image', ['ngStorage', 'bndry.map', 'bndry.drawing', 'bndry
     // Generate paths from drawings
     var drawing, urlPath, polyPath, encodedPath, color, hex;
     var bounds = new MapSvc.LatLngBounds();
-    for (i = 0; i < DrawingSvc.drawings.length; i++) {
+    for ( let i = 0; i < DrawingSvc.drawings.length; i++ ) {
       urlPath = [];
       drawing = DrawingSvc.drawings[i];
       polyPath = drawing._poly.getPath().getArray();
 
-      for (j = 0; j < polyPath.length; j++) {
+      for ( let j = 0; j < polyPath.length; j++ ) {
         bounds.extend(polyPath[j]);
       }
 
