@@ -145,7 +145,9 @@ function build(files, dir) {
 		}))
 		
     .pipe(sourcemaps.init())
-		  .pipe(to5())
+		  .pipe(to5({
+        modules: 'amd'
+      }))
     .pipe(sourcemaps.write('../sourcemaps'))
     .pipe(gulp.dest(dir))
     .on('error', errorHandler);

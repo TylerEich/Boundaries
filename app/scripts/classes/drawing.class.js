@@ -1,6 +1,6 @@
 // import { Marker, Polygon, Polyline } from './map';
 
-import { emit } from '../hub.js';
+import { PubSub } from '../pubsub.js';
 
 
 
