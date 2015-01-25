@@ -15,6 +15,11 @@ files.src = {
   ],
 
 
+  modules: [
+    'src/modules/**/*.js'
+  ],
+
+
   tests: [
     'src/tests/**/*.spec.js'
   ],
@@ -37,6 +42,11 @@ files.build = {
   scripts: [
     'build/scripts/**/*.js',
     'build/scripts/main.js'
+  ],
+
+
+  modules: [
+    'build/modules/**/*.js'
   ],
 
 
@@ -77,6 +87,11 @@ files.dist = {
 
 
 
+files.polyfills = [ 'polyfills/**/*.js' ];
+
+
+
+
 files.components = {
   main: [],
   min: []
@@ -90,7 +105,10 @@ components.filter(function( folderName ) {
   var folderPath = './bower_components/' + folderName;
 
   // Get fileName minus leading './'
-  var fileName = require( folderPath + '/bower.json' ).main.substring( 2 );
+  var fileName = require( folderPath + '/bower.json' ).main;
+  if ( fileName.indexOf( './' ) === 0 ) {
+    fileName = fileName.substring( 2 );
+  }
 
   var mainFile = folderPath + '/' + fileName;
   var minFile = mainFile.replace( '.js', '.min.js' );

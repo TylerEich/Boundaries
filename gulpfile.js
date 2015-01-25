@@ -68,7 +68,14 @@ function clean( glob, done ) {
   del( glob, done );
 }
 
-function build(files, dir) {
+function build(files, dir, modules) {
+  var options = {
+    modules: 'ignore'
+  };
+  if ( modules ) {
+    options.modules = 'system';
+    options.moduleIds = true;
+  }
   return gulp.src(files)
     .pipe(changed(dir))
     
@@ -80,7 +87,7 @@ function build(files, dir) {
     }))
     
     .pipe(sourcemaps.init())
-      .pipe(to5())
+      .pipe(to5( options ))
     .pipe(sourcemaps.write('sourcemaps'))
     .pipe(gulp.dest(dir))
     .on('error', errorHandler);
@@ -89,21 +96,28 @@ function build(files, dir) {
 var tasks = {
   'test': test.bind( null, true, [].concat(
     projectFiles.components.main,
+    projectFiles.polyfills,
+    projectFiles.build.modules,
     projectFiles.build.scripts,
     projectFiles.build.tests
   ) ),
   'test:once': test.bind( null, false, [].concat(
     projectFiles.components.main,
+    projectFiles.polyfills,
+    projectFiles.build.modules,
     projectFiles.build.scripts,
     projectFiles.build.tests
   ) ),
   'test:dist': test.bind( null, false, [].concat(
     projectFiles.components.main,
+    projectFiles.polyfills,
+    projectFiles.build.modules,
     projectFiles.dist.scripts,
     projectFiles.build.tests
   ) ),
-  'build:js': build.bind(null, projectFiles.src.scripts, 'build/scripts'),
-  'build:test': build.bind(null, projectFiles.src.tests, 'build/tests'),
+  'build:js': build.bind(null, projectFiles.src.scripts, 'build/scripts', false),
+  'build:modules': build.bind(null, projectFiles.src.modules, 'build/modules', true),
+  'build:test': build.bind(null, projectFiles.src.tests, 'build/tests', false),
   'build:css': function() {
     return gulp.src( projectFiles.src.styles )
       .pipe( changed('build/styles', {
@@ -276,10 +290,11 @@ gulp.task('test:dist', ['build:test', 'dist:js'], tasks['test:dist']);
 
 // Build tasks
 gulp.task('build', ['build:html', 'build:test']);
+gulp.task('build:modules', tasks['build:modules']);
 gulp.task('build:js', tasks['build:js']);
 gulp.task('build:test', tasks['build:test']);
 gulp.task('build:css', tasks['build:css']);
-gulp.task('build:html', ['build:js', 'build:css'], tasks['build:html']);
+gulp.task('build:html', ['build:modules', 'build:js', 'build:css'], tasks['build:html']);
 // Clean tasks
 gulp.task('clean', tasks['clean']);
 gulp.task('clean:css', tasks['clean:css']);
@@ -319,7 +334,8 @@ gulp.task('server:dist', ['dist:html'], function() {
 });
 
 // Default
-gulp.task('default', [ 'clean', 'build', 'server' ], function( done ) {
+gulp.task('default', [ 'build', 'server' ], function( done ) {
+  gulp.watch( projectFiles.src.modules, [ 'build:modules' ] );
   gulp.watch( projectFiles.src.scripts, [ 'build:js' ] );
   gulp.watch( projectFiles.src.tests, [ 'build:test' ] );
   gulp.watch( projectFiles.src.styles, [ 'build:css' ] );
@@ -332,6 +348,8 @@ gulp.task('default', [ 'clean', 'build', 'server' ], function( done ) {
   
   test( true, [].concat(
     projectFiles.components.main,
+    projectFiles.polyfills,
+    projectFiles.build.modules,
     projectFiles.build.scripts,
     projectFiles.build.tests
   ) );
