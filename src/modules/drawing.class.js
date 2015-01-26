@@ -1,23 +1,41 @@
-// import { Marker, Polygon, Polyline } from './map';
-
-// import { PubSub } from './pubsub.js';
-
+import { emit } from 'pubsub';
+import assert from 'assert';
 
 
 
-class Path extends Array {
+
+class Path {
   constructor( ...points ) {
-    super( ...points );
+    this._points = points;
   }
 
+
+  splice( ...args ) {
+    return this._points.splice( ...args );
+  }
+
+  get length() {
+    return this._points.length;
+  }
+
+
+  indexOf( point ) {
+    assert( point instanceof Point );
+
+    return this._points.indexOf( point );
+  }
+
+
   isValid() {
+    let points = this._points;
+
     return (
       // Path can be empty
-      this.length === 0 ||
+      points.length === 0 ||
 
       // Non-empty Path must start and end with a Node
-      this[ this.length - 1 ] instanceof Node &&
-      this[ 0 ] instanceof Node
+      points[ points.length - 1 ] instanceof Node &&
+      points[ 0 ] instanceof Node
     );
   }
 }
@@ -27,12 +45,18 @@ class Path extends Array {
 
 class Point {
   constructor( x, y ) {
+    assert( typeof x === 'number' );
+    assert( typeof y === 'number' );
+
     this._x = x;
     this._y = y;
   }
 
 
   moveTo( x, y ) {
+    assert( typeof x === 'number' );
+    assert( typeof y === 'number' );
+
     this._x = x;
     this._y = y;
   }
@@ -60,7 +84,7 @@ class Node extends Point {
   }
 
 
-  moveTo({ x, y }) {
+  moveTo( x, y ) {
     super.moveTo( x, y );
 
     emit( Node.event.MOVED, {
@@ -80,8 +104,13 @@ Node.event = {
 
 class Drawing {
   constructor({ color, fill, rigid, points = [] }) {
-    this._path = new Path( points );
+    assert( Array.isArray( points ) );
+    this._path = new Path( ...points );
+    assert( this._path.isValid() );
 
+    assert( typeof color === 'string' );
+    assert( typeof fill === 'boolean' );
+    assert( typeof rigid === 'boolean' );
     this._color = color;
     this._fill = fill;
     this._rigid = rigid;
@@ -92,14 +121,14 @@ class Drawing {
     return this._color;
   }
   set color( value ) {
-    console.assert( typeof value === 'string' );
+    assert( typeof value === 'string' );
 
     this._color = value;
 
     emit( Drawing.event.COLOR_CHANGED, {
       color: value,
       context: this
-    } );
+    });
   }
 
 
@@ -107,14 +136,14 @@ class Drawing {
     return this._fill;
   }
   set fill( value ) {
-    console.assert( typeof value === 'boolean' );
+    assert( typeof value === 'boolean' );
 
     this._fill = value;
 
     emit( Drawing.event.FILL_CHANGED, {
       fill: value,
       context: this
-    } );
+    });
   }
 
 
@@ -122,19 +151,19 @@ class Drawing {
     return this._rigid;
   }
   set rigid( value ) {
-    console.assert( typeof value === 'boolean' );
+    assert( typeof value === 'boolean' );
 
     this._rigid = value;
 
     emit( Drawing.event.RIGID_CHANGED, {
       rigid: value,
       context: this
-    } );
+    });
   }
 
 
   indexOf( point ) {
-    console.assert( point instanceof Point );
+    assert( point instanceof Point );
 
     return this._path.indexOf( point );
   }
@@ -144,7 +173,7 @@ class Drawing {
       end,
       positions = this.nodePositions();
 
-    console.assert( index >= 0 && index < positions.length );
+    assert( index >= 0 && index < positions.length );
 
     if ( index === 0 ) { // First node
       start = positions[ index ]; // Include Node at index in splice
@@ -164,12 +193,12 @@ class Drawing {
 
 
   removePoints({ start, end }) {
-    console.assert( start >= 0 );
-    console.assert( end < this._path.length );
+    assert( start >= 0 );
+    assert( end < this._path.length );
 
     let removedPoints = this._path.splice( start, end );
 
-    console.assert( this._path.isValid() );
+    assert( this._path.isValid() );
 
     emit( Drawing.event.POINTS_REMOVED, {
       start,
@@ -183,12 +212,12 @@ class Drawing {
 
 
   addPoints({ atIndex, points }) {
-    console.assert( atIndex >= 0 && atIndex <= this._path.length );
-    console.assert( Array.isArray( points ) );
+    assert( atIndex >= 0 && atIndex <= this._path.length );
+    assert( Array.isArray( points ) );
 
-    this._path.splice( atIndex, 0, ...path );
+    this._path.splice( atIndex, 0, ...points );
 
-    console.assert( this._path.isValid() );
+    assert( this._path.isValid() );
 
     emit( Drawing.event.POINTS_ADDED, {
       atIndex,

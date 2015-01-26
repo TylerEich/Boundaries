@@ -152,7 +152,6 @@ export default class Color {
 	
 	
 	get hex32() {
-    console.log( 'HEX' );
     const hexArray = this.rgbaArray.map(( val ) => {
       let hexString = '00' + Math.round( val * 0xFF ).toString( 16 );
       return hexString.slice( -2 ); // Pad with leading zero
