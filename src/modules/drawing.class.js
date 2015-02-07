@@ -10,9 +10,36 @@ class Path {
   }
 
 
+  push( ...args ) {
+    return this._points.push( ...args );
+  }
+
+
   splice( ...args ) {
     return this._points.splice( ...args );
   }
+
+
+  filter( cb ) {
+    return this._points.filter( cb );
+  }
+
+
+  every( cb ) {
+    return this._points.every( cb );
+  }
+
+
+  some( cb ) {
+    return this._points.some( cb );
+  }
+
+  atIndex( i ) {
+    assert( i < this._points.length,
+      'Out of bounds' );
+    return this._points[ i ];
+  }
+
 
   get length() {
     return this._points.length;
@@ -102,11 +129,10 @@ Node.event = {
 
 
 
-class Drawing {
+class Drawing extends Path {
   constructor({ color, fill, rigid, points = [] }) {
     assert( Array.isArray( points ) );
-    this._path = new Path( ...points );
-    assert( this._path.isValid() );
+    super( ...points );
 
     assert( typeof color === 'string' );
     assert( typeof fill === 'boolean' );
@@ -114,6 +140,16 @@ class Drawing {
     this._color = color;
     this._fill = fill;
     this._rigid = rigid;
+
+    assert( this.isValid() );
+  }
+
+
+  isValid() {
+    let valid = super.isValid(),
+      rigid = this.rigid ? this.every(( point ) => point instanceof Node ) : true,
+      fill = this.fill ? this.atIndex( 0 ) === this.atIndex( this.length - 1 ) : true;
+      return ( valid && rigid && fill );
   }
 
 
@@ -138,7 +174,22 @@ class Drawing {
   set fill( value ) {
     assert( typeof value === 'boolean' );
 
+    let oldValue = this.fill;
+
     this._fill = value;
+
+    if ( value !== oldValue ) {
+      if ( value && this.atIndex( 0 ) ) {
+        this.addPoints({
+          atIndex: this.length,
+          points: [ this.atIndex( 0 ) ]
+        });
+      } else if ( !value ) {
+        this.removeNode(
+          this.atIndex( this.length - 1 )
+        );
+      }
+    }
 
     emit( Drawing.event.FILL_CHANGED, {
       fill: value,
@@ -153,7 +204,17 @@ class Drawing {
   set rigid( value ) {
     assert( typeof value === 'boolean' );
 
+    let oldValue = this.rigid;
+
     this._rigid = value;
+
+    if ( value && value !== oldValue ) {
+      for ( let i = 0; i < this.length; i++ ) {
+        if ( !( this.atIndex( i ) instanceof Node ) ) {
+          this.splice( i, 1 );
+        }
+      }
+    }
 
     emit( Drawing.event.RIGID_CHANGED, {
       rigid: value,
@@ -162,29 +223,76 @@ class Drawing {
   }
 
 
-  indexOf( point ) {
-    assert( point instanceof Point );
+  nodesAroundNode( node ) {
+    let nodes = this.nodes(),
+      index = nodes.indexOf( node );
 
-    return this._path.indexOf( point );
+    let { start, end, hasFirst, hasLast } = this.nodeIndicesAroundNodeIndex( index );
+
+    return {
+      start: this.atIndex( start ),
+      end: this.atIndex( end ),
+      hasFirst,
+      hasLast
+    };
   }
 
-  removeNodeAtIndex( index ) {
+
+  nodeIndicesAroundNodeIndex( index ) {
     let start,
       end,
+      hasFirst = false,
+      hasLast = false,
       positions = this.nodePositions();
 
     assert( index >= 0 && index < positions.length );
 
-    if ( index === 0 ) { // First node
+    /*
+      Include logic for closed polygons
+      Allow seamless wrapping
+      Splice both ends of array if first or last
+        node is removed
+    */
+
+    if ( index === 0 && !this.fill ) { // First node
       start = positions[ index ]; // Include Node at index in splice
+      hasFirst = true;
+    } else if ( index === 0 && this.fill ) {
+      // Nodes at front and end are identical. Ignore last node
+      assert( positions.length >= 2 );
+      start = positions[ positions.length - 2 ]; // Wrap to exclude Node at -2
     } else {
-      start = positions[ index - 1 ] - 1; // Exclude previous Node from splice
+      start = positions[ index - 1 ]; // Exclude previous Node from splice
     }
 
-    if ( index === positions.length - 1 ) { // Last node
-      end = positions[ index ] + 1; // Include Node at index in splice
+    if ( index === positions.length - 1 && !this.fill ) { // Last node
+      end = positions[ index ]; // Include Node at index in splice
+      hasLast = true;
     } else {
       end = positions[ index + 1 ]; // Exclude next Node from splice
+    }
+
+    return { start, end, hasFirst, hasLast };
+  }
+
+
+  removeNode( node ) {
+    assert( node instanceof Node );
+
+    let indexOnPath = this.indexOf( node ),
+      index = this.nodePositions().indexOf( indexOnPath );
+
+    return this.removeNodeAtIndex( index );
+  }
+
+
+  removeNodeAtIndex( index ) {
+    let { start, end, hasFirst, hasLast } = this.nodeIndicesAroundNodeIndex( index );
+    if ( !hasFirst ) {
+      start++;
+    }
+    if ( hasLast ) {
+      end++;
     }
 
     let removedPoints = this.removePoints({ start, end });
@@ -194,11 +302,32 @@ class Drawing {
 
   removePoints({ start, end }) {
     assert( start >= 0 );
-    assert( end < this._path.length );
+    assert( end <= this.length );
+    assert( start <= end || this.fill );
 
-    let removedPoints = this._path.splice( start, end );
+    let removeLength = 0,
+      removedPoints = [];
 
-    assert( this._path.isValid() );
+    if ( this.fill && start >= end ) {
+      removeLength = this.length - start;
+      
+      assert( removeLength >= 0 );
+
+      removedPoints.push(
+        ...this.splice( start, removeLength )
+      );
+      this.push( this.atIndex( end ) );
+
+      start = 0;
+    }
+
+    removeLength = end - start;
+    removedPoints.push(
+      ...this.splice( start, removeLength )
+    );
+
+    assert( this.isValid(),
+      'Invalid path operation' );
 
     emit( Drawing.event.POINTS_REMOVED, {
       start,
@@ -212,12 +341,15 @@ class Drawing {
 
 
   addPoints({ atIndex, points }) {
-    assert( atIndex >= 0 && atIndex <= this._path.length );
-    assert( Array.isArray( points ) );
+    assert( atIndex >= 0 && atIndex <= this.length,
+      'Out of bounds' );
+    assert( Array.isArray( points ),
+      'points must be an Array' );
 
-    this._path.splice( atIndex, 0, ...points );
+    this.splice( atIndex, 0, ...points );
 
-    assert( this._path.isValid() );
+    assert( this.isValid(),
+      'Invalid path operation' );
 
     emit( Drawing.event.POINTS_ADDED, {
       atIndex,
@@ -227,12 +359,17 @@ class Drawing {
   }
 
 
+  pointAtIndex( index ) {
+    return this.atIndex( index );
+  }
+
+
   nodePositions() {
-    let points = this._path,
+    let points = this,
       positions = [];
 
     for ( let i = 0; i < points.length; i++ ) {
-      let point = points[ i ];
+      let point = points.atIndex( i );
 
       if ( point instanceof Node ) {
         positions.push( i );
@@ -243,8 +380,8 @@ class Drawing {
   }
 
 
-  get nodes() {
-    return this._path.filter( point => point instanceof Node );
+  nodes() {
+    return this.filter(( point ) => point instanceof Node );
   }
 }
 
@@ -259,11 +396,11 @@ Drawing.event = {
 
 
 
-class DrawingCollection extends Array {
+// class DrawingCollection extends Array {
 
-}
-
-
+// }
 
 
-export { Point, Node, Drawing, DrawingCollection };
+
+
+export { Point, Node, Drawing };

@@ -35,11 +35,23 @@ module.exports = function( config ) {
 
     reporters: [
       'mocha',
-      'growl'
+      'growl',
+      'coverage'
     ],
+
+    preprocessors: {
+      'build/scripts/**/*.js': [ 'coverage' ],
+      'build/modules/**/*.js': [ 'coverage' ]
+    },
 
     mochaReporter: {
       output: 'minimal'
+    },
+
+    coverageReporter: {
+      type: 'html',
+      dir: 'coverage/',
+      subdir: '.'
     },
 
     // list of files / patterns to load in the browser

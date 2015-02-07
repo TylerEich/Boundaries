@@ -49,7 +49,7 @@ function fileContents( filePath, file ) {
 }
 function errorHandler( e ) {
   console.error( e );
-  // this.emit( 'end' );
+  this.emit( 'end' );
 }
 
 // Tests
@@ -75,7 +75,8 @@ function clean( glob, done ) {
 
 function build( files, dir, modules ) {
   var options = {
-    modules: 'ignore'
+    modules: 'ignore',
+    experimental: true
   };
   if ( modules ) {
     options.modules = 'system';

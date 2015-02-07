@@ -5,7 +5,7 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 500;
 
 describe( 'DrawingModule', () => {
   var emit, on, off;
-  var Point, Node, Drawing, DrawingCollection;
+  var Point, Node, Drawing;
 
 
 
@@ -19,8 +19,7 @@ describe( 'DrawingModule', () => {
         ({
           Point,
           Node,
-          Drawing,
-          DrawingCollection
+          Drawing
         }) = DrawingModule;
 
         emit = spyOn( PubSubModule, 'emit' ).and.callThrough();
@@ -33,7 +32,7 @@ describe( 'DrawingModule', () => {
         // }) = PubSubModule;
       })
       .then( done )
-      .catch( err => console.error( err ) );
+      .catch( err => console.error( 'ERROR:', err ) );
   });
 
 
@@ -187,7 +186,7 @@ describe( 'DrawingModule', () => {
 
       let newColor = drawing.color = '#ffffff',
         newFill = drawing.fill = true,
-        newRigid = drawing.rigid = true;
+        newRigid = drawing.rigid = false;
     });
 
 
@@ -195,6 +194,11 @@ describe( 'DrawingModule', () => {
       let point = points[ 2 ];
 
       expect( drawing.indexOf( point ) ).toEqual( 2 );
+    });
+
+
+    it("Gets point at index", function() {
+      expect( drawing.pointAtIndex( 2 ) ).toEqual( points[ 2 ] );
     });
 
 
@@ -214,6 +218,11 @@ describe( 'DrawingModule', () => {
     });
 
 
+    it("Gets node positions", function() {
+      expect( drawing.nodePositions() ).toEqual([ 0, 9 ]);
+    });
+
+
     it("Removes points in a valid manner", function() {
       // Remove all points between bounding nodes. Still valid.
       expect( drawing.removePoints.bind( drawing, {
@@ -229,8 +238,83 @@ describe( 'DrawingModule', () => {
     });
 
 
+    it("Removes nodes by reference", function() {
+      let node = points[ 0 ],
+        removedPoints = drawing.removeNode( node );
+
+      expect( drawing.nodePositions() ).toEqual([ 0 ]);
+      expect( removedPoints.length ).toEqual( 9 );
+    });
+
+
     it("Removes points around Node", function() {
-      expect( false ).toEqual( true );
+      let morePoints = generatePoints( 7 ),
+        removedPoints;
+      
+      drawing.addPoints({
+        atIndex: 5,
+        points: morePoints
+      });
+
+      removedPoints = drawing.removeNodeAtIndex( 1 );
+
+      expect( drawing.nodePositions() ).toEqual([ 0, 1, 6 ]);
+      expect( removedPoints.length ).toEqual( 10 );
+
+      drawing.addPoints({
+        atIndex: 1,
+        points: removedPoints
+      });
+
+      removedPoints = drawing.removeNodeAtIndex( 0 );
+
+      expect( drawing.nodePositions() ).toEqual([ 0, 6, 11 ]);
+      expect( removedPoints.length ).toEqual( 5 );
+
+      drawing.addPoints({
+        atIndex: 0,
+        points: removedPoints
+      });
+
+      removedPoints = drawing.removeNodeAtIndex( 3 );
+
+      expect( drawing.nodePositions() ).toEqual([ 0, 5, 11 ]);
+      expect( removedPoints.length ).toEqual( 5 );
+
+      expect( drawing.removeNodeAtIndex.bind( drawing, 3 ) ).toThrow();
+    });
+
+
+    it("Removes first point of polygon properly", function() {
+      let morePoints = generatePoints( 7 );
+      drawing.fill = true;
+
+      drawing.addPoints({
+        atIndex: drawing.length - 1,
+        points: morePoints.slice( 1, -1 )
+      });
+
+      drawing.removeNodeAtIndex( 0 );
+
+      expect( drawing.length ).toEqual( 2 );
+    });
+
+
+    it("Removes single point", function() {
+      drawing.removePoints({
+        start: 0,
+        end: 10
+      });
+
+      drawing.addPoints({
+        atIndex: 0,
+        points: generatePoints( 1 )
+      });
+
+      let removedPoints = drawing.removeNodeAtIndex( 0 );
+
+      expect( drawing.nodePositions() ).toEqual([]);
+      expect( removedPoints.length ).toEqual( 1 );
     });
   });
 });
