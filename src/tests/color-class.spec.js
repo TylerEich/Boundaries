@@ -2,7 +2,7 @@ describe( 'Color', () => {
   let Color;
 
   beforeEach(done => {
-    System.import( 'color' )
+    System.import( 'color-class' )
       .then( $Color => Color = $Color.default )
       .then( done )
       .catch( err => console.error( err ) );

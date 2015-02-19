@@ -1,5 +1,5 @@
 const [ emit, on, off ] = [
-  PubSub.publish.bind( PubSub ),
+  PubSub.publishSync.bind( PubSub ),
   PubSub.subscribe.bind( PubSub ),
   PubSub.unsubscribe.bind( PubSub )
 ];

@@ -12,7 +12,7 @@ describe( 'DrawingModule', () => {
 
   beforeEach(done => {
     Promise.all([
-      System.import( 'drawing' ),
+      System.import( 'drawing-class' ),
       System.import( 'pubsub' )
     ])
       .then(([ DrawingModule, PubSubModule ]) => {
@@ -60,20 +60,8 @@ describe( 'DrawingModule', () => {
     });
 
 
-    it("Changes coordinates properly", function() {
-      let point = new Point( 1, 0 );
-      point.moveTo( 2, 1 );
-
-      expect( point.x ).toEqual( 2 );
-      expect( point.y ).toEqual( 1 );
-    });
-
-
     it("Rejects incorrect input", function() {
       expect( Point.bind( {}, '1', '0' ) ).toThrow();
-
-      let point = new Point( 1, 0 );
-      expect( point.moveTo.bind( point, '1', '0' ) ).toThrow();
     });
   });
 
@@ -137,11 +125,12 @@ describe( 'DrawingModule', () => {
       rigid = false;
 
       drawing = new Drawing({
-        points,
         color,
         fill,
         rigid
       });
+
+      drawing._addPoints({ atIndex: 0, points });
     });
 
 
@@ -164,17 +153,18 @@ describe( 'DrawingModule', () => {
       let resolveColor, resolveFill, resolveRigid;
 
       on( Drawing.event.COLOR_CHANGED, ( msg, data ) => {
-        expect( data.color ).toEqual( newColor );
+        console.log( data );
+        expect( data.color ).toEqual( '#ffffff' );
         resolveColor();
       });
 
       on( Drawing.event.FILL_CHANGED, ( msg, data ) => {
-        expect( data.fill ).toEqual( newFill );
+        expect( data.fill ).toEqual( true );
         resolveFill();
       });
 
       on( Drawing.event.RIGID_CHANGED, ( msg, data ) => {
-        expect( data.rigid ).toEqual( newRigid );
+        expect( data.rigid ).toEqual( false );
         resolveRigid();
       });
 
@@ -184,9 +174,9 @@ describe( 'DrawingModule', () => {
         new Promise(( resolve ) => resolveRigid = resolve )
       ]).then( done );
 
-      let newColor = drawing.color = '#ffffff',
-        newFill = drawing.fill = true,
-        newRigid = drawing.rigid = false;
+      drawing.color = '#ffffff';
+      drawing.fill = true;
+      drawing.rigid = false;
     });
 
 
@@ -202,39 +192,8 @@ describe( 'DrawingModule', () => {
     });
 
 
-    it("Adds points in a valid manner", function() {
-      let morePoints = generatePoints( 5 );
-
-      expect( drawing.addPoints.bind( drawing, {
-        atIndex: 5,
-        points: morePoints
-      }) ).not.toThrow();
-      expect( drawing.indexOf( morePoints[ 0 ] ) ).toEqual( 5 );
-
-      expect( drawing.addPoints.bind( drawing, {
-        atIndex: -1,
-        points: morePoints
-      }) ).toThrow();
-    });
-
-
     it("Gets node positions", function() {
       expect( drawing.nodePositions() ).toEqual([ 0, 9 ]);
-    });
-
-
-    it("Removes points in a valid manner", function() {
-      // Remove all points between bounding nodes. Still valid.
-      expect( drawing.removePoints.bind( drawing, {
-        start: 1,
-        end: 9
-      }) ).not.toThrow();
-
-      // Bounding node at index 0. Removal invalidates path.
-      expect( drawing.removePoints.bind( drawing, {
-        start: 0,
-        end: 4
-      }) ).toThrow();
     });
 
 
@@ -251,7 +210,7 @@ describe( 'DrawingModule', () => {
       let morePoints = generatePoints( 7 ),
         removedPoints;
       
-      drawing.addPoints({
+      drawing._addPoints({
         atIndex: 5,
         points: morePoints
       });
@@ -261,7 +220,7 @@ describe( 'DrawingModule', () => {
       expect( drawing.nodePositions() ).toEqual([ 0, 1, 6 ]);
       expect( removedPoints.length ).toEqual( 10 );
 
-      drawing.addPoints({
+      drawing._addPoints({
         atIndex: 1,
         points: removedPoints
       });
@@ -271,7 +230,7 @@ describe( 'DrawingModule', () => {
       expect( drawing.nodePositions() ).toEqual([ 0, 6, 11 ]);
       expect( removedPoints.length ).toEqual( 5 );
 
-      drawing.addPoints({
+      drawing._addPoints({
         atIndex: 0,
         points: removedPoints
       });
@@ -289,7 +248,7 @@ describe( 'DrawingModule', () => {
       let morePoints = generatePoints( 7 );
       drawing.fill = true;
 
-      drawing.addPoints({
+      drawing._addPoints({
         atIndex: drawing.length - 1,
         points: morePoints.slice( 1, -1 )
       });
@@ -301,12 +260,12 @@ describe( 'DrawingModule', () => {
 
 
     it("Removes single point", function() {
-      drawing.removePoints({
+      drawing._removePoints({
         start: 0,
         end: 10
       });
 
-      drawing.addPoints({
+      drawing._addPoints({
         atIndex: 0,
         points: generatePoints( 1 )
       });

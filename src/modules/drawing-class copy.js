@@ -1,5 +1,5 @@
-import { emit } from 'pubsub';
-import assert from 'assert';
+import { emit } from './pubsub';
+import assert from './assert';
 
 
 
@@ -22,6 +22,11 @@ class Path {
 
   filter( cb ) {
     return this._points.filter( cb );
+  }
+
+
+  find( cb ) {
+    return this._points.find( cb );
   }
 
 
@@ -148,7 +153,7 @@ class Drawing extends Path {
   isValid() {
     let valid = super.isValid(),
       rigid = this.rigid ? this.every(( point ) => point instanceof Node ) : true,
-      fill = this.fill ? this.atIndex( 0 ) === this.atIndex( this.length - 1 ) : true;
+      fill = this.fill ? this.length === 0 || this.atIndex( 0 ) === this.atIndex( this.length - 1 ) : true;
       return ( valid && rigid && fill );
   }
 
@@ -227,7 +232,7 @@ class Drawing extends Path {
     let nodes = this.nodes(),
       index = nodes.indexOf( node );
 
-    let { start, end, hasFirst, hasLast } = this.nodeIndicesAroundNodeIndex( index );
+    let { start, end, hasFirst, hasLast } = this._nodeIndicesAroundNodeIndex( index );
 
     return {
       start: this.atIndex( start ),
@@ -238,7 +243,7 @@ class Drawing extends Path {
   }
 
 
-  nodeIndicesAroundNodeIndex( index ) {
+  _nodeIndicesAroundNodeIndex( index ) {
     let start,
       end,
       hasFirst = false,
@@ -246,13 +251,6 @@ class Drawing extends Path {
       positions = this.nodePositions();
 
     assert( index >= 0 && index < positions.length );
-
-    /*
-      Include logic for closed polygons
-      Allow seamless wrapping
-      Splice both ends of array if first or last
-        node is removed
-    */
 
     if ( index === 0 && !this.fill ) { // First node
       start = positions[ index ]; // Include Node at index in splice
@@ -276,6 +274,57 @@ class Drawing extends Path {
   }
 
 
+  removePointsBetweenNodes( node1, node2 ) {
+    assert( node1 instanceof Node );
+    assert( node2 instanceof Node );
+    assert( this.indexOf( node1 ) > -1,
+      'Node not found' );
+    assert( this.indexOf( node2 ) > -1,
+      'Node not found' );
+
+    if ( node1 === node2 ) return;
+
+    let i1 = this.indexOf( node1 ) + 1,
+      i2 = this.indexOf( node2 ),
+      [ start, end ] =
+        [ Math.min( i1, i2 ), Math.max( i1, i2 ) ];
+
+    return this._removePoints({ start, end });
+  }
+
+
+  addPointsAfterNode( node, points ) {
+    assert( node instanceof Node );
+    assert( Array.isArray( points ) );
+    assert( this.indexOf( node ) > -1,
+      'Node not found' );
+
+    let atIndex = this.indexOf( node ) + 1;
+
+    return this._addPoints({ atIndex, points });
+  }
+
+
+  addNode( node, atIndex = this.length ) {
+    assert( node instanceof Node );
+
+    assert( Number.isInteger( atIndex ) );
+    assert( atIndex >= 0 && atIndex <= this.length );
+
+    let points = [ node ];
+    if ( this.length === 0 && this.fill ) {
+      points.push( node );
+    } else if ( this.fill && atIndex === this.length ) {
+      atIndex--;
+    }
+
+    this._addPoints({
+      atIndex,
+      points
+    });
+  }
+
+
   removeNode( node ) {
     assert( node instanceof Node );
 
@@ -295,12 +344,12 @@ class Drawing extends Path {
       end++;
     }
 
-    let removedPoints = this.removePoints({ start, end });
+    let removedPoints = this._removePoints({ start, end });
     return removedPoints;
   }
 
 
-  removePoints({ start, end }) {
+  _removePoints({ start, end }) {
     assert( start >= 0 );
     assert( end <= this.length );
     assert( start <= end || this.fill );
@@ -308,7 +357,7 @@ class Drawing extends Path {
     let removeLength = 0,
       removedPoints = [];
 
-    if ( this.fill && start >= end ) {
+    if ( this.fill && start > end ) {
       removeLength = this.length - start;
       
       assert( removeLength >= 0 );
@@ -340,13 +389,25 @@ class Drawing extends Path {
   }
 
 
-  addPoints({ atIndex, points }) {
+  _addPoints({ atIndex, points }) {
     assert( atIndex >= 0 && atIndex <= this.length,
       'Out of bounds' );
     assert( Array.isArray( points ),
       'points must be an Array' );
 
     this.splice( atIndex, 0, ...points );
+
+    // if ( this.fill && atIndex === 0 ) {
+    //   if ( this.length === 1 && this.atIndex( 0 ) instanceof Node ) {
+    //     this.push( this.atIndex( 0 ) );
+    //   } else if ( this.length > 1 ) {
+    //     this.removePoints({
+    //       start: this.length - 1,
+    //       end: this.length
+    //     });
+    //     this.push( this.atIndex( 0 ) );
+    //   }
+    // }
 
     assert( this.isValid(),
       'Invalid path operation' );
@@ -380,6 +441,11 @@ class Drawing extends Path {
   }
 
 
+  points() {
+    return this.filter(() => true );
+  }
+
+
   nodes() {
     return this.filter(( point ) => point instanceof Node );
   }
@@ -396,11 +462,185 @@ Drawing.event = {
 
 
 
-// class DrawingCollection extends Array {
+class DrawingCollection {
+  constructor() {
+    this._drawings = [];
+    this._activeDrawingIndex = -1;
+  }
 
-// }
+
+  get length() {
+    return this._drawings.length;
+  }
+
+
+  get activeDrawingIndex() {
+    return this._activeDrawingIndex;
+  }
+  set activeDrawingIndex( value ) {
+    assert( value >= 0 && value < this._drawings.length,
+      'Out of bounds' );
+
+    this._activeDrawingIndex = value;    
+  }
+
+
+  get activeDrawing() {
+    assert( this.activeDrawingIndex >= 0 &&
+      this.activeDrawingIndex < this._drawings.length,
+      'Out of bounds' );
+    return this._drawings[ this.activeDrawingIndex ];
+  }
+  set activeDrawing( drawing ) {
+    let drawingIndex = this._drawings.indexOf( drawing );
+    assert( drawingIndex > -1,
+      'Drawing not found' );
+
+    this.activeDrawingIndex = drawingIndex;
+  }
+
+
+  find( cb ) {
+    return this._drawings.find( cb );
+  }
+
+
+  addDrawing({ atIndex, drawing }) {
+    assert( typeof atIndex === 'number' );
+    assert( drawing instanceof Drawing );
+
+    emit( DrawingCollection.event.DRAWING_ADDED, {
+      atIndex,
+      drawing,
+      context: this
+    });
+
+    return this._drawings.splice( atIndex, 0, drawing );
+  };
+
+
+  removeDrawing( drawing ) {
+    assert( drawing instanceof Drawing );
+
+    let index = this._drawings.indexOf( drawing );
+    assert( index > -1,
+      'Drawing not found' );
+
+    return removeDrawingAtIndex( index );
+  }
+
+
+  removeDrawingAtIndex( index ) {
+    assert( index > 0 && index < this._drawings.length,
+      'Out of bounds' );
+
+    let removedDrawing = drawings.splice( index, 1 )[ 0 ];
+
+    emit( DrawingCollection.event.DRAWING_REMOVED, {
+      atIndex: index,
+      drawing: removedDrawing,
+      context: this
+    });
+  }
+
+
+  toGeoJson() {
+    let geoJson = {
+      type: 'FeatureCollection'
+    };
+
+    geoJson.features = this._drawings.map(
+      ( drawing ) => {
+        let feature = {
+          type: 'Feature'
+        };
+        
+        let coordinates = drawing._points.map(
+          ( point ) => {
+            let { x, y } = point;
+            return [ x, y ];
+          }
+        );
+        
+        feature.geometry = {
+          type: drawing.fill ? 'Polygon' : 'LineString',
+          coordinates: drawing.fill ? [ coordinates ] : coordinates
+        };
+        
+        let { color, rigid, fill } = drawing;
+        feature.properties = { color, rigid, fill };
+        feature.properties.nodePositions = drawing.nodePositions();
+        
+        return feature;
+      }
+    );
+    
+    return geoJson;
+  }
+
+
+  static fromGeoJson( geoJson ) {
+    assert( typeof geoJson === 'object' );
+    let drawings = new DrawingCollection();
+
+    assert( Array.isArray( geoJson.features ) );
+    geoJson.features.forEach(
+      ( feature, i ) => {
+        assert( typeof feature.properties === 'object' );
+        assert( typeof feature.geometry === 'object' )
+
+        let { color, rigid, fill, nodePositions } = feature.properties;
+        assert( typeof color === 'string' );
+        assert( typeof rigid === 'boolean' );
+        assert( typeof fill === 'boolean' );
+        assert( Array.isArray( nodePositions ) );
+
+        let drawing = new Drawing({ color, rigid, fill });
+        
+        drawings.addDrawings({
+          atIndex: -1,
+          drawing
+        });
+              
+        let coordinates;
+        if ( fill ) {
+          coordinates = feature.geometry.coordinates[ 0 ];
+        } else {
+          coordinates = feature.geometry.coordinates;
+        }
+        assert( Array.isArray( coordinates ) );
+
+        let points = coordinates.map(
+          ( coordinate, i ) => {
+            let [ x, y ] = coordinate;
+
+            if ( nodePositions.indexOf( i ) === -1 ) {
+              return new Point( x, y );
+            } else {
+              return new Node( x, y );
+            }
+          }
+        );
+
+        drawing.addPoints({
+          atIndex: 0,
+          points
+        });
+
+        return drawing;
+      }
+    );
+    
+    return drawings;
+  }
+}
+
+DrawingCollection.event = {
+  DRAWING_ADDED: 'DrawingCollection.drawingAdded',
+  DRAWING_REMOVED: 'DrawingCollection.drawingRemoved'
+};
 
 
 
 
-export { Point, Node, Drawing };
+export { Point, Node, Drawing, DrawingCollection };

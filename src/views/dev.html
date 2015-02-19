@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Boundaries</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  </head>
+  <body>
+    <svg id="spritesheet" style="display: none;">
+      <symbol id="flex-nofill" viewBox="0 0 64 64">
+        <path d="m12,12c0,0 48,0 20,20c-20,20 20,20 20,20" fill="none" stroke-opacity="0.5" />
+        <circle r="4" cx="12" cy="12" />
+        <circle r="4" cx="52" cy="52" />
+      </symbol>
+      <symbol id="rigid-nofill" viewBox="0 0 64 64">
+        <line x1="12" y1="12" x2="52" y2="52" stroke-opacity="0.5"/>
+        <circle r="4" cx="12" cy="12" />
+        <circle r="4" cx="52" cy="52" />
+      </symbol>
+      <symbol id="flex-fill" viewBox="0 0 64 64">
+        <path d="M 52,50 C 47.000001,59 42,50 32.000001,50 22.000001,50 17,59 12,50 6.9999998,41 17,41 22,32 27,23 22,14 32,14 42,14 37,23 42,31.999999 47,41 57,41 52,50 z" stroke="none" fill-opacity="0.5" />
+        <circle r="4" cx="32" cy="14" />
+        <circle r="4" cx="52" cy="50" />
+        <circle r="4" cx="12" cy="50" />
+      </symbol>
+      <symbol id="rigid-fill" viewBox="0 0 64 64">
+        <polygon points="32,14 52,50 12,50" stroke="none" fill-opacity="0.5" />
+        <circle r="4" cx="32" cy="14" />
+        <circle r="4" cx="52" cy="50" />
+        <circle r="4" cx="12" cy="50" />
+      </symbol>
+    </svg>
+
+<!--     <div id="buttons">
+      <button onclick="PubSub.publish( 'Editor.add' )">Add</button>
+    </div>
+ -->
+    <main id="map_canvas">
+    </main>
+
+    <!-- inject:css -->
+    <link rel="stylesheet" href="/build/styles/core.min.css">
+    <link rel="stylesheet" href="/build/styles/critical.min.css">
+    <link rel="stylesheet" href="/build/styles/header-footer.min.css">
+    <link rel="stylesheet" href="/build/styles/main.min.css">
+    <!-- endinject -->
+    
+    <script defer src="//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js"></script>
+    
+    <script src="//maps.googleapis.com/maps/api/js?libraries=geometry,places&sensor=false"></script>
+    <!-- script defer src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script-->
+        
+<!--     <script defer src="/bower_components/angular/angular.js"></script>
+    <script defer src="/bower_components/angular-animate/angular-animate.js"></script>
+    <script defer src="/bower_components/angular-mocks/angular-mocks.js"></script>
+    <script defer src="/bower_components/angular-resource/angular-resource.js"></script>
+    <script defer src="/bower_components/angular-route/angular-route.js"></script>
+    <script defer src="/bower_components/angular-sanitize/angular-sanitize.js"></script>
+    <script defer src="/bower_components/angular-touch/angular-touch.js"></script>
+    <script defer src="/bower_components/angular-ui-map/ui-map.js"></script>
+    <script defer src="/bower_components/angular-ui-utils/ui-utils.js"></script>
+    <script defer src="/bower_components/ngstorage/ngStorage.js"></script>
+ -->
+    <script defer src="/bower_components/pubsub-js/src/pubsub.js"></script>
+    <script defer src="/bundle.js"></script>
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
+     <!--script>
+       (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+       (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+       m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+       })(window,document,'script','http://www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-49860512-1');
+       ga('send', 'pageview');
+    </script-->
+</body>
+</html>
