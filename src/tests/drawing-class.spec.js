@@ -244,6 +244,22 @@ describe( 'DrawingModule', () => {
     });
 
 
+    it("Provides nodesAroundNode", function() {
+      let morePoints = generatePoints( 7 );
+
+      drawing._addPoints({
+        atIndex: 5,
+        points: morePoints
+      });
+
+      let nodes = drawing.nodes(),
+        nodesAroundNode = drawing.nodesAroundNode( nodes[ 1 ] );
+
+      expect( nodesAroundNode.start ).toBe( nodes[ 0 ] );
+      expect( nodesAroundNode.end ).toBe( nodes[ 2 ] );
+    });
+
+
     it("Removes first point of polygon properly", function() {
       let morePoints = generatePoints( 7 );
       drawing.fill = true;

@@ -34,6 +34,8 @@ var gulp = require( 'gulp' ),
   del = require( 'del' ),
   openUrl = require( 'gulp-open' ),
   karmaServer = require( 'karma' ).server,
+  browserify = require( 'browserify' ),
+  watchify = require( 'watchify' ),
   pkg = require( './package.json' );
 
 
@@ -350,6 +352,8 @@ gulp.task( 'default', [ 'build', 'server' ], function() {
     gulp.src( file.path )
       .pipe( connect.reload() );
   });
+
+  // watchify( browserify( './src/modules/main.js', watchify.args ) );
 
   test( true, [].concat(
     projectFiles.components.main,

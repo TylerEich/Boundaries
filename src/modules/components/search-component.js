@@ -1,4 +1,4 @@
-import { search, loadResult } from './services/search-service';
+import { search, loadResult } from '../services/search-service';
 
 'use strict';
 
@@ -8,7 +8,6 @@ angular.module( 'bndry' )
 
   };
 });
-
 
 
 
@@ -49,9 +48,9 @@ class SearchComponent {
 
   actionResult( result ) {
     if ( result.bounds ) {
-      map.bounds = result.bounds;
+      mapCanvas.setBounds( result.bounds );
     } else if ( result.location ) {
-      map.center = result.location;
+      mapCanvas.setCenter( result.location );
     }
   }
 }

@@ -26,24 +26,24 @@ class MapCanvas extends google.maps.Map {
   }
 
 
-  get center() {
-    return this.getCenter();
-  }
-  set center( latLng ) {
-    assert( latLng instanceof LatLng,
-      'Center must be a LatLng' );
-    this.setCenter( latLng );
-  }
+  // get center() {
+  //   return super.getCenter();
+  // }
+  // set center( latLng ) {
+  //   assert( latLng instanceof LatLng,
+  //     'Center must be a LatLng' );
+  //   super.setCenter( latLng );
+  // }
 
 
-  get zoom() {
-    return this.getZoom();
-  }
-  set zoom( value ) {
-    assert( typeof value === 'number',
-      'Zoom must be a number' );
-    this.setZoom( value );
-  }
+  // get zoom() {
+  //   return super.getZoom();
+  // }
+  // set zoom( value ) {
+  //   assert( typeof value === 'number',
+  //     'Zoom must be a number' );
+  //   super.setZoom( value );
+  // }
 
 
   addMarker({ atIndex, marker }) {

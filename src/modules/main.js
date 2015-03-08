@@ -8,6 +8,7 @@ mapView({
     lat: 41.123728,
     lng: -84.864721
   },
-  zoom: 17
+  zoom: 17,
+  disableDefaultUI: true
 });
 editorCtrl();

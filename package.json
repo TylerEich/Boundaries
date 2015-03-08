@@ -10,7 +10,7 @@
   "devDependencies": {
     "6to5ify": "^4.1.0",
     "bower": "^1.3.12",
-    "browserify": "^8.1.3",
+    "browserify": "^9.0.3",
     "cdnjs-cdn-data": "^0.1.1",
     "del": "^1.1.1",
     "google-cdn-data": "^0.1.6",
@@ -47,7 +47,8 @@
     "karma-jasmine": "^0.2.2",
     "karma-mocha-reporter": "^0.3.1",
     "karma-ng-scenario": "~0.1.0",
-    "karma-phantomjs-launcher": "~0.1.4"
+    "karma-phantomjs-launcher": "~0.1.4",
+    "watchify": "^2.4.0"
   },
   "engines": {
     "node": ">=0.10.0"

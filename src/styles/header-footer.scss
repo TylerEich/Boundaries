@@ -1,5 +1,608 @@
 @import 'variables';
 
+
+
+
+
+body {
+  max-width: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0,0,0,0.5);
+    // transform: scale( 1 );
+  }
+  13% {
+    // transform: scale( 0.8 );
+  }
+  25% {
+    // box-shadow: 0 0 0 0 rgba(0,0,0,0.5);
+  }
+  50% {
+    // transform: scale( 1 );
+  }
+  100% {
+    // transform: 1;
+    box-shadow: 0 0 0rem 1rem rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes smoosh {
+  0% {
+    transform: scale( 1 );
+  }
+  38% {
+    transform: scale( 0.95 ) translateY( 0.4rem );
+    // box-shadow: inset 0 0.4rem 0 -0.8rem rgba(0,0,0,0.5), inset 0 -0.4rem 0 -0.8rem rgba(0,0,0,0.5);
+  }
+  100% {
+    transform: scale( 1 );
+    // box-shadow: inset 0 0.4rem 0 0rem rgba(0,0,0,0), inset 0 -0.4rem 0 0rem rgba(0,0,0,0);
+  }
+}
+
+input,
+textarea {
+  -webkit-appearance: none;
+}
+
+#content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  pointer-events: none;
+
+  transition: $transition;
+  transition-duration: 500ms;
+
+  & > * {
+    pointer-events: auto;
+  }
+
+  &.ng-hide {
+    display: block !important;
+    transform: translateX( -18rem );
+  }
+}
+
+.primary {
+  width: 4rem;
+  height: 4rem;
+  margin: 0;
+  padding: 1rem;
+
+  background: #0080ff;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.5);
+  &:hover {
+    background: darken(#0080ff, 10%);
+  }
+
+  z-index: 2;
+}
+.primary svg {
+  stroke-linecap: miter;
+  // width: 2rem;
+  // height: 2rem;
+}
+
+.secondary,
+.secondary:hover {
+  background: none;
+  border: none;
+}
+
+#settings {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 0.5rem;
+  margin: 0;
+  // margin-left: -1rem;
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+
+  svg * {
+    fill: #b0b0b0;
+    stroke: #a0a0a0;
+    stroke-width: 2;
+  }
+}
+
+#card {
+  position: absolute;
+  bottom: 50%;
+  right: 0;
+  padding: 0.25rem;
+  padding-right: 1.25rem;
+  margin: 0;
+  margin-bottom: -1.5rem;
+  margin-right: -1rem;
+  min-width: 2rem;
+  width: 4rem;
+  height: 3rem;
+
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+
+  border: none;
+
+  &:hover {
+    background: white;
+    transform: translateX( -0.5rem );
+  }
+
+  &.active,
+  &:active {
+    background: white;
+  }
+
+  svg {
+    stroke: #808080;
+  }
+}
+// #card-options {
+//   padding: 0;
+//   font: 15pt Helvetica;
+//   position: absolute;
+//   height: 3.75in;
+//   width: 5.75in;
+//   bottom: 1rem;
+//   left: 1rem;
+
+//   transform: translateX(0);
+
+//   &.ng-hide {
+//     transform: translateX(-100%);
+//   }
+
+//   input,
+//   textarea {
+//     font-size: 1rem;
+//     position: absolute;
+//     margin: 0;
+//     padding: 0;
+//     resize: none;
+//     border: 0;
+//     outline: none;
+//     border: 1px solid whitesmoke;
+//     line-height: 1em;
+//     border-radius: 0.2rem;
+
+//     transition: $transition;
+
+//     &:focus {
+//       border: 1px solid #0080ff;
+//     }
+//   }
+
+//   textarea {
+//     text-align: center;
+//   }
+// }
+
+// #locality {
+//   left: 0.94in;
+//   top: 0.5in;
+//   width: 2.75in;
+//   height: 0.25in;
+// }
+
+// #number {
+//   left: 4.38in;
+//   top: 0.5in;
+//   width: 0.94in;
+//   height: 0.25in;
+// }
+
+// #notes {
+//   top: 1in;
+//   left: 0.25in;
+//   width: 5.25in;
+//   height: 1in;
+// }
+
+// #colors {
+//   position: absolute;
+//   display: flex;
+//   flex-direction: column;
+//   left: 0.825in;
+//   top: 2in;
+//   width: 4in;
+//   height: 1in;
+//   font-weight: bold;
+
+//   div {
+//     flex-grow: 1;
+//     padding: 0.0625in;
+//     margin: 0;
+//   }
+//   input {
+//     position: absolute;
+//     margin: 0;
+//   }
+// }
+
+// .color-label {
+//   left: 0;
+//   width: 1.25in;
+//   margin-right: 0.25rem;
+//   font-weight: bold;
+//   text-align: right;
+// }
+// .color-desc {
+//   right: 0;
+//   width: 2.5in;
+// }
+#card-options {
+  padding: 1rem;
+  font: inherit;
+  position: absolute;
+  overflow: scroll;
+  height: 100%;
+  width: 18rem;
+  bottom: 0;
+  right: 0;
+
+  transition: $transition;
+  transition-duration: 500ms;
+  transform: translateX(0);
+
+  &.ng-hide {
+    transform: translateX(100%);
+  }
+
+  label {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #c0c0c0;
+  }
+
+  input,
+  textarea {
+    font-size: 1rem;
+    // position: absolute;
+    width: 100%;
+    margin: 0;
+    margin-bottom: 1rem;
+    padding: 0;
+    resize: none;
+    border: 0;
+    outline: none;
+    border: 1px solid whitesmoke;
+    line-height: 1em;
+    border-radius: 0.2rem;
+
+    transition: $transition;
+
+    &:focus {
+      border: 1px solid #0080ff;
+    }
+  }
+
+  input {
+    height: 2rem;
+    padding: 0.5rem;
+  }
+
+  textarea {
+    text-align: center;
+  }
+}
+
+#locality {
+  left: 0.94in;
+  top: 0.5in;
+  width: 2.75in;
+  height: 0.25in;
+}
+
+#number {
+  left: 4.38in;
+  top: 0.5in;
+  width: 0.94in;
+  height: 0.25in;
+}
+
+#notes {
+  top: 1in;
+  left: 0.25in;
+  width: 5.25in;
+  height: 1in;
+}
+
+#colors {
+  // display: flex;
+  // flex-direction: column;
+  font-weight: bold;
+
+  div {
+    // flex-grow: 1;
+    padding: 0.25rem 0;
+    padding-left: 1rem;
+    margin: 0;
+  }
+  input {
+    // position: absolute;
+    margin: 0;
+  }
+}
+
+.color-label {
+  left: 0;
+  width: 1.25in;
+  margin-left: 0.5rem;
+  font-weight: bold;
+  // text-align: right;
+}
+.color-desc {
+  right: 0;
+  width: 2.5in;
+}
+
+
+
+#add {
+  position: absolute;
+  bottom: 1rem;
+  right: 0.5rem;
+  margin: 0;
+}
+#add.active {
+  // animation: smoosh 500ms cubic-bezier(0.23, 1, 0.32, 1);
+  transform: translateX( 150% );
+  // transition-timing-function: cubic-bezier(0.23, 0, 0.32, 0);
+  transition-duration: 300ms;
+}
+
+#drawing-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+
+  position: absolute;
+  bottom: 1rem;
+  right: -1rem;
+  height: 9rem;
+  width: 19rem;
+  padding: 0.5rem;
+  padding-right: 6rem;
+
+  overflow: hidden;
+  transition: $transition;
+  transition-duration: 500ms;
+  transform: translateX( 0 );
+
+  z-index: 1;
+
+  &.ng-hide {
+    display: flex !important;
+    visibility: hidden;
+    transform: translateX( 100% );
+    // transition-timing-function: cubic-bezier(0.23, 0, 0.32, 0);
+  }
+
+  // .open {
+  //   position: absolute;
+  //   left: 0.25rem;
+  //   top: 3rem;
+  //   min-width: 0.25rem;
+  //   padding: 0;
+  //   background: #c0c0c0;
+  //   border: 0;
+  // }
+  hr {
+    position: absolute;
+    right: 5.25rem;
+    top: 1.5rem;
+    height: 5rem;
+    width: 1px;
+    background: #e0e0e0;
+    border: 0;
+  }
+  .close {
+    position: absolute;
+    right: 1.5rem;
+    top: 3rem;
+    border-radius: 50%;
+    background: red;
+    margin: 0;
+  }
+}
+
+#red {
+  background: red;
+}
+#green {
+  background: #00c000;
+}
+#blue {
+  background: blue;
+}
+
+#drawing-options input[type=radio] {
+  flex-basis: 3rem;
+  flex-shrink: 0;
+
+  height: 3rem;
+  width: 3rem;
+  margin: 0.5rem;
+  border-radius: 50%;
+  border: 0.4rem solid #e0e0e0;
+
+  transition: $transition;
+  outline: none;
+  z-index: 2;
+}
+#drawing-options input[type=radio]:checked {
+  // transform: scale( 1.5 );
+  border: 0.4rem solid rgba(0,0,0,0.5);
+  z-index: 3;
+  animation: ripple 830ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+#drawing-options input[type=checkbox] {
+  width: 3rem;
+  height: 3rem;
+  margin: 0.5rem 1.5rem;
+  border: 0.2rem solid #e0e0e0;
+  border-radius: 0.4rem;
+  transition: $transition;
+  outline: none;
+}
+#drawing-options input[type=checkbox]:checked {
+  border: 0.2rem solid rgba(0,0,0,0.5);
+  background: #e0e0e0;
+  animation: ripple 830ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+#toolbar {
+  position: absolute;
+  display: flex;
+  flex-basis: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 0.5rem;
+  // height: 3rem;
+  pointer-events: none;
+
+  background: transparent;
+  // box-shadow: 0 0.4rem 0.8rem rgba(0,0,0,0.5);
+  // border-radius: 0.2rem;
+}
+
+#toolbar * {
+  pointer-events: auto;
+}
+
+.paper {
+  background: white;
+  border-radius: 0.2rem;
+  padding: 0.5rem;
+  margin: 0;
+  box-shadow: 0 0.1rem 0.2rem rgba(0,0,0,0.5), inset 0 0 0 1px whitesmoke;
+}
+
+#options {
+  background: white;
+  flex-grow: 0;
+
+  border: none;
+  color: #c0c0c0;
+}
+
+#search-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  // padding-left: 1rem;
+}
+#search-input {
+  margin: 0;
+  flex-shrink: 0;
+  // flex-basis: 100%;
+
+  height: 3rem;
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+
+  border: 1px solid transparent;
+  outline: none;
+
+  z-index: 3;
+
+  transition: $transition;
+}
+#search-input:focus {
+  // border-bottom-left-radius: 0;
+  // border-bottom-right-radius: 0;
+
+  border: 1px solid rgb(0,128,255);
+  // box-shadow: 0 0.8rem 1.6rem rgba(0,0,0,0.5);
+  // transform: translateY( -0.25rem );
+  // border-left: 0;
+  // border-right: 0;
+  // background: #efefef;
+  animation: smoosh 500ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+#search-results {
+  list-style: none;
+  padding: 0;
+  padding-left: 1rem;
+
+  transition: $transition;
+  transition-duration: 500ms;
+  transform-origin: top center;
+
+  &.ng-hide-remove {
+    // max-height: 10rem;
+    transform: scaleY( 1 ) translateY( 0 );
+    // opacity: 1;
+  }
+  &.ng-hide {
+    // max-height: 0.001rem;
+    transform: scaleY( 0.2 ) translateY( -1rem );
+    opacity: 0;
+  }
+}
+.result {
+  height: 2.5rem;
+  padding: 0;
+  padding-right: 0.5rem;
+  font-weight: 300;
+  line-height: 2.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+.result:last-of-type {
+  // border-bottom: none;
+  margin-bottom: 0.25rem;
+}
+
+#undo-redo {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  bottom: 1rem;
+  left: 50%;
+  margin-left: -5rem;
+  height: 3rem;
+  width: 10rem;
+}
+
+#undo-redo .secondary {
+  flex-basis: 2rem;
+  flex-grow: 0;
+  background: none;
+  margin: 0;
+  border: 0;
+  color: #e0e0e0;
+  height: 2rem;
+
+  svg * {
+    stroke: #808080;
+    fill: #808080;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
 @media (orientation: landscape) and (min-width: 50rem) {
 	header, footer {
 		width: 20rem;

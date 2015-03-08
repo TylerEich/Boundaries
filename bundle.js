@@ -2358,6 +2358,14 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 var emit = require("./pubsub").emit;
 var assert = _interopRequire(require("./assert"));
 
+
+
+
+
+
+/**
+  Path should `extend Array`, but browsers don't support that yet
+**/
 var Path = (function () {
   function Path() {
     for (var _len = arguments.length, points = Array(_len), _key = 0; _key < _len; _key++) {
@@ -2580,9 +2588,6 @@ var Drawing = (function (Path) {
       },
       set: function (value) {
         assert(typeof value === "string");
-
-        console.log(value);
-
         this._color = value;
 
         emit(Drawing.event.COLOR_CHANGED, {
@@ -3495,7 +3500,8 @@ mapView({
     lat: 41.123728,
     lng: -84.864721
   },
-  zoom: 17
+  zoom: 17,
+  disableDefaultUI: true
 });
 editorCtrl();
 
@@ -3552,6 +3558,28 @@ var MapCanvas = (function (_google$maps$Map) {
 
   _prototypeProperties(MapCanvas, null, {
     addMarker: {
+
+
+      // get center() {
+      //   return super.getCenter();
+      // }
+      // set center( latLng ) {
+      //   assert( latLng instanceof LatLng,
+      //     'Center must be a LatLng' );
+      //   super.setCenter( latLng );
+      // }
+
+
+      // get zoom() {
+      //   return super.getZoom();
+      // }
+      // set zoom( value ) {
+      //   assert( typeof value === 'number',
+      //     'Zoom must be a number' );
+      //   super.setZoom( value );
+      // }
+
+
       value: function addMarker(_ref) {
         var atIndex = _ref.atIndex;
         var marker = _ref.marker;
@@ -3899,7 +3927,6 @@ var _pubsub = require("./pubsub");
 
 var emit = _pubsub.emit;
 var on = _pubsub.on;
-var off = _pubsub.off;
 var _mapClass = require("./map-class");
 
 var MapCanvas = _mapClass.MapCanvas;
@@ -4348,27 +4375,6 @@ exports["default"] = function (options) {
       node: nodeForMarker(context)
     });
   });
-
-
-
-
-  // function renderDrawing( drawing ) {
-  //   drawing.forEach(( point ) => {
-
-  //   })
-  // }
-
-
-  // function unmountDrawing( drawing ) {
-
-  // }
-
-
-
-
-  // function renderGeoJson() {
-  //   mapView.data.
-  // }
 };
 
 Object.defineProperty(exports, "__esModule", {

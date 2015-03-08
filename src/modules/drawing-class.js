@@ -4,6 +4,9 @@ import assert from './assert';
 
 
 
+/**
+  Path should `extend Array`, but browsers don't support that yet
+**/
 class Path {
   constructor( ...points ) {
     this._points = points;
@@ -159,9 +162,6 @@ class Drawing extends Path {
   }
   set color( value ) {
     assert( typeof value === 'string' );
-
-    console.log( value );
-
     this._color = value;
 
     emit( Drawing.event.COLOR_CHANGED, {
