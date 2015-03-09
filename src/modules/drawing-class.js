@@ -335,14 +335,19 @@ class Drawing extends Path {
 
   removeNodeAtIndex( index ) {
     let { start, end, hasFirst, hasLast } = this._nodeIndicesAroundNodeIndex( index );
-    if ( !hasFirst ) {
+
+    if ( !hasFirst && ( !this.fill || this.length > 2 ) ) {
       start++;
     }
-    if ( hasLast ) {
+
+    if ( hasLast || ( this.fill && this.length <= 2 ) ) {
       end++;
     }
 
+    console.log({ start, end });
+
     let removedPoints = this._removePoints({ start, end });
+
     return removedPoints;
   }
 
@@ -355,7 +360,12 @@ class Drawing extends Path {
     let removeLength = 0,
       removedPoints = [];
 
+    console.log( start, end );
+
     if ( this.fill && start > end ) {
+      // assert( start < this.length - 1 );
+
+      // removeLength = this.length - start - 1;
       removeLength = this.length - start;
       
       assert( removeLength >= 0 );
@@ -363,6 +373,14 @@ class Drawing extends Path {
       removedPoints.push(
         ...this.splice( start, removeLength )
       );
+
+      // Remove last point
+      // @Why: This point is also the first point of
+      //       the next operation. Removing the last point now
+      //       prevents duplicates.
+      console.log( removedPoints );
+      removedPoints.pop();
+
       this.push( this.atIndex( end ) );
 
       start = 0;
@@ -375,6 +393,10 @@ class Drawing extends Path {
 
     assert( this.isValid(),
       'Invalid path operation' );
+
+    if ( removedPoints.length === 2 && removedPoints[ 0 ] === removedPoints[ 1 ] ) {
+      removedPoints.pop();
+    }
 
     emit( Drawing.event.POINTS_REMOVED, {
       start,
@@ -445,7 +467,12 @@ class Drawing extends Path {
 
 
   nodes() {
-    return this.filter(( point ) => point instanceof Node );
+    let nodes = this.filter(( point ) => point instanceof Node );
+    if ( this.fill ) {
+      nodes.pop();
+    }
+
+    return nodes;
   }
 }
 
@@ -524,15 +551,24 @@ class DrawingCollection {
     assert( index > -1,
       'Drawing not found' );
 
-    return removeDrawingAtIndex( index );
+    return this.removeDrawingAtIndex( index );
   }
 
 
   removeDrawingAtIndex( index ) {
-    assert( index > 0 && index < this._drawings.length,
+    assert( index >= 0 && index < this._drawings.length,
       'Out of bounds' );
 
-    let removedDrawing = drawings.splice( index, 1 )[ 0 ];
+    let removedDrawing = this._drawings.splice( index, 1 )[ 0 ],
+      nodes = removedDrawing.nodes();
+
+    console.log( nodes );
+
+    for ( let node of nodes ) {
+      removedDrawing.removeNode( node );
+    }
+
+    console.log( removedDrawing );
 
     emit( DrawingCollection.event.DRAWING_REMOVED, {
       atIndex: index,

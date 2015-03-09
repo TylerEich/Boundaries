@@ -3,7 +3,7 @@
 */
 
 import assert from './assert';
-import { on } from './pubsub';
+import { on, emit } from './pubsub';
 import Queue from './queue';
 import { DrawingCollection, Drawing, Node, Point } from './drawing-class';
 import { DirectionsService, LatLng } from './map-class';
@@ -11,7 +11,17 @@ import { MapView } from './map-view';
 
 
 
-export default function() {
+
+export const EditorView = {
+  event: {
+    DRAWING_SAVED: 'EditorView.drawingSaved'
+  }
+}
+
+
+
+
+export default function( mapCanvas ) {
   on( Drawing.event.COLOR_CHANGED, ( eventName, { color, context }) => {
     changeDrawing( context, { color });
   });
@@ -34,8 +44,9 @@ export default function() {
 
   const queue = new Queue();
 
-  const drawingCollection = new DrawingCollection(),
-    directionsService = new DirectionsService(),
+  let drawingCollection = new DrawingCollection();
+
+  const directionsService = new DirectionsService(),
     route = directionsService.route.bind( directionsService );
 
   const drawings = new WeakMap(),
@@ -64,6 +75,32 @@ export default function() {
     window.rigid = false,
     window.color = '#ff0000',
     window.fill = true;
+
+  let geoJsons = JSON.parse(
+    localStorage.getItem( 'drawings' ) || '[]'
+  );
+
+  for ( let geoJson of geoJsons ) {
+    mapCanvas.data.addGeoJson( geoJson );
+  }
+
+  window.saveDrawing = function() {
+    let geoJson = drawingCollection.toGeoJson(),
+      storedDrawings = JSON.parse(
+        localStorage.getItem( 'drawings' ) || '[]'
+      );
+
+    storedDrawings.push( geoJson );
+    localStorage.setItem( 'drawings', JSON.stringify( storedDrawings ) );
+
+    mapCanvas.data.addGeoJson( geoJson );
+
+    for ( let i = 0; i < drawingCollection.length; i++ ) {
+      drawingCollection.removeDrawingAtIndex( i );
+    }
+
+    window.createNewDrawing = true;
+  };
 
 
 

@@ -2785,14 +2785,20 @@ var Drawing = (function (Path) {
         var end = _nodeIndicesAroundNodeIndex.end;
         var hasFirst = _nodeIndicesAroundNodeIndex.hasFirst;
         var hasLast = _nodeIndicesAroundNodeIndex.hasLast;
-        if (!hasFirst) {
+
+
+        if (!hasFirst && (!this.fill || this.length > 2)) {
           start++;
         }
-        if (hasLast) {
+
+        if (hasLast || this.fill && this.length <= 2) {
           end++;
         }
 
+        console.log({ start: start, end: end });
+
         var removedPoints = this._removePoints({ start: start, end: end });
+
         return removedPoints;
       },
       writable: true,
@@ -2809,12 +2815,25 @@ var Drawing = (function (Path) {
         var removeLength = 0,
             removedPoints = [];
 
+        console.log(start, end);
+
         if (this.fill && start > end) {
+          // assert( start < this.length - 1 );
+
+          // removeLength = this.length - start - 1;
           removeLength = this.length - start;
 
           assert(removeLength >= 0);
 
           removedPoints.push.apply(removedPoints, _toArray(this.splice(start, removeLength)));
+
+          // Remove last point
+          // @Why: This point is also the first point of
+          //       the next operation. Removing the last point now
+          //       prevents duplicates.
+          console.log(removedPoints);
+          removedPoints.pop();
+
           this.push(this.atIndex(end));
 
           start = 0;
@@ -2824,6 +2843,10 @@ var Drawing = (function (Path) {
         removedPoints.push.apply(removedPoints, _toArray(this.splice(start, removeLength)));
 
         assert(this.isValid(), "Invalid path operation");
+
+        if (removedPoints.length === 2 && removedPoints[0] === removedPoints[1]) {
+          removedPoints.pop();
+        }
 
         emit(Drawing.event.POINTS_REMOVED, {
           start: start,
@@ -2906,9 +2929,14 @@ var Drawing = (function (Path) {
     },
     nodes: {
       value: function nodes() {
-        return this.filter(function (point) {
+        var nodes = this.filter(function (point) {
           return point instanceof Node;
         });
+        if (this.fill) {
+          nodes.pop();
+        }
+
+        return nodes;
       },
       writable: true,
       configurable: true
@@ -3063,16 +3091,26 @@ var DrawingCollection = (function () {
         var index = this._drawings.indexOf(drawing);
         assert(index > -1, "Drawing not found");
 
-        return removeDrawingAtIndex(index);
+        return this.removeDrawingAtIndex(index);
       },
       writable: true,
       configurable: true
     },
     removeDrawingAtIndex: {
       value: function removeDrawingAtIndex(index) {
-        assert(index > 0 && index < this._drawings.length, "Out of bounds");
+        assert(index >= 0 && index < this._drawings.length, "Out of bounds");
 
-        var removedDrawing = drawings.splice(index, 1)[0];
+        var removedDrawing = this._drawings.splice(index, 1)[0],
+            nodes = removedDrawing.nodes();
+
+        console.log(nodes);
+
+        for (var _iterator = nodes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+          var node = _step.value;
+          removedDrawing.removeNode(node);
+        }
+
+        console.log(removedDrawing);
 
         emit(DrawingCollection.event.DRAWING_REMOVED, {
           atIndex: index,
@@ -3151,7 +3189,10 @@ var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["defau
 
 var assert = _interopRequire(require("./assert"));
 
-var on = require("./pubsub").on;
+var _pubsub = require("./pubsub");
+
+var on = _pubsub.on;
+var emit = _pubsub.emit;
 var Queue = _interopRequire(require("./queue"));
 
 var _drawingClass = require("./drawing-class");
@@ -3165,7 +3206,16 @@ var _mapClass = require("./map-class");
 var DirectionsService = _mapClass.DirectionsService;
 var LatLng = _mapClass.LatLng;
 var MapView = require("./map-view").MapView;
-module.exports = function () {
+var EditorView = exports.EditorView = {
+  event: {
+    DRAWING_SAVED: "EditorView.drawingSaved"
+  }
+};
+
+
+
+
+exports["default"] = function (mapCanvas) {
   on(Drawing.event.COLOR_CHANGED, function (eventName, _ref) {
     var color = _ref.color;
     var context = _ref.context;
@@ -3193,8 +3243,9 @@ module.exports = function () {
 
   var queue = new Queue();
 
-  var drawingCollection = new DrawingCollection(),
-      directionsService = new DirectionsService(),
+  var drawingCollection = new DrawingCollection();
+
+  var directionsService = new DirectionsService(),
       route = directionsService.route.bind(directionsService);
 
   var drawings = new WeakMap(),
@@ -3219,6 +3270,29 @@ module.exports = function () {
     ********** DEBUG ONLY **********
     */
   window.drawingMode = CREATE_MODE, window.createNewDrawing = true, window.rigid = false, window.color = "#ff0000", window.fill = true;
+
+  var geoJsons = JSON.parse(localStorage.getItem("drawings") || "[]");
+
+  for (var _iterator = geoJsons[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+    var geoJson = _step.value;
+    mapCanvas.data.addGeoJson(geoJson);
+  }
+
+  window.saveDrawing = function () {
+    var geoJson = drawingCollection.toGeoJson(),
+        storedDrawings = JSON.parse(localStorage.getItem("drawings") || "[]");
+
+    storedDrawings.push(geoJson);
+    localStorage.setItem("drawings", JSON.stringify(storedDrawings));
+
+    mapCanvas.data.addGeoJson(geoJson);
+
+    for (var i = 0; i < drawingCollection.length; i++) {
+      drawingCollection.removeDrawingAtIndex(i);
+    }
+
+    window.createNewDrawing = true;
+  };
 
 
 
@@ -3478,6 +3552,10 @@ module.exports = function () {
   });
 };
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
 // Single node
 // Push to previous node
 // Push to next node
@@ -3489,13 +3567,14 @@ module.exports = function () {
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var mapView = _interopRequire(require("./map-view"));
+var MapCanvas = require("./map-class").MapCanvas;
+var MapView = _interopRequire(require("./map-view"));
 
-var editorCtrl = _interopRequire(require("./editor-ctrl"));
+var EditorCtrl = _interopRequire(require("./editor-ctrl"));
 
 require("6to5ify/polyfill");
 
-mapView({
+var mapCanvas = new MapCanvas(document.querySelector("#map_canvas"), {
   center: {
     lat: 41.123728,
     lng: -84.864721
@@ -3503,9 +3582,11 @@ mapView({
   zoom: 17,
   disableDefaultUI: true
 });
-editorCtrl();
 
-},{"./editor-ctrl":8,"./map-view":11,"6to5ify/polyfill":5}],10:[function(require,module,exports){
+new MapView(mapCanvas);
+new EditorCtrl(mapCanvas);
+
+},{"./editor-ctrl":8,"./map-class":10,"./map-view":11,"6to5ify/polyfill":5}],10:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -3601,7 +3682,7 @@ var MapCanvas = (function (_google$maps$Map) {
         var index = this._markers.indexOf(marker);
         assert(index > -1, "Poly not found");
 
-        return removePolyAtIndex(index);
+        return this.removePolyAtIndex(index);
       },
       writable: true,
       configurable: true
@@ -3641,7 +3722,7 @@ var MapCanvas = (function (_google$maps$Map) {
         var index = this._polys.indexOf(poly);
         assert(index > -1, "Poly not found");
 
-        return removePolyAtIndex(index);
+        return this.removePolyAtIndex(index);
       },
       writable: true,
       configurable: true
@@ -3952,9 +4033,8 @@ var MapView = exports.MapView = {
 
 
 
-exports["default"] = function (options) {
-  var mapView = new MapCanvas(document.querySelector("#map_canvas"), options),
-      polys = new Map(),
+exports["default"] = function (mapView) {
+  var polys = new Map(),
       markers = new Map(),
       markerIndices = new Map();
 
@@ -4075,6 +4155,29 @@ exports["default"] = function (options) {
 
 
 
+  mapView.data.setStyle(function (feature) {
+    var color = feature.getProperty("color"),
+        fill = feature.getProperty("fill");
+
+    if (fill) {
+      return {
+        strokeColor: color,
+        strokeOpacity: 0.25,
+        strokeWeight: 5,
+        fillColor: color,
+        fillOpacity: 0.25
+      };
+    } else {
+      return {
+        strokeColor: color,
+        strokeWeight: 5
+      };
+    }
+  });
+
+
+
+
   on(DrawingCollection.event.DRAWING_ADDED, function (eventName, _ref) {
     var atIndex = _ref.atIndex;
     var drawing = _ref.drawing;
@@ -4188,8 +4291,12 @@ exports["default"] = function (options) {
 
     poly.removeLatLngs({ start: start, end: end });
 
+    console.log("Removed points:", removedPoints);
+
     removedPoints.forEach(function (point, i) {
       if (skipLastPoint && i === len) return;
+
+      console.log(point);
 
       if (point instanceof Node) {
         assert(markers.has(point));

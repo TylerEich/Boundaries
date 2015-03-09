@@ -64,7 +64,7 @@ class MapCanvas extends google.maps.Map {
     assert( index > -1,
       'Poly not found' );
 
-    return removePolyAtIndex( index );
+    return this.removePolyAtIndex( index );
   }
 
 
@@ -97,7 +97,7 @@ class MapCanvas extends google.maps.Map {
     assert( index > -1,
       'Poly not found' );
 
-    return removePolyAtIndex( index );
+    return this.removePolyAtIndex( index );
   }
 
 

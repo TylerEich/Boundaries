@@ -275,6 +275,24 @@ describe( 'DrawingModule', () => {
     });
 
 
+    it("Removes single point from polygon properly", function() {
+      drawing = new Drawing({
+        color,
+        rigid,
+        fill: true
+      });
+
+      let point = generatePoints( 1 )[ 0 ];
+      drawing._addPoints({
+        atIndex: 0,
+        points: [ point, point ]
+      });
+      drawing.removeNodeAtIndex( 0 );
+
+      expect( drawing.length ).toEqual( 0 );
+    });
+
+
     it("Removes single point", function() {
       drawing._removePoints({
         start: 0,

@@ -20,12 +20,8 @@ export const MapView = {
 
 
 
-export default function( options ) {
-  let mapView = new MapCanvas(
-    document.querySelector( '#map_canvas' ),
-    options
-  ),
-    polys = new Map(),
+export default function( mapView ) {
+  let polys = new Map(),
     markers = new Map(),
     markerIndices = new Map();
 
@@ -139,6 +135,29 @@ export default function( options ) {
 
 
 
+  mapView.data.setStyle(( feature ) => {
+    let color = feature.getProperty( 'color' ),
+      fill = feature.getProperty( 'fill' );
+
+    if ( fill ) {
+      return {
+        strokeColor: color,
+        strokeOpacity: 0.25,
+        strokeWeight: 5,
+        fillColor: color,
+        fillOpacity: 0.25
+      }
+    } else {
+      return {
+        strokeColor: color,
+        strokeWeight: 5
+      }
+    }
+  });
+
+
+
+
   on( DrawingCollection.event.DRAWING_ADDED, ( eventName, { atIndex, drawing, context }) => {
     let poly = createPolyFromDrawing( drawing );
 
@@ -236,8 +255,12 @@ export default function( options ) {
 
     poly.removeLatLngs({ start, end });
 
+    console.log( 'Removed points:', removedPoints );
+
     removedPoints.forEach(( point, i ) => {
       if ( skipLastPoint && i === len ) return;
+
+      console.log( point );
 
       if ( point instanceof Node ) {
         assert( markers.has( point ) );
