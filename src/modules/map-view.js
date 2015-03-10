@@ -230,10 +230,6 @@ export default function( mapView ) {
       }
     });
 
-    console.info( 'POINTS_ADDED' );
-    console.log( `markers: ${markers.size} | nodes: ${context.nodes().length}` );
-    console.log( `latLngs: ${poly._poly.getPath().getLength()} | points: ${context.length}` );
-
     // for ( let point of addedPoints ) {
     //   if ( point instanceof Node ) {
     //     let atIndex = nodes.indexOf( point );
@@ -255,12 +251,8 @@ export default function( mapView ) {
 
     poly.removeLatLngs({ start, end });
 
-    console.log( 'Removed points:', removedPoints );
-
     removedPoints.forEach(( point, i ) => {
       if ( skipLastPoint && i === len ) return;
-
-      console.log( point );
 
       if ( point instanceof Node ) {
         assert( markers.has( point ) );

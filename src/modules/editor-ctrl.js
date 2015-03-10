@@ -95,7 +95,7 @@ export default function( mapCanvas ) {
 
     mapCanvas.data.addGeoJson( geoJson );
 
-    for ( let i = 0; i < drawingCollection.length; i++ ) {
+    for ( let i = drawingCollection.length - 1; i >= 0; i-- ) {
       drawingCollection.removeDrawingAtIndex( i );
     }
 

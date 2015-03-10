@@ -344,8 +344,6 @@ class Drawing extends Path {
       end++;
     }
 
-    console.log({ start, end });
-
     let removedPoints = this._removePoints({ start, end });
 
     return removedPoints;
@@ -359,8 +357,6 @@ class Drawing extends Path {
 
     let removeLength = 0,
       removedPoints = [];
-
-    console.log( start, end );
 
     if ( this.fill && start > end ) {
       // assert( start < this.length - 1 );
@@ -378,7 +374,6 @@ class Drawing extends Path {
       // @Why: This point is also the first point of
       //       the next operation. Removing the last point now
       //       prevents duplicates.
-      console.log( removedPoints );
       removedPoints.pop();
 
       this.push( this.atIndex( end ) );
@@ -562,13 +557,9 @@ class DrawingCollection {
     let removedDrawing = this._drawings.splice( index, 1 )[ 0 ],
       nodes = removedDrawing.nodes();
 
-    console.log( nodes );
-
     for ( let node of nodes ) {
       removedDrawing.removeNode( node );
     }
-
-    console.log( removedDrawing );
 
     emit( DrawingCollection.event.DRAWING_REMOVED, {
       atIndex: index,

@@ -3287,7 +3287,7 @@ exports["default"] = function (mapCanvas) {
 
     mapCanvas.data.addGeoJson(geoJson);
 
-    for (var i = 0; i < drawingCollection.length; i++) {
+    for (var i = drawingCollection.length - 1; i >= 0; i--) {
       drawingCollection.removeDrawingAtIndex(i);
     }
 
