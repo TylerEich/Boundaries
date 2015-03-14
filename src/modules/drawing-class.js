@@ -482,7 +482,7 @@ Drawing.event = {
 
 
 
-class DrawingCollection {
+class Territory {
   constructor() {
     this._drawings = [];
     this._activeDrawingIndex = -1;
@@ -529,7 +529,7 @@ class DrawingCollection {
     assert( typeof atIndex === 'number' );
     assert( drawing instanceof Drawing );
 
-    emit( DrawingCollection.event.DRAWING_ADDED, {
+    emit( Territory.event.DRAWING_ADDED, {
       atIndex,
       drawing,
       context: this
@@ -561,7 +561,7 @@ class DrawingCollection {
       removedDrawing.removeNode( node );
     }
 
-    emit( DrawingCollection.event.DRAWING_REMOVED, {
+    emit( Territory.event.DRAWING_REMOVED, {
       atIndex: index,
       drawing: removedDrawing,
       context: this
@@ -606,7 +606,7 @@ class DrawingCollection {
 
   static fromGeoJson( geoJson ) {
     assert( typeof geoJson === 'object' );
-    let drawings = new DrawingCollection();
+    let drawings = new Territory();
 
     assert( Array.isArray( geoJson.features ) );
     geoJson.features.forEach(
@@ -660,12 +660,12 @@ class DrawingCollection {
   }
 }
 
-DrawingCollection.event = {
-  DRAWING_ADDED: 'DrawingCollection.drawingAdded',
-  DRAWING_REMOVED: 'DrawingCollection.drawingRemoved'
+Territory.event = {
+  DRAWING_ADDED: 'Territory.drawingAdded',
+  DRAWING_REMOVED: 'Territory.drawingRemoved'
 };
 
 
 
 
-export { Point, Node, Drawing, DrawingCollection };
+export { Point, Node, Drawing, Territory };

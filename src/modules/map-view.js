@@ -1,7 +1,7 @@
 import assert from './assert';
 import { emit, on } from './pubsub';
 import { MapCanvas, Marker, Poly, LatLng } from './map-class';
-import { Node, Drawing, DrawingCollection } from './drawing-class';
+import { Node, Drawing, Territory } from './drawing-class';
 
 
 
@@ -158,7 +158,7 @@ export default function( mapView ) {
 
 
 
-  on( DrawingCollection.event.DRAWING_ADDED, ( eventName, { atIndex, drawing, context }) => {
+  on( Territory.event.DRAWING_ADDED, ( eventName, { atIndex, drawing, context }) => {
     let poly = createPolyFromDrawing( drawing );
 
     mapView.addPoly({ atIndex, poly });
@@ -166,7 +166,7 @@ export default function( mapView ) {
   });
 
 
-  on( DrawingCollection.event.DRAWING_REMOVED, ( eventName, { drawing }) => {
+  on( Territory.event.DRAWING_REMOVED, ( eventName, { drawing }) => {
     let poly = polys.get( drawing );
     assert( poly instanceof Poly );
 

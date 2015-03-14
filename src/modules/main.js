@@ -1,6 +1,6 @@
 import { MapCanvas } from './map-class';
 import MapView from './map-view';
-import EditorCtrl from './editor-ctrl';
+import TerritoryEditorCmp from './territory-editor-cmp';
 
 require( '6to5ify/polyfill' );
 
@@ -17,4 +17,4 @@ let mapCanvas = new MapCanvas(
 );
 
 new MapView( mapCanvas );
-new EditorCtrl( mapCanvas );
+new TerritoryEditorCmp( mapCanvas );
