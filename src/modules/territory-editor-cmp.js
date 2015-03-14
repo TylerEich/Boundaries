@@ -1,21 +1,105 @@
 /*
-  Bindings for editing DrawingCollections
+  Bindings for editing Territorys
 */
 
 import assert from './assert';
 import { on, emit } from './pubsub';
 import Queue from './queue';
-import { DrawingCollection, Drawing, Node, Point } from './drawing-class';
+import { Territory, Drawing, Node, Point } from './drawing-class';
 import { DirectionsService, LatLng } from './map-class';
 import { MapView } from './map-view';
 
 
 
 
-export const EditorView = {
-  event: {
-    DRAWING_SAVED: 'EditorView.drawingSaved'
+export default class TerritoryEditorCmp {
+  constructor( storage, mapCanvas ) {
+    this.territory = new Territory();
+
+    this._state = {
+      rigid: false,
+      fill: false,
+      color: '#ff0000'
+    };
   }
+
+
+  get rigid() {
+    return this._state.rigid;
+  }
+  set rigid( value ) {
+    assert( typeof value === 'boolean',
+      'Value of rigid must be boolean' );
+
+    this._state.rigid = value;
+  }
+
+
+  get fill() {
+    return this._state.fill;
+  }
+  set fill( value ) {
+    assert( typeof value === 'boolean',
+      'Value of fill must be boolean' );
+
+    this._state.fill = value;
+  }
+
+
+  get color() {
+    return this._state.color;
+  }
+  set color( value ) {
+    assert( typeof value === 'boolean',
+      'Value of color must be boolean' );
+
+    this._state.color = value;
+  }
+
+
+  createNewDrawing() {
+    let { rigid, fill, color } = this._state,
+      drawing = new Drawing({ rigid, fill, color }),
+      atIndex = ++territory.activeDrawingIndex;
+
+    territory.addDrawing({
+      atIndex,
+      drawing
+    });
+  }
+
+
+  removeDrawing() {
+    let activeDrawingIndex = territory.activeDrawingIndex--;
+    
+    territory.removeDrawingAtIndex( activeDrawingIndex );
+  }
+
+  
+  getTerritoryGeoJson() {
+    return this.territory.toGeoJson();
+  }
+
+
+  detachedCallback() {
+    // Remove bindings between territory and map
+    this.territory.forEach(( drawing ) => {
+      drawing.off( Drawing.event.POINTS_ADDED, renderDrawing );
+      drawing.off( Drawing.event.POINTS_REMOVED, renderDrawing );
+      drawing.off( Drawing.event.COLOR_CHANGED, renderDrawing );
+      drawing.off( Drawing.event.RIGID_CHANGED, renderDrawing );
+      drawing.off( Drawing.event.FILL_CHANGED, renderDrawing );
+
+      let nodes = drawing.nodes();
+      for ( let node of nodes ) {
+        node.off( Node.event.NODE_MOVED, renderNode );
+      }
+    });
+  }
+}
+
+TerritoryEditorCmp.event = {
+  DRAWING_SAVED: 'EditorView.drawingSaved'
 }
 
 
@@ -44,7 +128,7 @@ export default function( mapCanvas ) {
 
   const queue = new Queue();
 
-  let drawingCollection = new DrawingCollection();
+  let territory = new Territory();
 
   const directionsService = new DirectionsService(),
     route = directionsService.route.bind( directionsService );
@@ -85,7 +169,7 @@ export default function( mapCanvas ) {
   }
 
   window.saveDrawing = function() {
-    let geoJson = drawingCollection.toGeoJson(),
+    let geoJson = territory.toGeoJson(),
       storedDrawings = JSON.parse(
         localStorage.getItem( 'drawings' ) || '[]'
       );
@@ -95,8 +179,8 @@ export default function( mapCanvas ) {
 
     mapCanvas.data.addGeoJson( geoJson );
 
-    for ( let i = drawingCollection.length - 1; i >= 0; i-- ) {
-      drawingCollection.removeDrawingAtIndex( i );
+    for ( let i = territory.length - 1; i >= 0; i-- ) {
+      territory.removeDrawingAtIndex( i );
     }
 
     window.createNewDrawing = true;
@@ -230,7 +314,7 @@ export default function( mapCanvas ) {
   on( MapView.event.MARKER_DRAGSTARTED, ( eventName, { latLng, node }) => {
     assert( node instanceof Node );
 
-    let drawing = drawingCollection.find(( drawing ) => drawing.indexOf( node ) > -1 );
+    let drawing = territory.find(( drawing ) => drawing.indexOf( node ) > -1 );
 
     assert( drawing instanceof Drawing );
 
@@ -250,7 +334,7 @@ export default function( mapCanvas ) {
   on( MapView.event.MARKER_DRAGENDED, ( eventName, { latLng, node }) => {
     assert( node instanceof Node );
 
-    let drawing = drawingCollection.find(( drawing ) => drawing.indexOf( node ) > -1 ),
+    let drawing = territory.find(( drawing ) => drawing.indexOf( node ) > -1 ),
       newPoint = createPointFromLatLng( latLng );
 
     assert( drawing instanceof Drawing );
@@ -277,12 +361,12 @@ export default function( mapCanvas ) {
           color
         });
 
-        queue.add( drawingCollection.addDrawing.bind( drawingCollection, {
-          atIndex: drawingCollection.length,
+        queue.add( territory.addDrawing.bind( territory, {
+          atIndex: territory.length,
           drawing
         }) )
           .add( drawing.addNode.bind( drawing, node, undefined ) )
-          .add(() => drawingCollection.activeDrawingIndex = drawingCollection.length - 1 )
+          .add(() => territory.activeDrawingIndex = territory.length - 1 )
           .add( fillPathAroundNode.bind( null, {
             drawing,
             node
@@ -291,7 +375,7 @@ export default function( mapCanvas ) {
         createNewDrawing = false;
       } else {
         // Add point to end of current drawing
-        let drawing = drawingCollection.activeDrawing;
+        let drawing = territory.activeDrawing;
 
         queue.add( drawing.addNode.bind( drawing, node, undefined ) )
           .add( fillPathAroundNode.bind( null, {
