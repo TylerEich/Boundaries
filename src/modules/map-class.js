@@ -286,5 +286,4 @@ let LatLng = google.maps.LatLng;
 
 
 
-
 export { MapCanvas, Marker, Poly, LatLng, DirectionsService };

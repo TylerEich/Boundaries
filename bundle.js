@@ -2343,6 +2343,931 @@ function assert(condition) {
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
+var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+/*
+  Bindings for editing Territories
+*/
+
+var assert = _interopRequire(require("../assert"));
+
+var _pubsub = require("../pubsub");
+
+var on = _pubsub.on;
+var emit = _pubsub.emit;
+var eventTarget = _interopRequire(require("../event-target"));
+
+var Queue = _interopRequire(require("../queue"));
+
+// import undoManager from '../undo-manager';
+var _drawingClass = require("../drawing-class");
+
+var Territory = _drawingClass.Territory;
+var Drawing = _drawingClass.Drawing;
+var Node = _drawingClass.Node;
+var Point = _drawingClass.Point;
+var _mapClass = require("../map-class");
+
+var DirectionsService = _mapClass.DirectionsService;
+var LatLng = _mapClass.LatLng;
+var MapView = require("../map-view").MapView;
+
+
+
+
+
+var directionsService = new DirectionsService();
+
+
+
+
+var CREATE_MODE = 0,
+    EDIT_MODE = 1;
+
+
+
+
+function latLngFromPoint(point) {
+  assert(point instanceof Point);
+
+  return new LatLng(point.y, point.x);
+}
+
+
+function pointFromLatLng(latLng) {
+  assert(typeof latLng.lat === "function" && typeof latLng.lng === "function");
+
+  return new Point(latLng.lng(), latLng.lat());
+}
+
+
+
+
+function renderDrawing(_ref) {
+  var drawing = _ref.drawing;
+}
+
+
+function renderNode(_ref) {
+  var node = _ref.node;
+}
+
+
+
+
+function listenToNode(node) {
+  return;
+
+
+
+  node.on(Node.event.MOVED, renderNode);
+}
+
+
+function ignoreNode(node) {
+  return;
+
+
+
+  node.off(Node.event.MOVED, renderNode);
+}
+
+
+
+
+function listenToDrawing(drawing) {
+  return;
+
+
+
+  drawing.on(Drawing.event.POINTS_ADDED, renderDrawing);
+  drawing.on(Drawing.event.POINTS_REMOVED, renderDrawing);
+  drawing.on(Drawing.event.COLOR_CHANGED, renderDrawing);
+  drawing.on(Drawing.event.FILL_CHANGED, renderDrawing);
+
+  var nodes = drawing.nodes();
+
+  for (var _iterator = nodes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+    var node = _step.value;
+    listenToNode(node);
+  }
+}
+
+
+function ignoreDrawing(drawing) {
+  return;
+
+
+
+  drawing.off(Drawing.event.POINTS_ADDED, renderDrawing);
+  drawing.off(Drawing.event.POINTS_REMOVED, renderDrawing);
+  drawing.off(Drawing.event.COLOR_CHANGED, renderDrawing);
+  drawing.off(Drawing.event.FILL_CHANGED, renderDrawing);
+
+  var nodes = drawing.nodes();
+
+  for (var _iterator = nodes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+    var node = _step.value;
+    ignoreNode(node);
+  }
+}
+
+
+
+
+var TerritoryEditorCmp = (function () {
+  function TerritoryEditorCmp() {
+    var _this = this;
+    _classCallCheck(this, TerritoryEditorCmp);
+
+    this.territory = new Territory();
+
+    this._state = {
+      createNewDrawing: false,
+      rigid: false,
+      fill: false,
+      color: "#ff0000",
+      mode: CREATE_MODE,
+      activeDrawingIndex: -1,
+      activeNodeIndex: -1
+    };
+
+    this.queue = new Queue();
+
+    on(MapView.event.MAP_PRESSED, function (eventName, event) {
+      return _this.addNode(event);
+    });
+    // on( MapView.event.MARKER_PRESSED, this.editDrawing );
+    on(MapView.event.MARKER_DRAGENDED, function (eventName, event) {
+      return _this.moveNode(event);
+    });
+    // on( MapView.event.POLY_PRESSED, this.editDrawing );
+
+    // mapView.on( MapCanvas.event.PRESSED, this.addNode );
+    // mapView.on( Marker.event.PRESSED, this.editDrawing );
+    // mapView.on( Marker.event.DRAGGED, this.moveNode );
+    // mapView.on( Poly.event.PRESSED, this.editDrawing );
+  }
+
+  _prototypeProperties(TerritoryEditorCmp, null, {
+    createNewDrawing: {
+      get: function () {
+        return this._state.createNewDrawing;
+      },
+      set: function (value) {
+        assert(typeof value === "boolean", "Value of createNewDrawing must be boolean");
+
+        this._state.createNewDrawing = value;
+      },
+      configurable: true
+    },
+    rigid: {
+      get: function () {
+        return this._state.rigid;
+      },
+      set: function (value) {
+        assert(typeof value === "boolean", "Value of rigid must be boolean");
+
+        this._state.rigid = value;
+      },
+      configurable: true
+    },
+    fill: {
+      get: function () {
+        return this._state.fill;
+      },
+      set: function (value) {
+        assert(typeof value === "boolean", "Value of fill must be boolean");
+
+        this._state.fill = value;
+      },
+      configurable: true
+    },
+    color: {
+      get: function () {
+        return this._state.color;
+      },
+      set: function (value) {
+        assert(typeof value === "string", "Value of color must be string");
+
+        this._state.color = value;
+      },
+      configurable: true
+    },
+    mode: {
+      get: function () {
+        return this._state.mode;
+      },
+      set: function (value) {
+        assert(Number.isInteger(value), "Value of mode must be a constant");
+
+        this._state.mode = value;
+      },
+      configurable: true
+    },
+    activeDrawingIndex: {
+      get: function () {
+        return this._state.activeDrawingIndex;
+      },
+      set: function (value) {
+        assert(Number.isInteger(value), "Value of activeDrawingIndex must be integer");
+
+        this._state.activeDrawingIndex = value;
+      },
+      configurable: true
+    },
+    activeNodeIndex: {
+      get: function () {
+        return this._state.activeNodeIndex;
+      },
+      set: function (value) {
+        assert(Number.isInteger(value), "Value of activeNodeIndex must be integer");
+
+        this._state.activeNodeIndex = value;
+      },
+      configurable: true
+    },
+    addDrawing: {
+      value: function addDrawing() {
+        var _state = this._state;
+        var rigid = _state.rigid;
+        var fill = _state.fill;
+        var color = _state.color;
+        var drawing = new Drawing({ rigid: rigid, fill: fill, color: color });
+        var atIndex = ++this.activeDrawingIndex;
+
+        this.territory.addDrawing({
+          atIndex: atIndex,
+          drawing: drawing
+        });
+
+        listenToDrawing(drawing);
+      },
+      writable: true,
+      configurable: true
+    },
+    removeDrawing: {
+      value: function removeDrawing() {
+        var activeDrawingIndex = this.activeDrawingIndex--,
+            drawing = this.territory.removeDrawingAtIndex(activeDrawingIndex);
+
+        ignoreDrawing(drawing);
+      },
+      writable: true,
+      configurable: true
+    },
+    fillPathAroundNode: {
+      value: function fillPathAroundNode(_ref) {
+        var _this = this;
+        var drawing = _ref.drawing;
+        var node = _ref.node;
+        var _drawing$nodesAroundNode, start, end, _latLngs, _points$0, x, y, latLngs, points, _ref2, _ref3, _ref4, _ref5;
+        return regeneratorRuntime.async(function fillPathAroundNode$(context$2$0) {
+          while (1) switch (context$2$0.prev = context$2$0.next) {
+            case 0:
+              assert(drawing instanceof Drawing);
+              assert(node instanceof Node);
+
+              _drawing$nodesAroundNode = drawing.nodesAroundNode(node);
+              start = _drawing$nodesAroundNode.start;
+              end = _drawing$nodesAroundNode.end;
+              if (drawing.rigid) {
+                context$2$0.next = 68;
+                break;
+              }
+              if (!(start === node && end === node)) {
+                context$2$0.next = 23;
+                break;
+              }
+              _latLngs = undefined;
+              context$2$0.prev = 8;
+              context$2$0.next = 11;
+              return directionsService.route({
+                origin: latLngFromPoint(node),
+                destination: latLngFromPoint(node)
+              });
+            case 11:
+              _latLngs = context$2$0.sent;
+              context$2$0.next = 17;
+              break;
+            case 14:
+              context$2$0.prev = 14;
+              context$2$0.t0 = context$2$0["catch"](8);
+              alert(context$2$0.t0);
+            case 17:
+
+
+              points = _latLngs.map(pointFromLatLng);
+
+              assert(points.length > 0);
+
+              _points$0 = points[0];
+              x = _points$0.x;
+              y = _points$0.y;
+              _this.queue.add(node.moveTo.bind(node, x, y));
+            case 23:
+              latLngs = undefined, points = undefined;
+              if (!(start !== node)) {
+                context$2$0.next = 46;
+                break;
+              }
+              context$2$0.prev = 25;
+              context$2$0.next = 28;
+              return directionsService.route({
+                origin: latLngFromPoint(start),
+                destination: latLngFromPoint(node)
+              });
+            case 28:
+              latLngs = context$2$0.sent;
+              context$2$0.next = 34;
+              break;
+            case 31:
+              context$2$0.prev = 31;
+              context$2$0.t1 = context$2$0["catch"](25);
+              alert(context$2$0.t1);
+            case 34:
+
+
+              points = latLngs.map(pointFromLatLng);
+
+              x = undefined, y = undefined;
+              _ref2 = points.shift();
+              x = _ref2.x;
+              y = _ref2.y;
+              start.moveTo(x, y);
+              _ref3 = points.pop();
+              x = _ref3.x;
+              y = _ref3.y;
+              node.moveTo(x, y);
+
+              _this.queue.add(drawing.removePointsBetweenNodes.bind(drawing, start, node));
+              _this.queue.add(drawing.addPointsAfterNode.bind(drawing, start, points));
+            case 46:
+              if (!(end !== node)) {
+                context$2$0.next = 68;
+                break;
+              }
+              context$2$0.prev = 47;
+              context$2$0.next = 50;
+              return directionsService.route({
+                origin: latLngFromPoint(node),
+                destination: latLngFromPoint(end)
+              });
+            case 50:
+              latLngs = context$2$0.sent;
+              context$2$0.next = 56;
+              break;
+            case 53:
+              context$2$0.prev = 53;
+              context$2$0.t2 = context$2$0["catch"](47);
+              alert(context$2$0.t2);
+            case 56:
+
+
+              points = latLngs.map(pointFromLatLng);
+
+              x = undefined, y = undefined;
+              _ref4 = points.shift();
+              x = _ref4.x;
+              y = _ref4.y;
+              node.moveTo(x, y);
+              _ref5 = points.pop();
+              x = _ref5.x;
+              y = _ref5.y;
+              end.moveTo(x, y);
+
+              _this.queue.add(drawing.removePointsBetweenNodes.bind(drawing, node, end));
+              _this.queue.add(drawing.addPointsAfterNode.bind(drawing, node, points));
+            case 68:
+            case "end":
+              return context$2$0.stop();
+          }
+        }, null, this, [[8, 14], [25, 31], [47, 53]]);
+      },
+      writable: true,
+      configurable: true
+    },
+    addNode: {
+      value: function addNode(event) {
+        var _this = this;
+        if (this.createNewDrawing) {
+          this.addDrawing();
+          this.createNewDrawing = false;
+        }
+
+        var drawing = this.territory.atIndex(this.activeDrawingIndex);
+        var activeNodeIndex = ++this.activeNodeIndex;var _ref = [event.latLng.lng(), event.latLng.lat()];
+
+        var x = _ref[0];
+        var y = _ref[1];
+        var node = new Node(x, y);
+
+        this.queue.add(function () {
+          drawing.addNode(node, activeNodeIndex);
+
+          _this.fillPathAroundNode({ drawing: drawing, node: node });
+          // undoManager.add({
+          //   undo() {
+          //     this.removeNode();
+          //   },
+          //   redo() {
+          //     this.addNode( event );
+          //   }
+          // })
+        });
+
+        listenToNode(node);
+      },
+      writable: true,
+      configurable: true
+    },
+    moveNode: {
+      value: function moveNode(_ref) {
+        var _this = this;
+        var latLng = _ref.latLng;
+        var node = _ref.node;
+        assert(node instanceof Node);
+
+        var drawing = this.territory.find(function (drawing) {
+          return drawing.indexOf(node) > -1;
+        }),
+            newPoint = pointFromLatLng(latLng);
+
+        assert(drawing instanceof Drawing);
+
+        this.queue.add(function () {
+          node.moveTo(newPoint.x, newPoint.y);
+
+          return _this.fillPathAroundNode({ drawing: drawing, node: node });
+        });
+      },
+      writable: true,
+      configurable: true
+    },
+    removeNode: {
+      value: function removeNode() {
+        var _this = this;
+        this.queue.add(function () {
+          var drawing = _this.territory.atIndex(_this.activeDrawingIndex);
+
+          var node = drawing.removeNodeAtIndex(_this.activeNodeIndex);
+
+          ignoreNode(node);
+        });
+      },
+      writable: true,
+      configurable: true
+    },
+    getTerritoryGeoJson: {
+      value: function getTerritoryGeoJson() {
+        return this.territory.toGeoJson();
+      },
+      writable: true,
+      configurable: true
+    },
+    detachedCallback: {
+
+
+      // Called when element is removed
+      value: function detachedCallback() {
+        // Remove bindings between territory and map
+        this.territory.forEach(ignoreDrawing);
+      },
+      writable: true,
+      configurable: true
+    }
+  });
+
+  return TerritoryEditorCmp;
+})();
+
+module.exports = TerritoryEditorCmp;
+/* syncedStorage */
+// Single node
+// Push to previous node
+// Push to next node
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// export function oldMain( mapView ) {
+//   on( Drawing.event.COLOR_CHANGED, ( eventName, { color, context }) => {
+//     changeDrawing( context, { color });
+//   });
+
+
+//   on( Drawing.event.FILL_CHANGED, ( eventName, { fill, context }) => {
+//     changeDrawing( context, { fill });
+//   });
+
+
+//   on( Drawing.event.RIGID_CHANGED, ( eventName, { rigid, context }) =>  {
+
+//   });
+
+
+
+
+//   const CREATE_MODE = 'Mode.create',
+//     EDIT_MODE = 'Mode.edit';
+
+//   const queue = new Queue();
+
+//   let territory = new Territory();
+
+//   const directionsService = new DirectionsService(),
+//     route = directionsService.route.bind( directionsService );
+
+//   const drawings = new WeakMap(),
+//     nodes = new WeakMap();
+
+
+
+
+
+//   // let drawingMode = CREATE_MODE,
+//   //   createNewDrawing = true,
+//   //   rigid = false,
+//   //   color = '#ff0000',
+//   //   fill = true;
+
+
+
+
+//   /*
+//     ********** DEBUG ONLY **********
+//     ********** DEBUG ONLY **********
+//     ********** DEBUG ONLY **********
+//     */
+//   window.drawingMode = CREATE_MODE,
+//     window.createNewDrawing = true,
+//     window.rigid = false,
+//     window.color = '#ff0000',
+//     window.fill = true;
+
+//   let geoJsons = JSON.parse(
+//     localStorage.getItem( 'drawings' ) || '[]'
+//   );
+
+//   for ( let geoJson of geoJsons ) {
+//     mapView.data.addGeoJson( geoJson );
+//   }
+
+//   window.saveDrawing = function() {
+//     let geoJson = territory.toGeoJson(),
+//       storedDrawings = JSON.parse(
+//         localStorage.getItem( 'drawings' ) || '[]'
+//       );
+
+//     storedDrawings.push( geoJson );
+//     localStorage.setItem( 'drawings', JSON.stringify( storedDrawings ) );
+
+//     mapView.data.addGeoJson( geoJson );
+
+//     for ( let i = territory.length - 1; i >= 0; i-- ) {
+//       territory.removeDrawingAtIndex( i );
+//     }
+
+//     window.createNewDrawing = true;
+//   };
+
+
+
+
+//   function latLngFromPoint( point ) {
+//     assert( point instanceof Point );
+
+//     return new LatLng( point.y, point.x );
+//   }
+
+
+//   function pointFromLatLng( latLng ) {
+//     assert( typeof latLng.lat === 'function' &&
+//       typeof latLng.lng === 'function' );
+
+//     return new Point( latLng.lng(), latLng.lat() );
+//   }
+
+
+//   function createNodeFromLatLng( latLng ) {
+//     return new Node( latLng.lng(), latLng.lat() );
+//   }
+
+
+//   function createPointFromLatLng( latLng ) {
+//     return new Point( latLng.lng(), latLng.lat() );
+//   }
+
+
+
+
+//   async function fillPathAroundNode({ drawing, node }) {
+//     assert( drawing instanceof Drawing );
+//     assert( node instanceof Node );
+
+//     let { start, end } = drawing.nodesAroundNode( node );
+
+//     if ( !drawing.rigid ) {
+//       if ( start === node && end === node ) {
+//         // Single node
+//         let latLngs;
+//         try {
+//           latLngs = await route({
+//             origin: latLngFromPoint( node ),
+//             destination: latLngFromPoint( node )
+//           });
+//         } catch ( e ) {
+//           alert( e );
+//         }
+
+//         points = latLngs.map( pointFromLatLng );
+
+//         assert( points.length > 0 );
+
+//         let { x, y } = points[ 0 ];
+//         queue.add( node.moveTo.bind( node, x, y ) );
+//       }
+
+//       let latLngs, points;
+//       if ( start !== node ) {
+//         // Push to previous node
+//         try {
+//           latLngs = await route({
+//             origin: latLngFromPoint( start ),
+//             destination: latLngFromPoint( node )
+//           });
+//         } catch ( e ) {
+//           alert( e );
+//         }
+
+//         points = latLngs.map( pointFromLatLng );
+
+//         let x, y;
+//         ({ x, y }) = points.shift();
+//         start.moveTo( x, y );
+//         ({ x, y }) = points.pop();
+//         node.moveTo( x, y );
+
+//         queue.add( drawing.removePointsBetweenNodes.bind( drawing, start, node ) );
+//         queue.add( drawing.addPointsAfterNode.bind( drawing, start, points ) );
+//       }
+
+//       if ( end !== node ) {
+//         // Push to next node
+//         try {
+//           latLngs = await route({
+//             origin: latLngFromPoint( node ),
+//             destination: latLngFromPoint( end )
+//           });
+//         } catch ( e ) {
+//           alert( e );
+//         }
+
+//         points = latLngs.map( pointFromLatLng );
+
+//         let x, y;
+//         ({ x, y }) = points.shift();
+//         node.moveTo( x, y );
+//         ({ x, y }) = points.pop();
+//         end.moveTo( x, y );
+
+//         queue.add( drawing.removePointsBetweenNodes.bind( drawing, node, end ) );
+//         queue.add( drawing.addPointsAfterNode.bind( drawing, node, points ) );
+//       }
+//     }
+//   }
+
+
+
+
+//   function pressed( eventName, { latLng, node }) {
+//     if ( drawingMode === EDIT_MODE ) {
+//       // Identify clicked segment
+//       // Highlight segment on map
+//     } else {
+//       drawingMode = EDIT_MODE;
+//     }
+//   }
+
+
+//   on( MapView.event.MARKER_PRESSED, pressed );
+//   on( MapView.event.POLY_PRESSED, pressed );
+
+
+
+
+//   mapView.on( MapView.event.MARKER_DRAGSTARTED, ({ latLng, node }) => {
+//     assert( node instanceof Node );
+
+//     let drawing = territory.find(( drawing ) => drawing.indexOf( node ) > -1 );
+
+//     assert( drawing instanceof Drawing );
+
+//     // queue.add( drawing.removeNode.bind( drawing, node ) );
+//   });
+
+
+//   on( MapView.event.MARKER_DRAGGED, ( eventName, { latLng, node }) => {
+//     assert( node instanceof Node );
+
+//     let point = createPointFromLatLng( latLng );
+
+//     node.moveTo( point.x, point.y );
+//   });
+
+
+//   on( MapView.event.MARKER_DRAGENDED, ( eventName, { latLng, node }) => {
+//     assert( node instanceof Node );
+
+//     let drawing = territory.find(( drawing ) => drawing.indexOf( node ) > -1 ),
+//       newPoint = createPointFromLatLng( latLng );
+
+//     assert( drawing instanceof Drawing );
+
+//     queue.add( node.moveTo.bind( node, newPoint.x, newPoint.y ) )
+//       .add( fillPathAroundNode.bind( null, { drawing, node }) );
+//   });
+
+
+
+
+//   on( MapView.event.MAP_PRESSED, ( eventName, { latLng }) => {
+//     if ( drawingMode === EDIT_MODE ) {
+//       // Exit edit mode when map is pressed
+//       drawingMode = CREATE_MODE;
+//     } else if ( drawingMode === CREATE_MODE ) {
+//       let node = createNodeFromLatLng( latLng );
+
+//       if ( createNewDrawing ) {
+//         // Add drawing to end of array
+//         let drawing = new Drawing({
+//           fill,
+//           rigid,
+//           color
+//         });
+
+//         queue.add( territory.addDrawing.bind( territory, {
+//           atIndex: territory.length,
+//           drawing
+//         }) )
+//           .add( drawing.addNode.bind( drawing, node, undefined ) )
+//           .add(() => territory.activeDrawingIndex = territory.length - 1 )
+//           .add( fillPathAroundNode.bind( null, {
+//             drawing,
+//             node
+//           }) );
+
+//         createNewDrawing = false;
+//       } else {
+//         // Add point to end of current drawing
+//         let drawing = territory.activeDrawing;
+
+//         queue.add( drawing.addNode.bind( drawing, node, undefined ) )
+//           .add( fillPathAroundNode.bind( null, {
+//             drawing,
+//             node
+//           }) );
+//       }
+//     }
+//   });
+// }
+
+},{"../assert":6,"../drawing-class":9,"../event-target":10,"../map-class":12,"../map-view":13,"../pubsub":14,"../queue":15}],8:[function(require,module,exports){
+"use strict";
+
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
+/* global angular */
+
+
+
+
+var TerritoryEditorCmp = _interopRequire(require("../components/territory-editor-cmp"));
+
+module.exports = angular.module("bndry").directive("territoryEditor", function () {
+  return {
+    restrict: "E",
+    scope: {},
+    controller: TerritoryEditorCmp,
+    controllerAs: "territoryEditor",
+    templateUrl: "../templates/territory-editor-tpl.html",
+    bindToController: true
+  };
+});
+
+},{"../components/territory-editor-cmp":7}],9:[function(require,module,exports){
+"use strict";
+
+var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+
 var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else { var _arr = []; for (var _iterator = arr[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) { _arr.push(_step.value); if (i && _arr.length === i) break; } return _arr; } };
 
 var _toArray = function (arr) { return Array.isArray(arr) ? arr : Array.from(arr); };
@@ -2494,6 +3419,18 @@ var Point = (function () {
     y: {
       get: function () {
         return this._y;
+      },
+      configurable: true
+    },
+    lat: {
+      get: function () {
+        return this._y;
+      },
+      configurable: true
+    },
+    lng: {
+      get: function () {
+        return this._x;
       },
       configurable: true
     },
@@ -2743,12 +3680,18 @@ var Drawing = (function (Path) {
       configurable: true
     },
     addNode: {
-      value: function addNode(node) {
-        var atIndex = arguments[1] === undefined ? this.length : arguments[1];
+      value: function addNode(node, nodeIndex) {
+        var nodePositions = this.nodePositions(),
+            atIndex = this.length;
+
         assert(node instanceof Node);
 
-        assert(Number.isInteger(atIndex));
-        assert(atIndex >= 0 && atIndex <= this.length);
+        assert(Number.isInteger(nodeIndex));
+        assert(nodeIndex > -1);
+
+        if (nodePositions.length > 0 && nodeIndex >= 0 && nodeIndex < nodePositions.length) {
+          atIndex = nodePositions[nodeIndex] + 1;
+        }
 
         var points = [node];
         if (this.length === 0 && this.fill) {
@@ -2795,8 +3738,6 @@ var Drawing = (function (Path) {
           end++;
         }
 
-        console.log({ start: start, end: end });
-
         var removedPoints = this._removePoints({ start: start, end: end });
 
         return removedPoints;
@@ -2815,8 +3756,6 @@ var Drawing = (function (Path) {
         var removeLength = 0,
             removedPoints = [];
 
-        console.log(start, end);
-
         if (this.fill && start > end) {
           // assert( start < this.length - 1 );
 
@@ -2831,7 +3770,6 @@ var Drawing = (function (Path) {
           // @Why: This point is also the first point of
           //       the next operation. Removing the last point now
           //       prevents duplicates.
-          console.log(removedPoints);
           removedPoints.pop();
 
           this.push(this.atIndex(end));
@@ -2957,19 +3895,19 @@ Drawing.event = {
 
 
 
-var DrawingCollection = (function () {
-  function DrawingCollection() {
-    _classCallCheck(this, DrawingCollection);
+var Territory = (function () {
+  function Territory() {
+    _classCallCheck(this, Territory);
 
     this._drawings = [];
     this._activeDrawingIndex = -1;
   }
 
-  _prototypeProperties(DrawingCollection, {
+  _prototypeProperties(Territory, {
     fromGeoJson: {
       value: function fromGeoJson(geoJson) {
         assert(typeof geoJson === "object");
-        var drawings = new DrawingCollection();
+        var drawings = new Territory();
 
         assert(Array.isArray(geoJson.features));
         geoJson.features.forEach(function (feature, i) {
@@ -3035,33 +3973,19 @@ var DrawingCollection = (function () {
       },
       configurable: true
     },
-    activeDrawingIndex: {
-      get: function () {
-        return this._activeDrawingIndex;
-      },
-      set: function (value) {
-        assert(value >= 0 && value < this._drawings.length, "Out of bounds");
-
-        this._activeDrawingIndex = value;
-      },
-      configurable: true
-    },
-    activeDrawing: {
-      get: function () {
-        assert(this.activeDrawingIndex >= 0 && this.activeDrawingIndex < this._drawings.length, "Out of bounds");
-        return this._drawings[this.activeDrawingIndex];
-      },
-      set: function (drawing) {
-        var drawingIndex = this._drawings.indexOf(drawing);
-        assert(drawingIndex > -1, "Drawing not found");
-
-        this.activeDrawingIndex = drawingIndex;
-      },
-      configurable: true
-    },
     find: {
       value: function find(cb) {
         return this._drawings.find(cb);
+      },
+      writable: true,
+      configurable: true
+    },
+    atIndex: {
+      value: function atIndex(index) {
+        assert(Number.isInteger(index));
+        assert(index >= 0 && index < this._drawings.length);
+
+        return this._drawings[index];
       },
       writable: true,
       configurable: true
@@ -3070,10 +3994,10 @@ var DrawingCollection = (function () {
       value: function addDrawing(_ref) {
         var atIndex = _ref.atIndex;
         var drawing = _ref.drawing;
-        assert(typeof atIndex === "number");
+        assert(Number.isInteger(atIndex));
         assert(drawing instanceof Drawing);
 
-        emit(DrawingCollection.event.DRAWING_ADDED, {
+        emit(Territory.event.DRAWING_ADDED, {
           atIndex: atIndex,
           drawing: drawing,
           context: this
@@ -3103,20 +4027,18 @@ var DrawingCollection = (function () {
         var removedDrawing = this._drawings.splice(index, 1)[0],
             nodes = removedDrawing.nodes();
 
-        console.log(nodes);
-
         for (var _iterator = nodes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
           var node = _step.value;
           removedDrawing.removeNode(node);
         }
 
-        console.log(removedDrawing);
-
-        emit(DrawingCollection.event.DRAWING_REMOVED, {
+        emit(Territory.event.DRAWING_REMOVED, {
           atIndex: index,
           drawing: removedDrawing,
           context: this
         });
+
+        return removedDrawing;
       },
       writable: true,
       configurable: true
@@ -3159,12 +4081,12 @@ var DrawingCollection = (function () {
     }
   });
 
-  return DrawingCollection;
+  return Territory;
 })();
 
-DrawingCollection.event = {
-  DRAWING_ADDED: "DrawingCollection.drawingAdded",
-  DRAWING_REMOVED: "DrawingCollection.drawingRemoved"
+Territory.event = {
+  DRAWING_ADDED: "Territory.drawingAdded",
+  DRAWING_REMOVED: "Territory.drawingRemoved"
 };
 
 
@@ -3173,408 +4095,112 @@ DrawingCollection.event = {
 exports.Point = Point;
 exports.Node = Node;
 exports.Drawing = Drawing;
-exports.DrawingCollection = DrawingCollection;
+exports.Territory = Territory;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-},{"./assert":6,"./pubsub":12}],8:[function(require,module,exports){
+},{"./assert":6,"./pubsub":14}],10:[function(require,module,exports){
 "use strict";
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var PREFIX = "@@",
+    EventTarget = {},
+    descriptor = {
+  // in ES5 does not bother with enumeration
+  configurable: true,
+  value: null
+},
+    defineProperty = Object.defineProperty || function defineProperty(obj, prop, desc) {
+  // in ES3 obj.hasOwnProperty() in for/in loops
+  // is still mandatory since there's no way
+  // to simulate non enumerable properties
+  obj[prop] = desc.value;
+},
+    indexOf = [].indexOf || function indexOf(value) {
+  var i = this.length;
+  while (i-- && this[i] !== value) {}
+  return i;
+},
+    has = EventTarget.hasOwnProperty;
 
-/*
-  Bindings for editing DrawingCollections
-*/
+function configure(obj, prop, value) {
+  descriptor.value = value;
+  defineProperty(obj, prop, descriptor);
+  descriptor.value = null;
+}
 
-var assert = _interopRequire(require("./assert"));
-
-var _pubsub = require("./pubsub");
-
-var on = _pubsub.on;
-var emit = _pubsub.emit;
-var Queue = _interopRequire(require("./queue"));
-
-var _drawingClass = require("./drawing-class");
-
-var DrawingCollection = _drawingClass.DrawingCollection;
-var Drawing = _drawingClass.Drawing;
-var Node = _drawingClass.Node;
-var Point = _drawingClass.Point;
-var _mapClass = require("./map-class");
-
-var DirectionsService = _mapClass.DirectionsService;
-var LatLng = _mapClass.LatLng;
-var MapView = require("./map-view").MapView;
-var EditorView = exports.EditorView = {
-  event: {
-    DRAWING_SAVED: "EditorView.drawingSaved"
+function on(self, type, listener) {
+  var array;
+  if (has.call(self, type)) {
+    array = self[type];
+  } else {
+    configure(self, type, array = []);
   }
-};
-
-
-
-
-exports["default"] = function (mapCanvas) {
-  on(Drawing.event.COLOR_CHANGED, function (eventName, _ref) {
-    var color = _ref.color;
-    var context = _ref.context;
-    changeDrawing(context, { color: color });
-  });
-
-
-  on(Drawing.event.FILL_CHANGED, function (eventName, _ref) {
-    var fill = _ref.fill;
-    var context = _ref.context;
-    changeDrawing(context, { fill: fill });
-  });
-
-
-  on(Drawing.event.RIGID_CHANGED, function (eventName, _ref) {
-    var rigid = _ref.rigid;
-    var context = _ref.context;
-  });
-
-
-
-
-  var CREATE_MODE = "Mode.create",
-      EDIT_MODE = "Mode.edit";
-
-  var queue = new Queue();
-
-  var drawingCollection = new DrawingCollection();
-
-  var directionsService = new DirectionsService(),
-      route = directionsService.route.bind(directionsService);
-
-  var drawings = new WeakMap(),
-      nodes = new WeakMap();
-
-
-
-
-
-  // let drawingMode = CREATE_MODE,
-  //   createNewDrawing = true,
-  //   rigid = false,
-  //   color = '#ff0000',
-  //   fill = true;
-
-
-
-
-  /*
-    ********** DEBUG ONLY **********
-    ********** DEBUG ONLY **********
-    ********** DEBUG ONLY **********
-    */
-  window.drawingMode = CREATE_MODE, window.createNewDrawing = true, window.rigid = false, window.color = "#ff0000", window.fill = true;
-
-  var geoJsons = JSON.parse(localStorage.getItem("drawings") || "[]");
-
-  for (var _iterator = geoJsons[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-    var geoJson = _step.value;
-    mapCanvas.data.addGeoJson(geoJson);
+  if (indexOf.call(array, listener) < 0) {
+    array.push(listener);
   }
-
-  window.saveDrawing = function () {
-    var geoJson = drawingCollection.toGeoJson(),
-        storedDrawings = JSON.parse(localStorage.getItem("drawings") || "[]");
-
-    storedDrawings.push(geoJson);
-    localStorage.setItem("drawings", JSON.stringify(storedDrawings));
-
-    mapCanvas.data.addGeoJson(geoJson);
-
-    for (var i = drawingCollection.length - 1; i >= 0; i--) {
-      drawingCollection.removeDrawingAtIndex(i);
-    }
-
-    window.createNewDrawing = true;
-  };
-
-
-
-
-  function latLngFromPoint(point) {
-    assert(point instanceof Point);
-
-    return new LatLng(point.y, point.x);
-  }
-
-
-  function pointFromLatLng(latLng) {
-    assert(typeof latLng.lat === "function" && typeof latLng.lng === "function");
-
-    return new Point(latLng.lng(), latLng.lat());
-  }
-
-
-  function createNodeFromLatLng(latLng) {
-    return new Node(latLng.lng(), latLng.lat());
-  }
-
-
-  function createPointFromLatLng(latLng) {
-    return new Point(latLng.lng(), latLng.lat());
-  }
-
-
-
-
-  function fillPathAroundNode(_ref) {
-    var drawing = _ref.drawing;
-    var node = _ref.node;
-    var _drawing$nodesAroundNode, start, end, _latLngs, _points$0, x, y, latLngs, points, _ref2, _ref3, _ref4, _ref5;
-    return regeneratorRuntime.async(function fillPathAroundNode$(context$2$0) {
-      while (1) switch (context$2$0.prev = context$2$0.next) {
-        case 0:
-          assert(drawing instanceof Drawing);
-          assert(node instanceof Node);
-
-          _drawing$nodesAroundNode = drawing.nodesAroundNode(node);
-          start = _drawing$nodesAroundNode.start;
-          end = _drawing$nodesAroundNode.end;
-          if (drawing.rigid) {
-            context$2$0.next = 68;
-            break;
-          }
-          if (!(start === node && end === node)) {
-            context$2$0.next = 23;
-            break;
-          }
-          _latLngs = undefined;
-          context$2$0.prev = 8;
-          context$2$0.next = 11;
-          return route({
-            origin: latLngFromPoint(node),
-            destination: latLngFromPoint(node)
-          });
-        case 11:
-          _latLngs = context$2$0.sent;
-          context$2$0.next = 17;
-          break;
-        case 14:
-          context$2$0.prev = 14;
-          context$2$0.t0 = context$2$0["catch"](8);
-          alert(context$2$0.t0);
-        case 17:
-
-
-          points = _latLngs.map(pointFromLatLng);
-
-          assert(points.length > 0);
-
-          _points$0 = points[0];
-          x = _points$0.x;
-          y = _points$0.y;
-          queue.add(node.moveTo.bind(node, x, y));
-        case 23:
-          latLngs = undefined, points = undefined;
-          if (!(start !== node)) {
-            context$2$0.next = 46;
-            break;
-          }
-          context$2$0.prev = 25;
-          context$2$0.next = 28;
-          return route({
-            origin: latLngFromPoint(start),
-            destination: latLngFromPoint(node)
-          });
-        case 28:
-          latLngs = context$2$0.sent;
-          context$2$0.next = 34;
-          break;
-        case 31:
-          context$2$0.prev = 31;
-          context$2$0.t1 = context$2$0["catch"](25);
-          alert(context$2$0.t1);
-        case 34:
-
-
-          points = latLngs.map(pointFromLatLng);
-
-          x = undefined, y = undefined;
-          _ref2 = points.shift();
-          x = _ref2.x;
-          y = _ref2.y;
-          start.moveTo(x, y);
-          _ref3 = points.pop();
-          x = _ref3.x;
-          y = _ref3.y;
-          node.moveTo(x, y);
-
-          queue.add(drawing.removePointsBetweenNodes.bind(drawing, start, node));
-          queue.add(drawing.addPointsAfterNode.bind(drawing, start, points));
-        case 46:
-          if (!(end !== node)) {
-            context$2$0.next = 68;
-            break;
-          }
-          context$2$0.prev = 47;
-          context$2$0.next = 50;
-          return route({
-            origin: latLngFromPoint(node),
-            destination: latLngFromPoint(end)
-          });
-        case 50:
-          latLngs = context$2$0.sent;
-          context$2$0.next = 56;
-          break;
-        case 53:
-          context$2$0.prev = 53;
-          context$2$0.t2 = context$2$0["catch"](47);
-          alert(context$2$0.t2);
-        case 56:
-
-
-          points = latLngs.map(pointFromLatLng);
-
-          x = undefined, y = undefined;
-          _ref4 = points.shift();
-          x = _ref4.x;
-          y = _ref4.y;
-          node.moveTo(x, y);
-          _ref5 = points.pop();
-          x = _ref5.x;
-          y = _ref5.y;
-          end.moveTo(x, y);
-
-          queue.add(drawing.removePointsBetweenNodes.bind(drawing, node, end));
-          queue.add(drawing.addPointsAfterNode.bind(drawing, node, points));
-        case 68:
-        case "end":
-          return context$2$0.stop();
-      }
-    }, null, this, [[8, 14], [25, 31], [47, 53]]);
-  }
-
-
-
-
-  function pressed(eventName, _ref) {
-    var latLng = _ref.latLng;
-    var node = _ref.node;
-    if (drawingMode === EDIT_MODE) {} else {
-      drawingMode = EDIT_MODE;
-    }
-  }
-
-
-  on(MapView.event.MARKER_PRESSED, pressed);
-  on(MapView.event.POLY_PRESSED, pressed);
-
-
-
-
-  on(MapView.event.MARKER_DRAGSTARTED, function (eventName, _ref) {
-    var latLng = _ref.latLng;
-    var node = _ref.node;
-    assert(node instanceof Node);
-
-    var drawing = drawingCollection.find(function (drawing) {
-      return drawing.indexOf(node) > -1;
-    });
-
-    assert(drawing instanceof Drawing);
-
-    // queue.add( drawing.removeNode.bind( drawing, node ) );
-  });
-
-
-  on(MapView.event.MARKER_DRAGGED, function (eventName, _ref) {
-    var latLng = _ref.latLng;
-    var node = _ref.node;
-    assert(node instanceof Node);
-
-    var point = createPointFromLatLng(latLng);
-
-    node.moveTo(point.x, point.y);
-  });
-
-
-  on(MapView.event.MARKER_DRAGENDED, function (eventName, _ref) {
-    var latLng = _ref.latLng;
-    var node = _ref.node;
-    assert(node instanceof Node);
-
-    var drawing = drawingCollection.find(function (drawing) {
-      return drawing.indexOf(node) > -1;
-    }),
-        newPoint = createPointFromLatLng(latLng);
-
-    assert(drawing instanceof Drawing);
-
-    queue.add(node.moveTo.bind(node, newPoint.x, newPoint.y)).add(fillPathAroundNode.bind(null, { drawing: drawing, node: node }));
-  });
-
-
-
-
-  on(MapView.event.MAP_PRESSED, function (eventName, _ref) {
-    var latLng = _ref.latLng;
-    if (drawingMode === EDIT_MODE) {
-      // Exit edit mode when map is pressed
-      drawingMode = CREATE_MODE;
-    } else if (drawingMode === CREATE_MODE) {
-      var node = createNodeFromLatLng(latLng);
-
-      if (createNewDrawing) {
-        // Add drawing to end of array
-        var drawing = new Drawing({
-          fill: fill,
-          rigid: rigid,
-          color: color
-        });
-
-        queue.add(drawingCollection.addDrawing.bind(drawingCollection, {
-          atIndex: drawingCollection.length,
-          drawing: drawing
-        })).add(drawing.addNode.bind(drawing, node, undefined)).add(function () {
-          return drawingCollection.activeDrawingIndex = drawingCollection.length - 1;
-        }).add(fillPathAroundNode.bind(null, {
-          drawing: drawing,
-          node: node
-        }));
-
-        createNewDrawing = false;
-      } else {
-        // Add point to end of current drawing
-        var drawing = drawingCollection.activeDrawing;
-
-        queue.add(drawing.addNode.bind(drawing, node, undefined)).add(fillPathAroundNode.bind(null, {
-          drawing: drawing,
-          node: node
-        }));
+}
+
+function dispatch(self, type, evt) {
+  var array, current, i;
+  if (has.call(self, type)) {
+    evt.target = self;
+    array = self[type].slice(0);
+    for (i = 0; i < array.length; i++) {
+      current = array[i];
+      if (typeof current === "function") {
+        current.call(self, evt);
+      } else if (typeof current.handleEvent === "function") {
+        current.handleEvent(evt);
       }
     }
-  });
-};
+  }
+}
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
+function off(self, type, listener) {
+  var array, i;
+  if (has.call(self, type)) {
+    array = self[type];
+    i = indexOf.call(array, listener);
+    if (-1 < i) {
+      array.splice(i, 1);
+      if (!array.length) {
+        delete self[type];
+      }
+    }
+  }
+}
+
+configure(EventTarget, "addEventListener", function addEventListener(type, listener) {
+  on(this, PREFIX + type, listener);
 });
 
-// Single node
-// Push to previous node
-// Push to next node
-// Identify clicked segment
-// Highlight segment on map
+configure(EventTarget, "dispatchEvent", function dispatchEvent(evt) {
+  dispatch(this, PREFIX + evt.type, evt);
+});
 
-},{"./assert":6,"./drawing-class":7,"./map-class":10,"./map-view":11,"./pubsub":12,"./queue":13}],9:[function(require,module,exports){
+configure(EventTarget, "removeEventListener", function removeEventListener(type, listener) {
+  off(this, PREFIX + type, listener);
+});
+
+module.exports = EventTarget;
+
+},{}],11:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
 
-var MapCanvas = require("./map-class").MapCanvas;
-var MapView = _interopRequire(require("./map-view"));
+/* global angular */
 
-var EditorCtrl = _interopRequire(require("./editor-ctrl"));
-
+angular.module("bndry", []);
 require("6to5ify/polyfill");
 
-var mapCanvas = new MapCanvas(document.querySelector("#map_canvas"), {
+var MapCanvas = require("./map-class").MapCanvas;
+var territoryEditorDir = _interopRequire(require("./directives/territory-editor-dir"));
+
+var MapView = _interopRequire(require("./map-view"));
+
+window.mapCanvas = new MapCanvas(document.querySelector("#map_canvas"), {
   center: {
     lat: 41.123728,
     lng: -84.864721
@@ -3583,10 +4209,10 @@ var mapCanvas = new MapCanvas(document.querySelector("#map_canvas"), {
   disableDefaultUI: true
 });
 
-new MapView(mapCanvas);
-new EditorCtrl(mapCanvas);
+window.mapView = new MapView(window.mapCanvas);
+// let territorEditorCmp = new TerritoryEditorCmp( mapView );
 
-},{"./editor-ctrl":8,"./map-class":10,"./map-view":11,"6to5ify/polyfill":5}],10:[function(require,module,exports){
+},{"./directives/territory-editor-dir":8,"./map-class":12,"./map-view":13,"6to5ify/polyfill":5}],12:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -3983,7 +4609,6 @@ var LatLng = google.maps.LatLng;
 
 
 
-
 exports.MapCanvas = MapCanvas;
 exports.Marker = Marker;
 exports.Poly = Poly;
@@ -3995,7 +4620,7 @@ Object.defineProperty(exports, "__esModule", {
 
 // Generate new icon
 
-},{"./assert":6,"./pubsub":12}],11:[function(require,module,exports){
+},{"./assert":6,"./pubsub":14}],13:[function(require,module,exports){
 "use strict";
 
 var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
@@ -4008,6 +4633,8 @@ var _pubsub = require("./pubsub");
 
 var emit = _pubsub.emit;
 var on = _pubsub.on;
+var EventTarget = _interopRequire(require("./event-target"));
+
 var _mapClass = require("./map-class");
 
 var MapCanvas = _mapClass.MapCanvas;
@@ -4018,7 +4645,7 @@ var _drawingClass = require("./drawing-class");
 
 var Node = _drawingClass.Node;
 var Drawing = _drawingClass.Drawing;
-var DrawingCollection = _drawingClass.DrawingCollection;
+var Territory = _drawingClass.Territory;
 var MapView = exports.MapView = {
   event: {
     MAP_PRESSED: "MapView.mapPressed",
@@ -4033,7 +4660,7 @@ var MapView = exports.MapView = {
 
 
 
-exports["default"] = function (mapView) {
+exports["default"] = function () {
   var polys = new Map(),
       markers = new Map(),
       markerIndices = new Map();
@@ -4155,7 +4782,7 @@ exports["default"] = function (mapView) {
 
 
 
-  mapView.data.setStyle(function (feature) {
+  window.mapCanvas.data.setStyle(function (feature) {
     var color = feature.getProperty("color"),
         fill = feature.getProperty("fill");
 
@@ -4178,23 +4805,23 @@ exports["default"] = function (mapView) {
 
 
 
-  on(DrawingCollection.event.DRAWING_ADDED, function (eventName, _ref) {
+  on(Territory.event.DRAWING_ADDED, function (eventName, _ref) {
     var atIndex = _ref.atIndex;
     var drawing = _ref.drawing;
     var context = _ref.context;
     var poly = createPolyFromDrawing(drawing);
 
-    mapView.addPoly({ atIndex: atIndex, poly: poly });
+    window.mapCanvas.addPoly({ atIndex: atIndex, poly: poly });
     polys.set(drawing, poly);
   });
 
 
-  on(DrawingCollection.event.DRAWING_REMOVED, function (eventName, _ref) {
+  on(Territory.event.DRAWING_REMOVED, function (eventName, _ref) {
     var drawing = _ref.drawing;
     var poly = polys.get(drawing);
     assert(poly instanceof Poly);
 
-    mapView.removePoly(poly);
+    window.mapCanvas.removePoly(poly);
     polys["delete"](drawing);
   });
 
@@ -4256,22 +4883,18 @@ exports["default"] = function (mapView) {
 
         var marker = createMarker({ point: point, color: color });
 
-        mapView.addMarker({ atIndex: markerIndex, marker: marker });
+        window.mapCanvas.addMarker({ atIndex: markerIndex, marker: marker });
         markers.set(point, marker);
         markerIndices.set(marker, atIndex + i);
       }
     });
-
-    console.info("POINTS_ADDED");
-    console.log("markers: " + markers.size + " | nodes: " + context.nodes().length);
-    console.log("latLngs: " + poly._poly.getPath().getLength() + " | points: " + context.length);
 
     // for ( let point of addedPoints ) {
     //   if ( point instanceof Node ) {
     //     let atIndex = nodes.indexOf( point );
 
     //     let marker = createMarker({ point, color });
-    //     mapView.addMarker({ atIndex, marker });
+    //     window.mapCanvas.addMarker({ atIndex, marker });
     //     markers.set( point, marker );
     //   }
     // }
@@ -4291,12 +4914,8 @@ exports["default"] = function (mapView) {
 
     poly.removeLatLngs({ start: start, end: end });
 
-    console.log("Removed points:", removedPoints);
-
     removedPoints.forEach(function (point, i) {
       if (skipLastPoint && i === len) return;
-
-      console.log(point);
 
       if (point instanceof Node) {
         assert(markers.has(point));
@@ -4488,7 +5107,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-},{"./assert":6,"./drawing-class":7,"./map-class":10,"./pubsub":12}],12:[function(require,module,exports){
+},{"./assert":6,"./drawing-class":9,"./event-target":10,"./map-class":12,"./pubsub":14}],14:[function(require,module,exports){
 "use strict";
 
 var _ref = [PubSub.publishSync.bind(PubSub), PubSub.subscribe.bind(PubSub), PubSub.unsubscribe.bind(PubSub)];
@@ -4503,7 +5122,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 
 var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
@@ -4534,4 +5153,4 @@ var Queue = (function () {
 
 module.exports = Queue;
 
-},{}]},{},[9]);
+},{}]},{},[11]);

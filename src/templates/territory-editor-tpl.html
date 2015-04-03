@@ -1,0 +1,28 @@
+<button id="add" class="primary"
+    ng-class="{ active: territoryEditor.createNewDrawing }"
+    ng-click="territoryEditor.createNewDrawing = !territoryEditor.createNewDrawing">
+  <svg id="plus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <path d="M 32,10 L 32,54 M 10,32 L 54,32" />
+  </svg>
+</button>
+<section id="drawing-options" class="paper"
+    ng-show="territoryEditor.createNewDrawing">
+  <!-- <button class="open secondary"></button> -->
+  <button class="close secondary"
+      ng-click="territoryEditor.createNewDrawing = false">Close</button>
+  <hr>
+  <input type="radio" name="color" id="red"
+      ng-model="territoryEditor.color"
+      value="#ff0000">
+  <input type="radio" name="color" id="green"
+      ng-model="territoryEditor.color"
+      value="#00c000" checked>
+  <input type="radio" name="color" id="blue"
+      ng-model="territoryEditor.color"
+      value="#0000ff">
+
+  <input id="rigid" type="checkbox"
+      ng-model="territoryEditor.rigid">
+  <input id="fill" type="checkbox"
+      ng-model="territoryEditor.fill">
+</section>

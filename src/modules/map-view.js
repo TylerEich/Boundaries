@@ -1,5 +1,6 @@
 import assert from './assert';
 import { emit, on } from './pubsub';
+import EventTarget from './event-target';
 import { MapCanvas, Marker, Poly, LatLng } from './map-class';
 import { Node, Drawing, Territory } from './drawing-class';
 
@@ -20,7 +21,7 @@ export const MapView = {
 
 
 
-export default function( mapView ) {
+export default function() {
   let polys = new Map(),
     markers = new Map(),
     markerIndices = new Map();
@@ -135,7 +136,7 @@ export default function( mapView ) {
 
 
 
-  mapView.data.setStyle(( feature ) => {
+  window.mapCanvas.data.setStyle(( feature ) => {
     let color = feature.getProperty( 'color' ),
       fill = feature.getProperty( 'fill' );
 
@@ -161,7 +162,7 @@ export default function( mapView ) {
   on( Territory.event.DRAWING_ADDED, ( eventName, { atIndex, drawing, context }) => {
     let poly = createPolyFromDrawing( drawing );
 
-    mapView.addPoly({ atIndex, poly });
+    window.mapCanvas.addPoly({ atIndex, poly });
     polys.set( drawing, poly );
   });
 
@@ -170,7 +171,7 @@ export default function( mapView ) {
     let poly = polys.get( drawing );
     assert( poly instanceof Poly );
 
-    mapView.removePoly( poly );
+    window.mapCanvas.removePoly( poly );
     polys.delete( drawing );
   });
 
@@ -224,7 +225,7 @@ export default function( mapView ) {
 
         let marker = createMarker({ point, color });
 
-        mapView.addMarker({ atIndex: markerIndex, marker });
+        window.mapCanvas.addMarker({ atIndex: markerIndex, marker });
         markers.set( point, marker );
         markerIndices.set( marker, atIndex + i );
       }
@@ -235,7 +236,7 @@ export default function( mapView ) {
     //     let atIndex = nodes.indexOf( point );
 
     //     let marker = createMarker({ point, color });
-    //     mapView.addMarker({ atIndex, marker });
+    //     window.mapCanvas.addMarker({ atIndex, marker });
     //     markers.set( point, marker );
     //   }
     // }

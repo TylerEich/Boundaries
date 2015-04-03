@@ -6,6 +6,7 @@
     "mocha": false,
     "jasmine": false
   },
+  "_parser": "babel-eslint",
   "rules": {
     "brace-style": [2, "1tbs", { "allowSingleLine": true }],
     "camelcase": [0],
@@ -16,6 +17,7 @@
     "func-style": [0, "expression"],
     "quotes": [2, "single", "avoid-escape"],
     "new-cap": [0],
+    "no-func-assign": false,
     "no-constant-condition": [1],
     "no-floating-decimal": [2],
     "no-extend-native": [0],
@@ -42,19 +44,27 @@
     "yoda": [2, "never", { "exceptRange": true }]
   },
   "ecmaFeatures": {
+    "arrowFunctions": true,
     "binaryLiterals": true,
     "blockBindings": true,
+    "classes": true,
     "defaultParams": true,
+    "destructuring": true,
     "forOf": true,
     "generators": true,
+    "modules": true,
     "objectLiteralComputedProperties": true,
-    "objectLiteralDuplicateProperties": true,
+    "objectLiteralDuplicateProperties": false,
     "objectLiteralShorthandMethods": true,
     "objectLiteralShorthandProperties": true,
     "octalLiterals": true,
     "regexUFlag": true,
     "regexYFlag": true,
+    "spread": true,
+    "superInFunctions": true,
     "templateStrings": true,
     "unicodeCodePointEscapes": true,
+    "globalReturn": false,
+    "jsx": true
   }
 }

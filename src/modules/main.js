@@ -1,10 +1,13 @@
-import { MapCanvas } from './map-class';
-import MapView from './map-view';
-import TerritoryEditorCmp from './territory-editor-cmp';
+/* global angular */
 
+angular.module( 'bndry', [] );
 require( '6to5ify/polyfill' );
 
-let mapCanvas = new MapCanvas(
+import { MapCanvas } from './map-class';
+import territoryEditorDir from './directives/territory-editor-dir';
+import MapView from './map-view';
+
+window.mapCanvas = new MapCanvas(
   document.querySelector( '#map_canvas' ),
   {
     center: {
@@ -16,5 +19,5 @@ let mapCanvas = new MapCanvas(
   }
 );
 
-new MapView( mapCanvas );
-new TerritoryEditorCmp( mapCanvas );
+window.mapView = new MapView( window.mapCanvas );
+// let territorEditorCmp = new TerritoryEditorCmp( mapView );

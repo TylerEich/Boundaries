@@ -96,6 +96,14 @@ class Point {
   }
 
 
+  get lat() {
+    return this._y;
+  }
+  get lng() {
+    return this._x;
+  }
+
+
   equals( point ) {
     return ( this.x === point.x && this.y === point.y )
   }
@@ -303,11 +311,18 @@ class Drawing extends Path {
   }
 
 
-  addNode( node, atIndex = this.length ) {
+  addNode( node, nodeIndex ) {
+    let nodePositions = this.nodePositions(),
+      atIndex = this.length;
+
     assert( node instanceof Node );
 
-    assert( Number.isInteger( atIndex ) );
-    assert( atIndex >= 0 && atIndex <= this.length );
+    assert( Number.isInteger( nodeIndex ) );
+    assert( nodeIndex > -1 );
+
+    if ( nodePositions.length > 0 && nodeIndex >= 0 && nodeIndex < nodePositions.length ) {
+      atIndex = nodePositions[ nodeIndex ] + 1;
+    }
 
     let points = [ node ];
     if ( this.length === 0 && this.fill ) {
@@ -494,39 +509,21 @@ class Territory {
   }
 
 
-  get activeDrawingIndex() {
-    return this._activeDrawingIndex;
-  }
-  set activeDrawingIndex( value ) {
-    assert( value >= 0 && value < this._drawings.length,
-      'Out of bounds' );
-
-    this._activeDrawingIndex = value;    
-  }
-
-
-  get activeDrawing() {
-    assert( this.activeDrawingIndex >= 0 &&
-      this.activeDrawingIndex < this._drawings.length,
-      'Out of bounds' );
-    return this._drawings[ this.activeDrawingIndex ];
-  }
-  set activeDrawing( drawing ) {
-    let drawingIndex = this._drawings.indexOf( drawing );
-    assert( drawingIndex > -1,
-      'Drawing not found' );
-
-    this.activeDrawingIndex = drawingIndex;
-  }
-
-
   find( cb ) {
     return this._drawings.find( cb );
   }
 
 
+  atIndex( index ) {
+    assert( Number.isInteger( index ) );
+    assert( index >= 0 && index < this._drawings.length );
+
+    return this._drawings[ index ];
+  }
+
+
   addDrawing({ atIndex, drawing }) {
-    assert( typeof atIndex === 'number' );
+    assert( Number.isInteger( atIndex ) );
     assert( drawing instanceof Drawing );
 
     emit( Territory.event.DRAWING_ADDED, {
@@ -566,6 +563,8 @@ class Territory {
       drawing: removedDrawing,
       context: this
     });
+
+    return removedDrawing;
   }
 
 

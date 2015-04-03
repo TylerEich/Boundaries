@@ -36,13 +36,13 @@
 		transform-origin: right;
 	}
 }
-@media (orientation: landscape) and (min-width: 50rem) {
-	main {
-		order: 3;
-		min-height: 100%;
-		width: calc(100% - 20rem);
-	}
-}
+// @media (orientation: landscape) and (min-width: 50rem) {
+// 	main {
+// 		order: 3;
+// 		min-height: 100%;
+// 		width: calc(100% - 20rem);
+// 	}
+// }
 
 #full-logo {
 	display: none;
