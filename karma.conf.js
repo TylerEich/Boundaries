@@ -30,7 +30,8 @@ module.exports = function( config ) {
 
     // testing framework to use (jasmine/mocha/qunit/...)
     frameworks: [
-      'jasmine'
+      'jasmine',
+      'browserify'
     ],
 
     reporters: [
@@ -40,9 +41,14 @@ module.exports = function( config ) {
     ],
 
     preprocessors: {
-      'build/scripts/**/*.js': [ 'coverage' ],
-      'build/modules/**/*.js': [ 'coverage' ]
+      // 'build/scripts/**/*.js': [ 'coverage', 'browserify' ],
+      // 'build/modules/**/*.js': [ 'coverage', 'browserify' ],
+      'build/tests/**/*': [ 'browserify' ]
     },
+
+    // browserify: {
+    //   transform: [[ 'babelify', { optional: [ 'es7.asyncFunctions' ]} ]]
+    // },
 
     mochaReporter: {
       output: 'minimal'
@@ -78,7 +84,7 @@ module.exports = function( config ) {
     // - PhantomJS
     // - IE (only Windows)
     browsers: [
-      'Chrome'
+      'Chrome'//,
       // 'PhantomJS'
     ],
 

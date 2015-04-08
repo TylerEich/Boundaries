@@ -15,7 +15,7 @@ export default angular.module( 'bndry' )
     scope: {},
     controller: TerritoryEditorCmp,
     controllerAs: 'territoryEditor',
-    templateUrl: '../templates/territory-editor-tpl.html',
+    templateUrl: '/src/templates/territory-editor-tpl.html',
     bindToController: true
   };
 });

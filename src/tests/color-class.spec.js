@@ -1,12 +1,15 @@
-describe( 'Color', () => {
-  let Color;
+import Color from '../modules/color-class';
 
-  beforeEach(done => {
-    System.import( 'color-class' )
-      .then( $Color => Color = $Color.default )
-      .then( done )
-      .catch( err => console.error( err ) );
-  });
+
+
+
+describe( 'Color', () => {
+  // beforeEach(done => {
+  //   System.import( 'color-class' )
+  //     .then( $Color => Color = $Color.default )
+  //     .then( done )
+  //     .catch( err => console.error( err ) );
+  // });
 
 
   const DATA = [

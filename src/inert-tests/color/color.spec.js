@@ -1,7 +1,7 @@
 
 var ColorSvc;
 var converts, tos;
-beforeEach(module('bndry.color'));
+beforeEach(angular.mock.module('bndry.color'));
 
 describe('ColorSvc', function() {
   beforeEach(inject(function(_ColorSvc_) {

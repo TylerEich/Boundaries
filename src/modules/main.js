@@ -1,7 +1,4 @@
-/* global angular */
-
-angular.module( 'bndry', [] );
-require( '6to5ify/polyfill' );
+// require( '6to5ify/polyfill' );
 
 import { MapCanvas } from './map-class';
 import territoryEditorDir from './directives/territory-editor-dir';
@@ -21,3 +18,11 @@ window.mapCanvas = new MapCanvas(
 
 window.mapView = new MapView( window.mapCanvas );
 // let territorEditorCmp = new TerritoryEditorCmp( mapView );
+
+if ( document.readyState !== 'loading' ) {
+  angular.bootstrap( document, [ 'bndry' ]);
+} else {
+  document.addEventListener( 'DOMContentLoaded', () => {
+    angular.bootstrap( document, [ 'bndry' ]);
+  });
+}

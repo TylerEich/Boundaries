@@ -286,9 +286,9 @@ export default class TerritoryEditorCmp {
         points = latLngs.map( pointFromLatLng );
 
         let x, y;
-        ({ x, y }) = points.shift();
+        ({ x, y } = points.shift() );
         start.moveTo( x, y );
-        ({ x, y }) = points.pop();
+        ({ x, y } = points.pop() );
         node.moveTo( x, y );
 
         this.queue.add( drawing.removePointsBetweenNodes.bind( drawing, start, node ) );
@@ -309,9 +309,9 @@ export default class TerritoryEditorCmp {
         points = latLngs.map( pointFromLatLng );
 
         let x, y;
-        ({ x, y }) = points.shift();
+        ({ x, y } = points.shift() );
         node.moveTo( x, y );
-        ({ x, y }) = points.pop();
+        ({ x, y } = points.pop() );
         end.moveTo( x, y );
 
         this.queue.add( drawing.removePointsBetweenNodes.bind( drawing, node, end ) );

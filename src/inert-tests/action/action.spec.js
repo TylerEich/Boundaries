@@ -2,7 +2,7 @@ var scope = {},
 	HistorySvc = {},
 	rootScope = {};
 
-beforeEach(module('bndry.action'));
+beforeEach(angular.mock.module('bndry.action'));
 
 describe('ActionCtrl', function() {
 	beforeEach(inject(function($controller) {

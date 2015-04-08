@@ -1,4 +1,4 @@
-import { AutocompleteService } from 'map-class';
+import { AutocompleteService } from '../map-class';
 
 
 

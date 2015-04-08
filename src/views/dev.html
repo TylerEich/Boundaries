@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="bndry">
+<html>
   <head>
     <meta charset="utf-8">
     <title>Boundaries</title>
@@ -180,10 +180,12 @@
     <script defer src="/bower_components/ngstorage/ngStorage.js"></script>
  -->
     <script src="/bower_components/pubsub-js/src/pubsub.js"></script>
-    <script defer src="/bundle.js"></script>
+    <script defer src="/build/scripts/bundle.js"></script>
 
     <script>
     new FastClick( document.body );
+    angular.module( 'bndry', [] );
+    
     angular.module('app', [ 'ngAnimate' ]).controller('Main', function() {
       this.search = false;
       this.add = false;
@@ -208,6 +210,7 @@
           'Add new Do Not Calls as you find them.'
       };
       });</script>
+
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
      <!--script>
        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){

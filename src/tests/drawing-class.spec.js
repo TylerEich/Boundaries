@@ -3,37 +3,43 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 500;
 
 
 
+import { Point, Node, Drawing } from '../modules/drawing-class';
+import * as PubSubModule from '../modules/pubsub';
+
+
+
+
 describe( 'DrawingModule', () => {
-  var emit, on, off;
-  var Point, Node, Drawing;
+  let emit, on, off;
 
 
-
-
-  beforeEach(done => {
-    Promise.all([
-      System.import( 'drawing-class' ),
-      System.import( 'pubsub' )
-    ])
-      .then(([ DrawingModule, PubSubModule ]) => {
-        ({
-          Point,
-          Node,
-          Drawing
-        }) = DrawingModule;
-
-        emit = spyOn( PubSubModule, 'emit' ).and.callThrough();
-        on = spyOn( PubSubModule, 'on' ).and.callThrough();
-        off = spyOn( PubSubModule, 'off' ).and.callThrough();
-        // ({
-        //   emit,
-        //   on,
-        //   off
-        // }) = PubSubModule;
-      })
-      .then( done )
-      .catch( err => console.error( 'ERROR:', err ) );
+  beforeEach(() => {
+    emit = spyOn( PubSubModule, 'emit' ).and.callThrough();
+    on = spyOn( PubSubModule, 'on' ).and.callThrough();
+    off = spyOn( PubSubModule, 'off' ).and.callThrough();
   });
+  // beforeEach(() => {
+  //   emit = spyOn
+  // } done => {
+  //   Promise.all([
+  //     System.import( 'drawing-class' ),
+  //     System.import( 'pubsub' )
+  //   ])
+  //     .then(([ DrawingModule, PubSubModule ]) => {
+  //       ({ Point, Node, Drawing } = DrawingModule );
+
+  //       emit = spyOn( PubSubModule, 'emit' ).and.callThrough();
+  //       on = spyOn( PubSubModule, 'on' ).and.callThrough();
+  //       off = spyOn( PubSubModule, 'off' ).and.callThrough();
+  //       // ({
+  //       //   emit,
+  //       //   on,
+  //       //   off
+  //       // }) = PubSubModule;
+  //     })
+  //     .then( done )
+  //     .catch( err => console.error( 'ERROR:', err ) );
+  // });
 
 
 
@@ -153,7 +159,6 @@ describe( 'DrawingModule', () => {
       let resolveColor, resolveFill, resolveRigid;
 
       on( Drawing.event.COLOR_CHANGED, ( msg, data ) => {
-        console.log( data );
         expect( data.color ).toEqual( '#ffffff' );
         resolveColor();
       });

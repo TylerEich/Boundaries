@@ -20,7 +20,6 @@ export const MapView = {
 
 
 
-
 export default function() {
   let polys = new Map(),
     markers = new Map(),

@@ -272,7 +272,7 @@ describe('DrawingSvc', function() {
     'map': {}
   };
 
-  beforeEach(module('bndry.drawing', function($provide) {
+  beforeEach(angular.mock.module('bndry.drawing', function($provide) {
     $provide.value('DirectionsSvc', new MockDirectionsSvc());
     $provide.value('MapSvc', MockMapSvc);
   }));

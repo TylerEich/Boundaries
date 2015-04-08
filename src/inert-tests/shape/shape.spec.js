@@ -1,7 +1,7 @@
 describe('ShapeCtrl', function() {
   var ShapeCtrl, scope;
 
-  beforeEach(module('bndry.shape'));
+  beforeEach(angular.mock.module('bndry.shape'));
   beforeEach(inject(function($rootScope, $controller) {
     scope = $rootScope.$new();
     ShapeCtrl = $controller('ShapeCtrl', {

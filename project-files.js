@@ -9,6 +9,9 @@ var files = {};
 
 
 files.src = {
+  dirName: 'src/',
+
+
   scripts: [
     'src/scripts/**/*.js',
     'src/scripts/main.js'
@@ -39,6 +42,9 @@ files.src = {
 
 
 files.build = {
+  dir: 'build/',
+
+
   scripts: [
     'build/scripts/**/*.js',
     'build/scripts/main.js'
@@ -82,7 +88,7 @@ files.dist = {
   views: [
     'dist/views/**/*.html'
   ]
-}
+};
 
 
 
@@ -95,13 +101,13 @@ files.polyfills = [ 'polyfills/**/*.js' ];
 files.components = {
   main: [],
   min: []
-}
+};
 
 var components = fs.readdirSync( './bower_components' );
 
-components.filter(function( folderName ) {
-  return !( folderName[0] === '.' );
-}).forEach(function( folderName ) {
+components.filter( function( folderName ) {
+  return !( folderName[ 0 ] === '.' );
+}).forEach( function( folderName ) {
   var folderPath = './bower_components/' + folderName;
 
   // Get fileName minus leading './'

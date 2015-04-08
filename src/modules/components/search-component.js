@@ -1,7 +1,5 @@
 import { search, loadResult } from '../services/search-service';
 
-'use strict';
-
 angular.module( 'bndry' )
 .directive( 'mapCanvas', function(  ) {
   return {

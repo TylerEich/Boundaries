@@ -2325,9 +2325,14 @@ module.exports = require("6to5-core/polyfill");
 },{"6to5-core/polyfill":4}],6:[function(require,module,exports){
 "use strict";
 
-module.exports = assert;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = assert;
+
 function assert(condition) {
   var message = arguments[1] === undefined ? "Assertion failed" : arguments[1];
+
   if (!condition) {
     debugger;
 
@@ -2338,169 +2343,180 @@ function assert(condition) {
   }
 }
 
+module.exports = exports["default"];
+
 },{}],7:[function(require,module,exports){
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
-var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 /*
   Bindings for editing Territories
 */
 
-var assert = _interopRequire(require("../assert"));
+var _assert = require('../assert');
 
-var _pubsub = require("../pubsub");
+var _assert2 = _interopRequireWildcard(_assert);
 
-var on = _pubsub.on;
-var emit = _pubsub.emit;
-var eventTarget = _interopRequire(require("../event-target"));
+var _on$emit = require('../pubsub');
 
-var Queue = _interopRequire(require("../queue"));
+var _eventTarget = require('../event-target');
+
+var _eventTarget2 = _interopRequireWildcard(_eventTarget);
+
+var _Queue = require('../queue');
+
+var _Queue2 = _interopRequireWildcard(_Queue);
 
 // import undoManager from '../undo-manager';
-var _drawingClass = require("../drawing-class");
 
-var Territory = _drawingClass.Territory;
-var Drawing = _drawingClass.Drawing;
-var Node = _drawingClass.Node;
-var Point = _drawingClass.Point;
-var _mapClass = require("../map-class");
+var _Territory$Drawing$Node$Point = require('../drawing-class');
 
-var DirectionsService = _mapClass.DirectionsService;
-var LatLng = _mapClass.LatLng;
-var MapView = require("../map-view").MapView;
+var _DirectionsService$LatLng = require('../map-class');
 
+var _MapView = require('../map-view');
 
-
-
-
-var directionsService = new DirectionsService();
-
-
-
+var directionsService = new _DirectionsService$LatLng.DirectionsService();
 
 var CREATE_MODE = 0,
     EDIT_MODE = 1;
 
-
-
-
 function latLngFromPoint(point) {
-  assert(point instanceof Point);
+  _assert2['default'](point instanceof _Territory$Drawing$Node$Point.Point);
 
-  return new LatLng(point.y, point.x);
+  return new _DirectionsService$LatLng.LatLng(point.y, point.x);
 }
-
 
 function pointFromLatLng(latLng) {
-  assert(typeof latLng.lat === "function" && typeof latLng.lng === "function");
+  _assert2['default'](typeof latLng.lat === 'function' && typeof latLng.lng === 'function');
 
-  return new Point(latLng.lng(), latLng.lat());
+  return new _Territory$Drawing$Node$Point.Point(latLng.lng(), latLng.lat());
 }
-
-
-
 
 function renderDrawing(_ref) {
   var drawing = _ref.drawing;
 }
 
-
-function renderNode(_ref) {
-  var node = _ref.node;
+function renderNode(_ref2) {
+  var node = _ref2.node;
 }
-
-
-
 
 function listenToNode(node) {
   return;
 
-
-
-  node.on(Node.event.MOVED, renderNode);
+  node.on(_Territory$Drawing$Node$Point.Node.event.MOVED, renderNode);
 }
-
 
 function ignoreNode(node) {
   return;
 
-
-
-  node.off(Node.event.MOVED, renderNode);
+  node.off(_Territory$Drawing$Node$Point.Node.event.MOVED, renderNode);
 }
-
-
-
 
 function listenToDrawing(drawing) {
   return;
 
-
-
-  drawing.on(Drawing.event.POINTS_ADDED, renderDrawing);
-  drawing.on(Drawing.event.POINTS_REMOVED, renderDrawing);
-  drawing.on(Drawing.event.COLOR_CHANGED, renderDrawing);
-  drawing.on(Drawing.event.FILL_CHANGED, renderDrawing);
+  drawing.on(_Territory$Drawing$Node$Point.Drawing.event.POINTS_ADDED, renderDrawing);
+  drawing.on(_Territory$Drawing$Node$Point.Drawing.event.POINTS_REMOVED, renderDrawing);
+  drawing.on(_Territory$Drawing$Node$Point.Drawing.event.COLOR_CHANGED, renderDrawing);
+  drawing.on(_Territory$Drawing$Node$Point.Drawing.event.FILL_CHANGED, renderDrawing);
 
   var nodes = drawing.nodes();
 
-  for (var _iterator = nodes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-    var node = _step.value;
-    listenToNode(node);
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = nodes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var node = _step.value;
+
+      listenToNode(node);
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator['return']) {
+        _iterator['return']();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
   }
 }
-
 
 function ignoreDrawing(drawing) {
   return;
 
-
-
-  drawing.off(Drawing.event.POINTS_ADDED, renderDrawing);
-  drawing.off(Drawing.event.POINTS_REMOVED, renderDrawing);
-  drawing.off(Drawing.event.COLOR_CHANGED, renderDrawing);
-  drawing.off(Drawing.event.FILL_CHANGED, renderDrawing);
+  drawing.off(_Territory$Drawing$Node$Point.Drawing.event.POINTS_ADDED, renderDrawing);
+  drawing.off(_Territory$Drawing$Node$Point.Drawing.event.POINTS_REMOVED, renderDrawing);
+  drawing.off(_Territory$Drawing$Node$Point.Drawing.event.COLOR_CHANGED, renderDrawing);
+  drawing.off(_Territory$Drawing$Node$Point.Drawing.event.FILL_CHANGED, renderDrawing);
 
   var nodes = drawing.nodes();
 
-  for (var _iterator = nodes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-    var node = _step.value;
-    ignoreNode(node);
+  var _iteratorNormalCompletion2 = true;
+  var _didIteratorError2 = false;
+  var _iteratorError2 = undefined;
+
+  try {
+    for (var _iterator2 = nodes[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+      var node = _step2.value;
+
+      ignoreNode(node);
+    }
+  } catch (err) {
+    _didIteratorError2 = true;
+    _iteratorError2 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion2 && _iterator2['return']) {
+        _iterator2['return']();
+      }
+    } finally {
+      if (_didIteratorError2) {
+        throw _iteratorError2;
+      }
+    }
   }
 }
-
-
-
 
 var TerritoryEditorCmp = (function () {
   function TerritoryEditorCmp() {
     var _this = this;
+
     _classCallCheck(this, TerritoryEditorCmp);
 
-    this.territory = new Territory();
+    this.territory = new _Territory$Drawing$Node$Point.Territory();
 
     this._state = {
       createNewDrawing: false,
       rigid: false,
       fill: false,
-      color: "#ff0000",
+      color: '#ff0000',
       mode: CREATE_MODE,
       activeDrawingIndex: -1,
       activeNodeIndex: -1
     };
 
-    this.queue = new Queue();
+    this.queue = new _Queue2['default']();
 
-    on(MapView.event.MAP_PRESSED, function (eventName, event) {
+    _on$emit.on(_MapView.MapView.event.MAP_PRESSED, function (eventName, event) {
       return _this.addNode(event);
     });
     // on( MapView.event.MARKER_PRESSED, this.editDrawing );
-    on(MapView.event.MARKER_DRAGENDED, function (eventName, event) {
+    _on$emit.on(_MapView.MapView.event.MARKER_DRAGENDED, function (eventName, event) {
       return _this.moveNode(event);
     });
     // on( MapView.event.POLY_PRESSED, this.editDrawing );
@@ -2511,470 +2527,361 @@ var TerritoryEditorCmp = (function () {
     // mapView.on( Poly.event.PRESSED, this.editDrawing );
   }
 
-  _prototypeProperties(TerritoryEditorCmp, null, {
-    createNewDrawing: {
-      get: function () {
-        return this._state.createNewDrawing;
-      },
-      set: function (value) {
-        assert(typeof value === "boolean", "Value of createNewDrawing must be boolean");
-
-        this._state.createNewDrawing = value;
-      },
-      configurable: true
+  _createClass(TerritoryEditorCmp, [{
+    key: 'createNewDrawing',
+    get: function () {
+      return this._state.createNewDrawing;
     },
-    rigid: {
-      get: function () {
-        return this._state.rigid;
-      },
-      set: function (value) {
-        assert(typeof value === "boolean", "Value of rigid must be boolean");
+    set: function (value) {
+      _assert2['default'](typeof value === 'boolean', 'Value of createNewDrawing must be boolean');
 
-        this._state.rigid = value;
-      },
-      configurable: true
-    },
-    fill: {
-      get: function () {
-        return this._state.fill;
-      },
-      set: function (value) {
-        assert(typeof value === "boolean", "Value of fill must be boolean");
-
-        this._state.fill = value;
-      },
-      configurable: true
-    },
-    color: {
-      get: function () {
-        return this._state.color;
-      },
-      set: function (value) {
-        assert(typeof value === "string", "Value of color must be string");
-
-        this._state.color = value;
-      },
-      configurable: true
-    },
-    mode: {
-      get: function () {
-        return this._state.mode;
-      },
-      set: function (value) {
-        assert(Number.isInteger(value), "Value of mode must be a constant");
-
-        this._state.mode = value;
-      },
-      configurable: true
-    },
-    activeDrawingIndex: {
-      get: function () {
-        return this._state.activeDrawingIndex;
-      },
-      set: function (value) {
-        assert(Number.isInteger(value), "Value of activeDrawingIndex must be integer");
-
-        this._state.activeDrawingIndex = value;
-      },
-      configurable: true
-    },
-    activeNodeIndex: {
-      get: function () {
-        return this._state.activeNodeIndex;
-      },
-      set: function (value) {
-        assert(Number.isInteger(value), "Value of activeNodeIndex must be integer");
-
-        this._state.activeNodeIndex = value;
-      },
-      configurable: true
-    },
-    addDrawing: {
-      value: function addDrawing() {
-        var _state = this._state;
-        var rigid = _state.rigid;
-        var fill = _state.fill;
-        var color = _state.color;
-        var drawing = new Drawing({ rigid: rigid, fill: fill, color: color });
-        var atIndex = ++this.activeDrawingIndex;
-
-        this.territory.addDrawing({
-          atIndex: atIndex,
-          drawing: drawing
-        });
-
-        listenToDrawing(drawing);
-      },
-      writable: true,
-      configurable: true
-    },
-    removeDrawing: {
-      value: function removeDrawing() {
-        var activeDrawingIndex = this.activeDrawingIndex--,
-            drawing = this.territory.removeDrawingAtIndex(activeDrawingIndex);
-
-        ignoreDrawing(drawing);
-      },
-      writable: true,
-      configurable: true
-    },
-    fillPathAroundNode: {
-      value: function fillPathAroundNode(_ref) {
-        var _this = this;
-        var drawing = _ref.drawing;
-        var node = _ref.node;
-        var _drawing$nodesAroundNode, start, end, _latLngs, _points$0, x, y, latLngs, points, _ref2, _ref3, _ref4, _ref5;
-        return regeneratorRuntime.async(function fillPathAroundNode$(context$2$0) {
-          while (1) switch (context$2$0.prev = context$2$0.next) {
-            case 0:
-              assert(drawing instanceof Drawing);
-              assert(node instanceof Node);
-
-              _drawing$nodesAroundNode = drawing.nodesAroundNode(node);
-              start = _drawing$nodesAroundNode.start;
-              end = _drawing$nodesAroundNode.end;
-              if (drawing.rigid) {
-                context$2$0.next = 68;
-                break;
-              }
-              if (!(start === node && end === node)) {
-                context$2$0.next = 23;
-                break;
-              }
-              _latLngs = undefined;
-              context$2$0.prev = 8;
-              context$2$0.next = 11;
-              return directionsService.route({
-                origin: latLngFromPoint(node),
-                destination: latLngFromPoint(node)
-              });
-            case 11:
-              _latLngs = context$2$0.sent;
-              context$2$0.next = 17;
-              break;
-            case 14:
-              context$2$0.prev = 14;
-              context$2$0.t0 = context$2$0["catch"](8);
-              alert(context$2$0.t0);
-            case 17:
-
-
-              points = _latLngs.map(pointFromLatLng);
-
-              assert(points.length > 0);
-
-              _points$0 = points[0];
-              x = _points$0.x;
-              y = _points$0.y;
-              _this.queue.add(node.moveTo.bind(node, x, y));
-            case 23:
-              latLngs = undefined, points = undefined;
-              if (!(start !== node)) {
-                context$2$0.next = 46;
-                break;
-              }
-              context$2$0.prev = 25;
-              context$2$0.next = 28;
-              return directionsService.route({
-                origin: latLngFromPoint(start),
-                destination: latLngFromPoint(node)
-              });
-            case 28:
-              latLngs = context$2$0.sent;
-              context$2$0.next = 34;
-              break;
-            case 31:
-              context$2$0.prev = 31;
-              context$2$0.t1 = context$2$0["catch"](25);
-              alert(context$2$0.t1);
-            case 34:
-
-
-              points = latLngs.map(pointFromLatLng);
-
-              x = undefined, y = undefined;
-              _ref2 = points.shift();
-              x = _ref2.x;
-              y = _ref2.y;
-              start.moveTo(x, y);
-              _ref3 = points.pop();
-              x = _ref3.x;
-              y = _ref3.y;
-              node.moveTo(x, y);
-
-              _this.queue.add(drawing.removePointsBetweenNodes.bind(drawing, start, node));
-              _this.queue.add(drawing.addPointsAfterNode.bind(drawing, start, points));
-            case 46:
-              if (!(end !== node)) {
-                context$2$0.next = 68;
-                break;
-              }
-              context$2$0.prev = 47;
-              context$2$0.next = 50;
-              return directionsService.route({
-                origin: latLngFromPoint(node),
-                destination: latLngFromPoint(end)
-              });
-            case 50:
-              latLngs = context$2$0.sent;
-              context$2$0.next = 56;
-              break;
-            case 53:
-              context$2$0.prev = 53;
-              context$2$0.t2 = context$2$0["catch"](47);
-              alert(context$2$0.t2);
-            case 56:
-
-
-              points = latLngs.map(pointFromLatLng);
-
-              x = undefined, y = undefined;
-              _ref4 = points.shift();
-              x = _ref4.x;
-              y = _ref4.y;
-              node.moveTo(x, y);
-              _ref5 = points.pop();
-              x = _ref5.x;
-              y = _ref5.y;
-              end.moveTo(x, y);
-
-              _this.queue.add(drawing.removePointsBetweenNodes.bind(drawing, node, end));
-              _this.queue.add(drawing.addPointsAfterNode.bind(drawing, node, points));
-            case 68:
-            case "end":
-              return context$2$0.stop();
-          }
-        }, null, this, [[8, 14], [25, 31], [47, 53]]);
-      },
-      writable: true,
-      configurable: true
-    },
-    addNode: {
-      value: function addNode(event) {
-        var _this = this;
-        if (this.createNewDrawing) {
-          this.addDrawing();
-          this.createNewDrawing = false;
-        }
-
-        var drawing = this.territory.atIndex(this.activeDrawingIndex);
-        var activeNodeIndex = ++this.activeNodeIndex;var _ref = [event.latLng.lng(), event.latLng.lat()];
-
-        var x = _ref[0];
-        var y = _ref[1];
-        var node = new Node(x, y);
-
-        this.queue.add(function () {
-          drawing.addNode(node, activeNodeIndex);
-
-          _this.fillPathAroundNode({ drawing: drawing, node: node });
-          // undoManager.add({
-          //   undo() {
-          //     this.removeNode();
-          //   },
-          //   redo() {
-          //     this.addNode( event );
-          //   }
-          // })
-        });
-
-        listenToNode(node);
-      },
-      writable: true,
-      configurable: true
-    },
-    moveNode: {
-      value: function moveNode(_ref) {
-        var _this = this;
-        var latLng = _ref.latLng;
-        var node = _ref.node;
-        assert(node instanceof Node);
-
-        var drawing = this.territory.find(function (drawing) {
-          return drawing.indexOf(node) > -1;
-        }),
-            newPoint = pointFromLatLng(latLng);
-
-        assert(drawing instanceof Drawing);
-
-        this.queue.add(function () {
-          node.moveTo(newPoint.x, newPoint.y);
-
-          return _this.fillPathAroundNode({ drawing: drawing, node: node });
-        });
-      },
-      writable: true,
-      configurable: true
-    },
-    removeNode: {
-      value: function removeNode() {
-        var _this = this;
-        this.queue.add(function () {
-          var drawing = _this.territory.atIndex(_this.activeDrawingIndex);
-
-          var node = drawing.removeNodeAtIndex(_this.activeNodeIndex);
-
-          ignoreNode(node);
-        });
-      },
-      writable: true,
-      configurable: true
-    },
-    getTerritoryGeoJson: {
-      value: function getTerritoryGeoJson() {
-        return this.territory.toGeoJson();
-      },
-      writable: true,
-      configurable: true
-    },
-    detachedCallback: {
-
-
-      // Called when element is removed
-      value: function detachedCallback() {
-        // Remove bindings between territory and map
-        this.territory.forEach(ignoreDrawing);
-      },
-      writable: true,
-      configurable: true
+      this._state.createNewDrawing = value;
     }
-  });
+  }, {
+    key: 'rigid',
+    get: function () {
+      return this._state.rigid;
+    },
+    set: function (value) {
+      _assert2['default'](typeof value === 'boolean', 'Value of rigid must be boolean');
+
+      this._state.rigid = value;
+    }
+  }, {
+    key: 'fill',
+    get: function () {
+      return this._state.fill;
+    },
+    set: function (value) {
+      _assert2['default'](typeof value === 'boolean', 'Value of fill must be boolean');
+
+      this._state.fill = value;
+    }
+  }, {
+    key: 'color',
+    get: function () {
+      return this._state.color;
+    },
+    set: function (value) {
+      _assert2['default'](typeof value === 'string', 'Value of color must be string');
+
+      this._state.color = value;
+    }
+  }, {
+    key: 'mode',
+    get: function () {
+      return this._state.mode;
+    },
+    set: function (value) {
+      _assert2['default'](Number.isInteger(value), 'Value of mode must be a constant');
+
+      this._state.mode = value;
+    }
+  }, {
+    key: 'activeDrawingIndex',
+    get: function () {
+      return this._state.activeDrawingIndex;
+    },
+    set: function (value) {
+      _assert2['default'](Number.isInteger(value), 'Value of activeDrawingIndex must be integer');
+
+      this._state.activeDrawingIndex = value;
+    }
+  }, {
+    key: 'activeNodeIndex',
+    get: function () {
+      return this._state.activeNodeIndex;
+    },
+    set: function (value) {
+      _assert2['default'](Number.isInteger(value), 'Value of activeNodeIndex must be integer');
+
+      this._state.activeNodeIndex = value;
+    }
+  }, {
+    key: 'addDrawing',
+    value: function addDrawing() {
+      var _state = this._state;
+      var rigid = _state.rigid;
+      var fill = _state.fill;
+      var color = _state.color;
+      var drawing = new _Territory$Drawing$Node$Point.Drawing({ rigid: rigid, fill: fill, color: color });
+      var atIndex = ++this.activeDrawingIndex;
+
+      this.territory.addDrawing({
+        atIndex: atIndex,
+        drawing: drawing
+      });
+
+      listenToDrawing(drawing);
+    }
+  }, {
+    key: 'removeDrawing',
+    value: function removeDrawing() {
+      var activeDrawingIndex = this.activeDrawingIndex--,
+          drawing = this.territory.removeDrawingAtIndex(activeDrawingIndex);
+
+      ignoreDrawing(drawing);
+    }
+  }, {
+    key: 'fillPathAroundNode',
+    value: function fillPathAroundNode(_ref3) {
+      var drawing = _ref3.drawing;
+      var node = _ref3.node;
+
+      var _drawing$nodesAroundNode, start, end, _latLngs, _points$0, x, y, latLngs, points, _points$shift, _points$pop, _points$shift2, _points$pop2;
+
+      return regeneratorRuntime.async(function fillPathAroundNode$(context$2$0) {
+        while (1) switch (context$2$0.prev = context$2$0.next) {
+          case 0:
+            _assert2['default'](drawing instanceof _Territory$Drawing$Node$Point.Drawing);
+            _assert2['default'](node instanceof _Territory$Drawing$Node$Point.Node);
+
+            _drawing$nodesAroundNode = drawing.nodesAroundNode(node);
+            start = _drawing$nodesAroundNode.start;
+            end = _drawing$nodesAroundNode.end;
+
+            if (drawing.rigid) {
+              context$2$0.next = 68;
+              break;
+            }
+
+            if (!(start === node && end === node)) {
+              context$2$0.next = 23;
+              break;
+            }
+
+            _latLngs = undefined;
+            context$2$0.prev = 8;
+            context$2$0.next = 11;
+            return directionsService.route({
+              origin: latLngFromPoint(node),
+              destination: latLngFromPoint(node)
+            });
+
+          case 11:
+            _latLngs = context$2$0.sent;
+            context$2$0.next = 17;
+            break;
+
+          case 14:
+            context$2$0.prev = 14;
+            context$2$0.t0 = context$2$0['catch'](8);
+
+            alert(context$2$0.t0);
+
+          case 17:
+
+            points = _latLngs.map(pointFromLatLng);
+
+            _assert2['default'](points.length > 0);
+
+            _points$0 = points[0];
+            x = _points$0.x;
+            y = _points$0.y;
+
+            this.queue.add(node.moveTo.bind(node, x, y));
+
+          case 23:
+            latLngs = undefined, points = undefined;
+
+            if (!(start !== node)) {
+              context$2$0.next = 46;
+              break;
+            }
+
+            context$2$0.prev = 25;
+            context$2$0.next = 28;
+            return directionsService.route({
+              origin: latLngFromPoint(start),
+              destination: latLngFromPoint(node)
+            });
+
+          case 28:
+            latLngs = context$2$0.sent;
+            context$2$0.next = 34;
+            break;
+
+          case 31:
+            context$2$0.prev = 31;
+            context$2$0.t1 = context$2$0['catch'](25);
+
+            alert(context$2$0.t1);
+
+          case 34:
+
+            points = latLngs.map(pointFromLatLng);
+
+            x = undefined, y = undefined;
+            _points$shift = points.shift();
+            x = _points$shift.x;
+            y = _points$shift.y;
+
+            start.moveTo(x, y);
+            _points$pop = points.pop();
+            x = _points$pop.x;
+            y = _points$pop.y;
+
+            node.moveTo(x, y);
+
+            this.queue.add(drawing.removePointsBetweenNodes.bind(drawing, start, node));
+            this.queue.add(drawing.addPointsAfterNode.bind(drawing, start, points));
+
+          case 46:
+            if (!(end !== node)) {
+              context$2$0.next = 68;
+              break;
+            }
+
+            context$2$0.prev = 47;
+            context$2$0.next = 50;
+            return directionsService.route({
+              origin: latLngFromPoint(node),
+              destination: latLngFromPoint(end)
+            });
+
+          case 50:
+            latLngs = context$2$0.sent;
+            context$2$0.next = 56;
+            break;
+
+          case 53:
+            context$2$0.prev = 53;
+            context$2$0.t2 = context$2$0['catch'](47);
+
+            alert(context$2$0.t2);
+
+          case 56:
+
+            points = latLngs.map(pointFromLatLng);
+
+            x = undefined, y = undefined;
+            _points$shift2 = points.shift();
+            x = _points$shift2.x;
+            y = _points$shift2.y;
+
+            node.moveTo(x, y);
+            _points$pop2 = points.pop();
+            x = _points$pop2.x;
+            y = _points$pop2.y;
+
+            end.moveTo(x, y);
+
+            this.queue.add(drawing.removePointsBetweenNodes.bind(drawing, node, end));
+            this.queue.add(drawing.addPointsAfterNode.bind(drawing, node, points));
+
+          case 68:
+          case 'end':
+            return context$2$0.stop();
+        }
+      }, null, this, [[8, 14], [25, 31], [47, 53]]);
+    }
+  }, {
+    key: 'addNode',
+    value: function addNode(event) {
+      var _this2 = this;
+
+      if (this.createNewDrawing) {
+        this.addDrawing();
+        this.createNewDrawing = false;
+      }
+
+      var drawing = this.territory.atIndex(this.activeDrawingIndex);
+      var activeNodeIndex = ++this.activeNodeIndex;var x = event.latLng.lng();
+
+      var y = event.latLng.lat();
+      var node = new _Territory$Drawing$Node$Point.Node(x, y);
+
+      this.queue.add(function () {
+        drawing.addNode(node, activeNodeIndex);
+
+        _this2.fillPathAroundNode({ drawing: drawing, node: node });
+        // undoManager.add({
+        //   undo() {
+        //     this.removeNode();
+        //   },
+        //   redo() {
+        //     this.addNode( event );
+        //   }
+        // })
+      });
+
+      listenToNode(node);
+    }
+  }, {
+    key: 'moveNode',
+    value: function moveNode(_ref4) {
+      var _this3 = this;
+
+      var latLng = _ref4.latLng;
+      var node = _ref4.node;
+
+      _assert2['default'](node instanceof _Territory$Drawing$Node$Point.Node);
+
+      var drawing = this.territory.find(function (drawing) {
+        return drawing.indexOf(node) > -1;
+      }),
+          newPoint = pointFromLatLng(latLng);
+
+      _assert2['default'](drawing instanceof _Territory$Drawing$Node$Point.Drawing);
+
+      this.queue.add(function () {
+        node.moveTo(newPoint.x, newPoint.y);
+
+        return _this3.fillPathAroundNode({ drawing: drawing, node: node });
+      });
+    }
+  }, {
+    key: 'removeNode',
+    value: function removeNode() {
+      var _this4 = this;
+
+      this.queue.add(function () {
+        var drawing = _this4.territory.atIndex(_this4.activeDrawingIndex);
+
+        var node = drawing.removeNodeAtIndex(_this4.activeNodeIndex);
+
+        ignoreNode(node);
+      });
+    }
+  }, {
+    key: 'getTerritoryGeoJson',
+    value: function getTerritoryGeoJson() {
+      return this.territory.toGeoJson();
+    }
+  }, {
+    key: 'detachedCallback',
+
+    // Called when element is removed
+    value: function detachedCallback() {
+      // Remove bindings between territory and map
+      this.territory.forEach(ignoreDrawing);
+    }
+  }]);
 
   return TerritoryEditorCmp;
 })();
 
-module.exports = TerritoryEditorCmp;
+exports['default'] = TerritoryEditorCmp;
+module.exports = exports['default'];
 /* syncedStorage */
 // Single node
+
 // Push to previous node
+
 // Push to next node
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // export function oldMain( mapView ) {
 //   on( Drawing.event.COLOR_CHANGED, ( eventName, { color, context }) => {
 //     changeDrawing( context, { color });
 //   });
 
-
 //   on( Drawing.event.FILL_CHANGED, ( eventName, { fill, context }) => {
 //     changeDrawing( context, { fill });
 //   });
 
-
 //   on( Drawing.event.RIGID_CHANGED, ( eventName, { rigid, context }) =>  {
 
 //   });
-
-
-
 
 //   const CREATE_MODE = 'Mode.create',
 //     EDIT_MODE = 'Mode.edit';
@@ -2989,18 +2896,11 @@ module.exports = TerritoryEditorCmp;
 //   const drawings = new WeakMap(),
 //     nodes = new WeakMap();
 
-
-
-
-
 //   // let drawingMode = CREATE_MODE,
 //   //   createNewDrawing = true,
 //   //   rigid = false,
 //   //   color = '#ff0000',
 //   //   fill = true;
-
-
-
 
 //   /*
 //     ********** DEBUG ONLY **********
@@ -3039,15 +2939,11 @@ module.exports = TerritoryEditorCmp;
 //     window.createNewDrawing = true;
 //   };
 
-
-
-
 //   function latLngFromPoint( point ) {
 //     assert( point instanceof Point );
 
 //     return new LatLng( point.y, point.x );
 //   }
-
 
 //   function pointFromLatLng( latLng ) {
 //     assert( typeof latLng.lat === 'function' &&
@@ -3056,18 +2952,13 @@ module.exports = TerritoryEditorCmp;
 //     return new Point( latLng.lng(), latLng.lat() );
 //   }
 
-
 //   function createNodeFromLatLng( latLng ) {
 //     return new Node( latLng.lng(), latLng.lat() );
 //   }
 
-
 //   function createPointFromLatLng( latLng ) {
 //     return new Point( latLng.lng(), latLng.lat() );
 //   }
-
-
-
 
 //   async function fillPathAroundNode({ drawing, node }) {
 //     assert( drawing instanceof Drawing );
@@ -3145,9 +3036,6 @@ module.exports = TerritoryEditorCmp;
 //     }
 //   }
 
-
-
-
 //   function pressed( eventName, { latLng, node }) {
 //     if ( drawingMode === EDIT_MODE ) {
 //       // Identify clicked segment
@@ -3157,12 +3045,8 @@ module.exports = TerritoryEditorCmp;
 //     }
 //   }
 
-
 //   on( MapView.event.MARKER_PRESSED, pressed );
 //   on( MapView.event.POLY_PRESSED, pressed );
-
-
-
 
 //   mapView.on( MapView.event.MARKER_DRAGSTARTED, ({ latLng, node }) => {
 //     assert( node instanceof Node );
@@ -3174,7 +3058,6 @@ module.exports = TerritoryEditorCmp;
 //     // queue.add( drawing.removeNode.bind( drawing, node ) );
 //   });
 
-
 //   on( MapView.event.MARKER_DRAGGED, ( eventName, { latLng, node }) => {
 //     assert( node instanceof Node );
 
@@ -3182,7 +3065,6 @@ module.exports = TerritoryEditorCmp;
 
 //     node.moveTo( point.x, point.y );
 //   });
-
 
 //   on( MapView.event.MARKER_DRAGENDED, ( eventName, { latLng, node }) => {
 //     assert( node instanceof Node );
@@ -3195,9 +3077,6 @@ module.exports = TerritoryEditorCmp;
 //     queue.add( node.moveTo.bind( node, newPoint.x, newPoint.y ) )
 //       .add( fillPathAroundNode.bind( null, { drawing, node }) );
 //   });
-
-
-
 
 //   on( MapView.event.MAP_PRESSED, ( eventName, { latLng }) => {
 //     if ( drawingMode === EDIT_MODE ) {
@@ -3241,56 +3120,62 @@ module.exports = TerritoryEditorCmp;
 // }
 
 },{"../assert":6,"../drawing-class":9,"../event-target":10,"../map-class":12,"../map-view":13,"../pubsub":14,"../queue":15}],8:[function(require,module,exports){
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 /* global angular */
 
+var _TerritoryEditorCmp = require('../components/territory-editor-cmp');
 
+var _TerritoryEditorCmp2 = _interopRequireWildcard(_TerritoryEditorCmp);
 
-
-var TerritoryEditorCmp = _interopRequire(require("../components/territory-editor-cmp"));
-
-module.exports = angular.module("bndry").directive("territoryEditor", function () {
+exports['default'] = angular.module('bndry').directive('territoryEditor', function () {
   return {
-    restrict: "E",
+    restrict: 'E',
     scope: {},
-    controller: TerritoryEditorCmp,
-    controllerAs: "territoryEditor",
-    templateUrl: "../templates/territory-editor-tpl.html",
+    controller: _TerritoryEditorCmp2['default'],
+    controllerAs: 'territoryEditor',
+    templateUrl: '../templates/territory-editor-tpl.html',
     bindToController: true
   };
 });
+module.exports = exports['default'];
 
 },{"../components/territory-editor-cmp":7}],9:[function(require,module,exports){
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
-var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else { var _arr = []; for (var _iterator = arr[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) { _arr.push(_step.value); if (i && _arr.length === i) break; } return _arr; } };
+var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } };
 
-var _toArray = function (arr) { return Array.isArray(arr) ? arr : Array.from(arr); };
+var _toConsumableArray = function (arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) arr2[i] = arr[i]; return arr2; } else { return Array.from(arr); } };
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
-var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var emit = require("./pubsub").emit;
-var assert = _interopRequire(require("./assert"));
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 
+var _emit = require('./pubsub');
 
+var _assert = require('./assert');
 
-
-
+var _assert2 = _interopRequireWildcard(_assert);
 
 /**
   Path should `extend Array`, but browsers don't support that yet
 **/
+
 var Path = (function () {
   function Path() {
     for (var _len = arguments.length, points = Array(_len), _key = 0; _key < _len; _key++) {
@@ -3302,98 +3187,80 @@ var Path = (function () {
     this._points = points;
   }
 
-  _prototypeProperties(Path, null, {
-    push: {
-      value: function push() {
-        var _points;
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
+  _createClass(Path, [{
+    key: 'push',
+    value: function push() {
+      var _points;
 
-        return (_points = this._points).push.apply(_points, _toArray(args));
-      },
-      writable: true,
-      configurable: true
-    },
-    splice: {
-      value: function splice() {
-        var _points;
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
+      for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
 
-        return (_points = this._points).splice.apply(_points, _toArray(args));
-      },
-      writable: true,
-      configurable: true
-    },
-    filter: {
-      value: function filter(cb) {
-        return this._points.filter(cb);
-      },
-      writable: true,
-      configurable: true
-    },
-    find: {
-      value: function find(cb) {
-        return this._points.find(cb);
-      },
-      writable: true,
-      configurable: true
-    },
-    every: {
-      value: function every(cb) {
-        return this._points.every(cb);
-      },
-      writable: true,
-      configurable: true
-    },
-    some: {
-      value: function some(cb) {
-        return this._points.some(cb);
-      },
-      writable: true,
-      configurable: true
-    },
-    atIndex: {
-      value: function atIndex(i) {
-        assert(i < this._points.length, "Out of bounds");
-        return this._points[i];
-      },
-      writable: true,
-      configurable: true
-    },
-    length: {
-      get: function () {
-        return this._points.length;
-      },
-      configurable: true
-    },
-    indexOf: {
-      value: function indexOf(point, fromIndex) {
-        assert(point instanceof Point);
-
-        return this._points.indexOf(point, fromIndex);
-      },
-      writable: true,
-      configurable: true
-    },
-    isValid: {
-      value: function isValid() {
-        var points = this._points;
-
-        return (
-          // Path can be empty
-          points.length === 0 ||
-
-          // Non-empty Path must start and end with a Node
-          points[points.length - 1] instanceof Node && points[0] instanceof Node
-        );
-      },
-      writable: true,
-      configurable: true
+      return (_points = this._points).push.apply(_points, args);
     }
-  });
+  }, {
+    key: 'splice',
+    value: function splice() {
+      var _points2;
+
+      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
+      }
+
+      return (_points2 = this._points).splice.apply(_points2, args);
+    }
+  }, {
+    key: 'filter',
+    value: function filter(cb) {
+      return this._points.filter(cb);
+    }
+  }, {
+    key: 'find',
+    value: function find(cb) {
+      return this._points.find(cb);
+    }
+  }, {
+    key: 'every',
+    value: function every(cb) {
+      return this._points.every(cb);
+    }
+  }, {
+    key: 'some',
+    value: function some(cb) {
+      return this._points.some(cb);
+    }
+  }, {
+    key: 'atIndex',
+    value: function atIndex(i) {
+      _assert2['default'](i < this._points.length, 'Out of bounds');
+      return this._points[i];
+    }
+  }, {
+    key: 'length',
+    get: function () {
+      return this._points.length;
+    }
+  }, {
+    key: 'indexOf',
+    value: function indexOf(point, fromIndex) {
+      _assert2['default'](point instanceof Point);
+
+      return this._points.indexOf(point, fromIndex);
+    }
+  }, {
+    key: 'isValid',
+    value: function isValid() {
+      var points = this._points;
+
+      return (
+        // Path can be empty
+        points.length === 0 ||
+
+        // Non-empty Path must start and end with a Node
+        points[points.length - 1] instanceof Node && points[0] instanceof Node
+      );
+    }
+  }]);
 
   return Path;
 })();
@@ -3402,498 +3269,460 @@ var Point = (function () {
   function Point(x, y) {
     _classCallCheck(this, Point);
 
-    assert(typeof x === "number");
-    assert(typeof y === "number");
+    _assert2['default'](typeof x === 'number');
+    _assert2['default'](typeof y === 'number');
 
     this._x = x;
     this._y = y;
   }
 
-  _prototypeProperties(Point, null, {
-    x: {
-      get: function () {
-        return this._x;
-      },
-      configurable: true
-    },
-    y: {
-      get: function () {
-        return this._y;
-      },
-      configurable: true
-    },
-    lat: {
-      get: function () {
-        return this._y;
-      },
-      configurable: true
-    },
-    lng: {
-      get: function () {
-        return this._x;
-      },
-      configurable: true
-    },
-    equals: {
-      value: function equals(point) {
-        return this.x === point.x && this.y === point.y;
-      },
-      writable: true,
-      configurable: true
+  _createClass(Point, [{
+    key: 'x',
+    get: function () {
+      return this._x;
     }
-  });
+  }, {
+    key: 'y',
+    get: function () {
+      return this._y;
+    }
+  }, {
+    key: 'lat',
+    get: function () {
+      return this._y;
+    }
+  }, {
+    key: 'lng',
+    get: function () {
+      return this._x;
+    }
+  }, {
+    key: 'equals',
+    value: function equals(point) {
+      return this.x === point.x && this.y === point.y;
+    }
+  }]);
 
   return Point;
 })();
 
-var Node = (function (Point) {
+var Node = (function (_Point) {
   function Node(x, y) {
     _classCallCheck(this, Node);
 
-    _get(Object.getPrototypeOf(Node.prototype), "constructor", this).call(this, x, y);
+    _get(Object.getPrototypeOf(Node.prototype), 'constructor', this).call(this, x, y);
   }
 
-  _inherits(Node, Point);
+  _inherits(Node, _Point);
 
-  _prototypeProperties(Node, null, {
-    moveTo: {
-      value: function moveTo(x, y) {
-        assert(typeof x === "number", "X must be a number");
-        assert(typeof y === "number", "Y must be a number");
+  _createClass(Node, [{
+    key: 'moveTo',
+    value: function moveTo(x, y) {
+      _assert2['default'](typeof x === 'number', 'X must be a number');
+      _assert2['default'](typeof y === 'number', 'Y must be a number');
 
-        this._x = x;
-        this._y = y;
+      this._x = x;
+      this._y = y;
 
-        emit(Node.event.MOVED, {
-          x: x,
-          y: y,
-          context: this
-        });
-      },
-      writable: true,
-      configurable: true
+      _emit.emit(Node.event.MOVED, {
+        x: x,
+        y: y,
+        context: this
+      });
     }
-  });
+  }]);
 
   return Node;
 })(Point);
 
 Node.event = {
-  MOVED: "Node.moved"
+  MOVED: 'Node.moved'
 };
 
-
-
-
-var Drawing = (function (Path) {
+var Drawing = (function (_Path) {
   function Drawing(_ref) {
     var color = _ref.color;
     var fill = _ref.fill;
     var rigid = _ref.rigid;
+
     _classCallCheck(this, Drawing);
 
-    _get(Object.getPrototypeOf(Drawing.prototype), "constructor", this).call(this);
+    _get(Object.getPrototypeOf(Drawing.prototype), 'constructor', this).call(this);
 
-    assert(typeof color === "string");
-    assert(typeof fill === "boolean");
-    assert(typeof rigid === "boolean");
+    _assert2['default'](typeof color === 'string');
+    _assert2['default'](typeof fill === 'boolean');
+    _assert2['default'](typeof rigid === 'boolean');
     this._color = color;
     this._fill = fill;
     this._rigid = rigid;
 
-    assert(this.isValid());
+    _assert2['default'](this.isValid());
   }
 
-  _inherits(Drawing, Path);
+  _inherits(Drawing, _Path);
 
-  _prototypeProperties(Drawing, null, {
-    isValid: {
-      value: function isValid() {
-        var valid = _get(Object.getPrototypeOf(Drawing.prototype), "isValid", this).call(this),
-            rigid = this.rigid ? this.every(function (point) {
-          return point instanceof Node;
-        }) : true,
-            fill = this.fill ? this.length === 0 || this.atIndex(0) === this.atIndex(this.length - 1) : true;
-        return valid && rigid && fill;
-      },
-      writable: true,
-      configurable: true
-    },
-    color: {
-      get: function () {
-        return this._color;
-      },
-      set: function (value) {
-        assert(typeof value === "string");
-        this._color = value;
-
-        emit(Drawing.event.COLOR_CHANGED, {
-          color: value,
-          context: this
-        });
-      },
-      configurable: true
-    },
-    fill: {
-      get: function () {
-        return this._fill;
-      },
-      set: function (value) {
-        assert(typeof value === "boolean");
-
-        var oldValue = this.fill;
-
-        this._fill = value;
-
-        if (value !== oldValue) {
-          if (value && this.length > 0) {
-            this._addPoints({
-              atIndex: this.length,
-              points: [this.atIndex(0)]
-            });
-          } else if (!value) {
-            this.removeNode(this.atIndex(this.length - 1));
-          }
-        }
-
-        emit(Drawing.event.FILL_CHANGED, {
-          fill: value,
-          context: this
-        });
-      },
-      configurable: true
-    },
-    rigid: {
-      get: function () {
-        return this._rigid;
-      },
-      set: function (value) {
-        assert(typeof value === "boolean");
-
-        var oldValue = this.rigid;
-
-        this._rigid = value;
-
-        if (value && value !== oldValue) {
-          for (var i = 0; i < this.length; i++) {
-            if (!(this.atIndex(i) instanceof Node)) {
-              this.splice(i, 1);
-            }
-          }
-        }
-
-        emit(Drawing.event.RIGID_CHANGED, {
-          rigid: value,
-          context: this
-        });
-      },
-      configurable: true
-    },
-    nodesAroundNode: {
-      value: function nodesAroundNode(node) {
-        var nodes = this.nodes(),
-            index = nodes.indexOf(node);
-
-        var _nodeIndicesAroundNodeIndex = this._nodeIndicesAroundNodeIndex(index);
-
-        var start = _nodeIndicesAroundNodeIndex.start;
-        var end = _nodeIndicesAroundNodeIndex.end;
-        var hasFirst = _nodeIndicesAroundNodeIndex.hasFirst;
-        var hasLast = _nodeIndicesAroundNodeIndex.hasLast;
-
-
-        return {
-          start: this.atIndex(start),
-          end: this.atIndex(end),
-          hasFirst: hasFirst,
-          hasLast: hasLast
-        };
-      },
-      writable: true,
-      configurable: true
-    },
-    _nodeIndicesAroundNodeIndex: {
-      value: function _nodeIndicesAroundNodeIndex(index) {
-        var start = undefined,
-            end = undefined,
-            hasFirst = false,
-            hasLast = false,
-            positions = this.nodePositions();
-
-        assert(index >= 0 && index < positions.length);
-
-        if (index === 0 && !this.fill) {
-          // First node
-          start = positions[index]; // Include Node at index in splice
-          hasFirst = true;
-        } else if (index === 0 && this.fill) {
-          // Nodes at front and end are identical. Ignore last node
-          assert(positions.length >= 2);
-          start = positions[positions.length - 2]; // Wrap to exclude Node at -2
-        } else {
-          start = positions[index - 1]; // Exclude previous Node from splice
-        }
-
-        if (index === positions.length - 1 && !this.fill) {
-          // Last node
-          end = positions[index]; // Include Node at index in splice
-          hasLast = true;
-        } else {
-          end = positions[index + 1]; // Exclude next Node from splice
-        }
-
-        return { start: start, end: end, hasFirst: hasFirst, hasLast: hasLast };
-      },
-      writable: true,
-      configurable: true
-    },
-    removePointsBetweenNodes: {
-      value: function removePointsBetweenNodes(node1, node2) {
-        assert(node1 instanceof Node);
-        assert(node2 instanceof Node);
-
-        var start = this.indexOf(node1),
-            end = this.indexOf(node2, start);
-
-        assert(start > -1, "Node not found");
-        assert(end > -1, "Node not found");
-        assert(start <= end);
-
-        start++; // Exclude node itself from operation
-
-        return this._removePoints({ start: start, end: end });
-      },
-      writable: true,
-      configurable: true
-    },
-    addPointsAfterNode: {
-      value: function addPointsAfterNode(node, points) {
-        assert(node instanceof Node);
-        assert(Array.isArray(points));
-        assert(this.indexOf(node) > -1, "Node not found");
-
-        var atIndex = this.indexOf(node) + 1;
-
-        return this._addPoints({ atIndex: atIndex, points: points });
-      },
-      writable: true,
-      configurable: true
-    },
-    addNode: {
-      value: function addNode(node, nodeIndex) {
-        var nodePositions = this.nodePositions(),
-            atIndex = this.length;
-
-        assert(node instanceof Node);
-
-        assert(Number.isInteger(nodeIndex));
-        assert(nodeIndex > -1);
-
-        if (nodePositions.length > 0 && nodeIndex >= 0 && nodeIndex < nodePositions.length) {
-          atIndex = nodePositions[nodeIndex] + 1;
-        }
-
-        var points = [node];
-        if (this.length === 0 && this.fill) {
-          points.push(node);
-        } else if (this.fill && atIndex === this.length) {
-          atIndex--;
-        }
-
-        this._addPoints({
-          atIndex: atIndex,
-          points: points
-        });
-      },
-      writable: true,
-      configurable: true
-    },
-    removeNode: {
-      value: function removeNode(node) {
-        assert(node instanceof Node);
-
-        var indexOnPath = this.indexOf(node),
-            index = this.nodePositions().indexOf(indexOnPath);
-
-        return this.removeNodeAtIndex(index);
-      },
-      writable: true,
-      configurable: true
-    },
-    removeNodeAtIndex: {
-      value: function removeNodeAtIndex(index) {
-        var _nodeIndicesAroundNodeIndex = this._nodeIndicesAroundNodeIndex(index);
-
-        var start = _nodeIndicesAroundNodeIndex.start;
-        var end = _nodeIndicesAroundNodeIndex.end;
-        var hasFirst = _nodeIndicesAroundNodeIndex.hasFirst;
-        var hasLast = _nodeIndicesAroundNodeIndex.hasLast;
-
-
-        if (!hasFirst && (!this.fill || this.length > 2)) {
-          start++;
-        }
-
-        if (hasLast || this.fill && this.length <= 2) {
-          end++;
-        }
-
-        var removedPoints = this._removePoints({ start: start, end: end });
-
-        return removedPoints;
-      },
-      writable: true,
-      configurable: true
-    },
-    _removePoints: {
-      value: function _removePoints(_ref) {
-        var start = _ref.start;
-        var end = _ref.end;
-        assert(start >= 0);
-        assert(end <= this.length);
-        assert(start <= end || this.fill);
-
-        var removeLength = 0,
-            removedPoints = [];
-
-        if (this.fill && start > end) {
-          // assert( start < this.length - 1 );
-
-          // removeLength = this.length - start - 1;
-          removeLength = this.length - start;
-
-          assert(removeLength >= 0);
-
-          removedPoints.push.apply(removedPoints, _toArray(this.splice(start, removeLength)));
-
-          // Remove last point
-          // @Why: This point is also the first point of
-          //       the next operation. Removing the last point now
-          //       prevents duplicates.
-          removedPoints.pop();
-
-          this.push(this.atIndex(end));
-
-          start = 0;
-        }
-
-        removeLength = end - start;
-        removedPoints.push.apply(removedPoints, _toArray(this.splice(start, removeLength)));
-
-        assert(this.isValid(), "Invalid path operation");
-
-        if (removedPoints.length === 2 && removedPoints[0] === removedPoints[1]) {
-          removedPoints.pop();
-        }
-
-        emit(Drawing.event.POINTS_REMOVED, {
-          start: start,
-          end: end,
-          removedPoints: removedPoints,
-          context: this
-        });
-
-        return removedPoints;
-      },
-      writable: true,
-      configurable: true
-    },
-    _addPoints: {
-      value: function _addPoints(_ref2) {
-        var _ref;
-        var atIndex = _ref2.atIndex;
-        var points = _ref2.points;
-        assert(atIndex >= 0 && atIndex <= this.length, "Out of bounds");
-        assert(Array.isArray(points), "points must be an Array");
-
-        (_ref = this).splice.apply(_ref, [atIndex, 0].concat(_toArray(points)));
-
-        // if ( this.fill && atIndex === 0 ) {
-        //   if ( this.length === 1 && this.atIndex( 0 ) instanceof Node ) {
-        //     this.push( this.atIndex( 0 ) );
-        //   } else if ( this.length > 1 ) {
-        //     this.removePoints({
-        //       start: this.length - 1,
-        //       end: this.length
-        //     });
-        //     this.push( this.atIndex( 0 ) );
-        //   }
-        // }
-
-        assert(this.isValid(), "Invalid path operation");
-
-        emit(Drawing.event.POINTS_ADDED, {
-          atIndex: atIndex,
-          addedPoints: points,
-          context: this
-        });
-      },
-      writable: true,
-      configurable: true
-    },
-    pointAtIndex: {
-      value: function pointAtIndex(index) {
-        return this.atIndex(index);
-      },
-      writable: true,
-      configurable: true
-    },
-    nodePositions: {
-      value: function nodePositions() {
-        var points = this,
-            positions = [];
-
-        for (var i = 0; i < points.length; i++) {
-          var point = points.atIndex(i);
-
-          if (point instanceof Node) {
-            positions.push(i);
-          }
-        }
-
-        return positions;
-      },
-      writable: true,
-      configurable: true
-    },
-    points: {
-      value: function points() {
-        return this.filter(function () {
-          return true;
-        });
-      },
-      writable: true,
-      configurable: true
-    },
-    nodes: {
-      value: function nodes() {
-        var nodes = this.filter(function (point) {
-          return point instanceof Node;
-        });
-        if (this.fill) {
-          nodes.pop();
-        }
-
-        return nodes;
-      },
-      writable: true,
-      configurable: true
+  _createClass(Drawing, [{
+    key: 'isValid',
+    value: function isValid() {
+      var valid = _get(Object.getPrototypeOf(Drawing.prototype), 'isValid', this).call(this),
+          rigid = this.rigid ? this.every(function (point) {
+        return point instanceof Node;
+      }) : true,
+          fill = this.fill ? this.length === 0 || this.atIndex(0) === this.atIndex(this.length - 1) : true;
+      return valid && rigid && fill;
     }
-  });
+  }, {
+    key: 'color',
+    get: function () {
+      return this._color;
+    },
+    set: function (value) {
+      _assert2['default'](typeof value === 'string');
+      this._color = value;
+
+      _emit.emit(Drawing.event.COLOR_CHANGED, {
+        color: value,
+        context: this
+      });
+    }
+  }, {
+    key: 'fill',
+    get: function () {
+      return this._fill;
+    },
+    set: function (value) {
+      _assert2['default'](typeof value === 'boolean');
+
+      var oldValue = this.fill;
+
+      this._fill = value;
+
+      if (value !== oldValue) {
+        if (value && this.length > 0) {
+          this._addPoints({
+            atIndex: this.length,
+            points: [this.atIndex(0)]
+          });
+        } else if (!value) {
+          this.removeNode(this.atIndex(this.length - 1));
+        }
+      }
+
+      _emit.emit(Drawing.event.FILL_CHANGED, {
+        fill: value,
+        context: this
+      });
+    }
+  }, {
+    key: 'rigid',
+    get: function () {
+      return this._rigid;
+    },
+    set: function (value) {
+      _assert2['default'](typeof value === 'boolean');
+
+      var oldValue = this.rigid;
+
+      this._rigid = value;
+
+      if (value && value !== oldValue) {
+        for (var i = 0; i < this.length; i++) {
+          if (!(this.atIndex(i) instanceof Node)) {
+            this.splice(i, 1);
+          }
+        }
+      }
+
+      _emit.emit(Drawing.event.RIGID_CHANGED, {
+        rigid: value,
+        context: this
+      });
+    }
+  }, {
+    key: 'nodesAroundNode',
+    value: function nodesAroundNode(node) {
+      var nodes = this.nodes(),
+          index = nodes.indexOf(node);
+
+      var _nodeIndicesAroundNodeIndex = this._nodeIndicesAroundNodeIndex(index);
+
+      var start = _nodeIndicesAroundNodeIndex.start;
+      var end = _nodeIndicesAroundNodeIndex.end;
+      var hasFirst = _nodeIndicesAroundNodeIndex.hasFirst;
+      var hasLast = _nodeIndicesAroundNodeIndex.hasLast;
+
+      return {
+        start: this.atIndex(start),
+        end: this.atIndex(end),
+        hasFirst: hasFirst,
+        hasLast: hasLast
+      };
+    }
+  }, {
+    key: '_nodeIndicesAroundNodeIndex',
+    value: function _nodeIndicesAroundNodeIndex(index) {
+      var start = undefined,
+          end = undefined,
+          hasFirst = false,
+          hasLast = false,
+          positions = this.nodePositions();
+
+      _assert2['default'](index >= 0 && index < positions.length);
+
+      if (index === 0 && !this.fill) {
+        // First node
+        start = positions[index]; // Include Node at index in splice
+        hasFirst = true;
+      } else if (index === 0 && this.fill) {
+        // Nodes at front and end are identical. Ignore last node
+        _assert2['default'](positions.length >= 2);
+        start = positions[positions.length - 2]; // Wrap to exclude Node at -2
+      } else {
+        start = positions[index - 1]; // Exclude previous Node from splice
+      }
+
+      if (index === positions.length - 1 && !this.fill) {
+        // Last node
+        end = positions[index]; // Include Node at index in splice
+        hasLast = true;
+      } else {
+        end = positions[index + 1]; // Exclude next Node from splice
+      }
+
+      return { start: start, end: end, hasFirst: hasFirst, hasLast: hasLast };
+    }
+  }, {
+    key: 'removePointsBetweenNodes',
+    value: function removePointsBetweenNodes(node1, node2) {
+      _assert2['default'](node1 instanceof Node);
+      _assert2['default'](node2 instanceof Node);
+
+      var start = this.indexOf(node1),
+          end = this.indexOf(node2, start);
+
+      _assert2['default'](start > -1, 'Node not found');
+      _assert2['default'](end > -1, 'Node not found');
+      _assert2['default'](start <= end);
+
+      start++; // Exclude node itself from operation
+
+      return this._removePoints({ start: start, end: end });
+    }
+  }, {
+    key: 'addPointsAfterNode',
+    value: function addPointsAfterNode(node, points) {
+      _assert2['default'](node instanceof Node);
+      _assert2['default'](Array.isArray(points));
+      _assert2['default'](this.indexOf(node) > -1, 'Node not found');
+
+      var atIndex = this.indexOf(node) + 1;
+
+      return this._addPoints({ atIndex: atIndex, points: points });
+    }
+  }, {
+    key: 'addNode',
+    value: function addNode(node, nodeIndex) {
+      var nodePositions = this.nodePositions(),
+          atIndex = this.length;
+
+      _assert2['default'](node instanceof Node);
+
+      _assert2['default'](Number.isInteger(nodeIndex));
+      _assert2['default'](nodeIndex > -1);
+
+      if (nodePositions.length > 0 && nodeIndex >= 0 && nodeIndex < nodePositions.length) {
+        atIndex = nodePositions[nodeIndex] + 1;
+      }
+
+      var points = [node];
+      if (this.length === 0 && this.fill) {
+        points.push(node);
+      } else if (this.fill && atIndex === this.length) {
+        atIndex--;
+      }
+
+      this._addPoints({
+        atIndex: atIndex,
+        points: points
+      });
+    }
+  }, {
+    key: 'removeNode',
+    value: function removeNode(node) {
+      _assert2['default'](node instanceof Node);
+
+      var indexOnPath = this.indexOf(node),
+          index = this.nodePositions().indexOf(indexOnPath);
+
+      return this.removeNodeAtIndex(index);
+    }
+  }, {
+    key: 'removeNodeAtIndex',
+    value: function removeNodeAtIndex(index) {
+      var _nodeIndicesAroundNodeIndex2 = this._nodeIndicesAroundNodeIndex(index);
+
+      var start = _nodeIndicesAroundNodeIndex2.start;
+      var end = _nodeIndicesAroundNodeIndex2.end;
+      var hasFirst = _nodeIndicesAroundNodeIndex2.hasFirst;
+      var hasLast = _nodeIndicesAroundNodeIndex2.hasLast;
+
+      if (!hasFirst && (!this.fill || this.length > 2)) {
+        start++;
+      }
+
+      if (hasLast || this.fill && this.length <= 2) {
+        end++;
+      }
+
+      var removedPoints = this._removePoints({ start: start, end: end });
+
+      return removedPoints;
+    }
+  }, {
+    key: '_removePoints',
+    value: function _removePoints(_ref2) {
+      var start = _ref2.start;
+      var end = _ref2.end;
+
+      _assert2['default'](start >= 0);
+      _assert2['default'](end <= this.length);
+      _assert2['default'](start <= end || this.fill);
+
+      var removeLength = 0,
+          removedPoints = [];
+
+      if (this.fill && start > end) {
+        // assert( start < this.length - 1 );
+
+        // removeLength = this.length - start - 1;
+        removeLength = this.length - start;
+
+        _assert2['default'](removeLength >= 0);
+
+        removedPoints.push.apply(removedPoints, _toConsumableArray(this.splice(start, removeLength)));
+
+        // Remove last point
+        // @Why: This point is also the first point of
+        //       the next operation. Removing the last point now
+        //       prevents duplicates.
+        removedPoints.pop();
+
+        this.push(this.atIndex(end));
+
+        start = 0;
+      }
+
+      removeLength = end - start;
+      removedPoints.push.apply(removedPoints, _toConsumableArray(this.splice(start, removeLength)));
+
+      _assert2['default'](this.isValid(), 'Invalid path operation');
+
+      if (removedPoints.length === 2 && removedPoints[0] === removedPoints[1]) {
+        removedPoints.pop();
+      }
+
+      _emit.emit(Drawing.event.POINTS_REMOVED, {
+        start: start,
+        end: end,
+        removedPoints: removedPoints,
+        context: this
+      });
+
+      return removedPoints;
+    }
+  }, {
+    key: '_addPoints',
+    value: function _addPoints(_ref3) {
+      var atIndex = _ref3.atIndex;
+      var points = _ref3.points;
+
+      _assert2['default'](atIndex >= 0 && atIndex <= this.length, 'Out of bounds');
+      _assert2['default'](Array.isArray(points), 'points must be an Array');
+
+      this.splice.apply(this, [atIndex, 0].concat(_toConsumableArray(points)));
+
+      // if ( this.fill && atIndex === 0 ) {
+      //   if ( this.length === 1 && this.atIndex( 0 ) instanceof Node ) {
+      //     this.push( this.atIndex( 0 ) );
+      //   } else if ( this.length > 1 ) {
+      //     this.removePoints({
+      //       start: this.length - 1,
+      //       end: this.length
+      //     });
+      //     this.push( this.atIndex( 0 ) );
+      //   }
+      // }
+
+      _assert2['default'](this.isValid(), 'Invalid path operation');
+
+      _emit.emit(Drawing.event.POINTS_ADDED, {
+        atIndex: atIndex,
+        addedPoints: points,
+        context: this
+      });
+    }
+  }, {
+    key: 'pointAtIndex',
+    value: function pointAtIndex(index) {
+      return this.atIndex(index);
+    }
+  }, {
+    key: 'nodePositions',
+    value: function nodePositions() {
+      var points = this,
+          positions = [];
+
+      for (var i = 0; i < points.length; i++) {
+        var point = points.atIndex(i);
+
+        if (point instanceof Node) {
+          positions.push(i);
+        }
+      }
+
+      return positions;
+    }
+  }, {
+    key: 'points',
+    value: function points() {
+      return this.filter(function () {
+        return true;
+      });
+    }
+  }, {
+    key: 'nodes',
+    value: (function (_nodes) {
+      function nodes() {
+        return _nodes.apply(this, arguments);
+      }
+
+      nodes.toString = function () {
+        return nodes.toString();
+      };
+
+      return nodes;
+    })(function () {
+      var nodes = this.filter(function (point) {
+        return point instanceof Node;
+      });
+      if (this.fill) {
+        nodes.pop();
+      }
+
+      return nodes;
+    })
+  }]);
 
   return Drawing;
 })(Path);
 
 Drawing.event = {
-  COLOR_CHANGED: "Drawing.colorChanged",
-  FILL_CHANGED: "Drawing.fillChanged",
-  RIGID_CHANGED: "Drawing.rigidChanged",
-  POINTS_ADDED: "Drawing.pointsAdded",
-  POINTS_REMOVED: "Drawing.pointsRemoved"
+  COLOR_CHANGED: 'Drawing.colorChanged',
+  FILL_CHANGED: 'Drawing.fillChanged',
+  RIGID_CHANGED: 'Drawing.rigidChanged',
+  POINTS_ADDED: 'Drawing.pointsAdded',
+  POINTS_REMOVED: 'Drawing.pointsRemoved'
 };
-
-
-
 
 var Territory = (function () {
   function Territory() {
@@ -3903,204 +3732,209 @@ var Territory = (function () {
     this._activeDrawingIndex = -1;
   }
 
-  _prototypeProperties(Territory, {
-    fromGeoJson: {
-      value: function fromGeoJson(geoJson) {
-        assert(typeof geoJson === "object");
-        var drawings = new Territory();
-
-        assert(Array.isArray(geoJson.features));
-        geoJson.features.forEach(function (feature, i) {
-          assert(typeof feature.properties === "object");
-          assert(typeof feature.geometry === "object");
-
-          var _feature$properties = feature.properties;
-          var color = _feature$properties.color;
-          var rigid = _feature$properties.rigid;
-          var fill = _feature$properties.fill;
-          var nodePositions = _feature$properties.nodePositions;
-          assert(typeof color === "string");
-          assert(typeof rigid === "boolean");
-          assert(typeof fill === "boolean");
-          assert(Array.isArray(nodePositions));
-
-          var drawing = new Drawing({ color: color, rigid: rigid, fill: fill });
-
-          drawings.addDrawings({
-            atIndex: -1,
-            drawing: drawing
-          });
-
-          var coordinates = undefined;
-          if (fill) {
-            coordinates = feature.geometry.coordinates[0];
-          } else {
-            coordinates = feature.geometry.coordinates;
-          }
-          assert(Array.isArray(coordinates));
-
-          var points = coordinates.map(function (coordinate, i) {
-            var _coordinate = _slicedToArray(coordinate, 2);
-
-            var x = _coordinate[0];
-            var y = _coordinate[1];
-
-
-            if (nodePositions.indexOf(i) === -1) {
-              return new Point(x, y);
-            } else {
-              return new Node(x, y);
-            }
-          });
-
-          drawing.addPoints({
-            atIndex: 0,
-            points: points
-          });
-
-          return drawing;
-        });
-
-        return drawings;
-      },
-      writable: true,
-      configurable: true
+  _createClass(Territory, [{
+    key: 'length',
+    get: function () {
+      return this._drawings.length;
     }
   }, {
-    length: {
-      get: function () {
-        return this._drawings.length;
-      },
-      configurable: true
-    },
-    find: {
-      value: function find(cb) {
-        return this._drawings.find(cb);
-      },
-      writable: true,
-      configurable: true
-    },
-    atIndex: {
-      value: function atIndex(index) {
-        assert(Number.isInteger(index));
-        assert(index >= 0 && index < this._drawings.length);
+    key: 'find',
+    value: function find(cb) {
+      return this._drawings.find(cb);
+    }
+  }, {
+    key: 'atIndex',
+    value: function atIndex(index) {
+      _assert2['default'](Number.isInteger(index));
+      _assert2['default'](index >= 0 && index < this._drawings.length);
 
-        return this._drawings[index];
-      },
-      writable: true,
-      configurable: true
-    },
-    addDrawing: {
-      value: function addDrawing(_ref) {
-        var atIndex = _ref.atIndex;
-        var drawing = _ref.drawing;
-        assert(Number.isInteger(atIndex));
-        assert(drawing instanceof Drawing);
+      return this._drawings[index];
+    }
+  }, {
+    key: 'addDrawing',
+    value: function addDrawing(_ref4) {
+      var atIndex = _ref4.atIndex;
+      var drawing = _ref4.drawing;
 
-        emit(Territory.event.DRAWING_ADDED, {
-          atIndex: atIndex,
-          drawing: drawing,
-          context: this
-        });
+      _assert2['default'](Number.isInteger(atIndex));
+      _assert2['default'](drawing instanceof Drawing);
 
-        return this._drawings.splice(atIndex, 0, drawing);
-      },
-      writable: true,
-      configurable: true
-    },
-    removeDrawing: {
-      value: function removeDrawing(drawing) {
-        assert(drawing instanceof Drawing);
+      _emit.emit(Territory.event.DRAWING_ADDED, {
+        atIndex: atIndex,
+        drawing: drawing,
+        context: this
+      });
 
-        var index = this._drawings.indexOf(drawing);
-        assert(index > -1, "Drawing not found");
+      return this._drawings.splice(atIndex, 0, drawing);
+    }
+  }, {
+    key: 'removeDrawing',
+    value: function removeDrawing(drawing) {
+      _assert2['default'](drawing instanceof Drawing);
 
-        return this.removeDrawingAtIndex(index);
-      },
-      writable: true,
-      configurable: true
-    },
-    removeDrawingAtIndex: {
-      value: function removeDrawingAtIndex(index) {
-        assert(index >= 0 && index < this._drawings.length, "Out of bounds");
+      var index = this._drawings.indexOf(drawing);
+      _assert2['default'](index > -1, 'Drawing not found');
 
-        var removedDrawing = this._drawings.splice(index, 1)[0],
-            nodes = removedDrawing.nodes();
+      return this.removeDrawingAtIndex(index);
+    }
+  }, {
+    key: 'removeDrawingAtIndex',
+    value: function removeDrawingAtIndex(index) {
+      _assert2['default'](index >= 0 && index < this._drawings.length, 'Out of bounds');
 
-        for (var _iterator = nodes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
+      var removedDrawing = this._drawings.splice(index, 1)[0],
+          nodes = removedDrawing.nodes();
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = nodes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var node = _step.value;
+
           removedDrawing.removeNode(node);
         }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator['return']) {
+            _iterator['return']();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
 
-        emit(Territory.event.DRAWING_REMOVED, {
-          atIndex: index,
-          drawing: removedDrawing,
-          context: this
-        });
+      _emit.emit(Territory.event.DRAWING_REMOVED, {
+        atIndex: index,
+        drawing: removedDrawing,
+        context: this
+      });
 
-        return removedDrawing;
-      },
-      writable: true,
-      configurable: true
-    },
-    toGeoJson: {
-      value: function toGeoJson() {
-        var geoJson = {
-          type: "FeatureCollection"
+      return removedDrawing;
+    }
+  }, {
+    key: 'toGeoJson',
+    value: function toGeoJson() {
+      var geoJson = {
+        type: 'FeatureCollection'
+      };
+
+      geoJson.features = this._drawings.map(function (drawing) {
+        var feature = {
+          type: 'Feature'
         };
 
-        geoJson.features = this._drawings.map(function (drawing) {
-          var feature = {
-            type: "Feature"
-          };
+        var coordinates = drawing._points.map(function (point) {
+          var x = point.x;
+          var y = point.y;
 
-          var coordinates = drawing._points.map(function (point) {
-            var x = point.x;
-            var y = point.y;
-            return [x, y];
-          });
-
-          feature.geometry = {
-            type: drawing.fill ? "Polygon" : "LineString",
-            coordinates: drawing.fill ? [coordinates] : coordinates
-          };
-
-          var color = drawing.color;
-          var rigid = drawing.rigid;
-          var fill = drawing.fill;
-          feature.properties = { color: color, rigid: rigid, fill: fill };
-          feature.properties.nodePositions = drawing.nodePositions();
-
-          return feature;
+          return [x, y];
         });
 
-        return geoJson;
-      },
-      writable: true,
-      configurable: true
+        feature.geometry = {
+          type: drawing.fill ? 'Polygon' : 'LineString',
+          coordinates: drawing.fill ? [coordinates] : coordinates
+        };
+
+        var color = drawing.color;
+        var rigid = drawing.rigid;
+        var fill = drawing.fill;
+
+        feature.properties = { color: color, rigid: rigid, fill: fill };
+        feature.properties.nodePositions = drawing.nodePositions();
+
+        return feature;
+      });
+
+      return geoJson;
     }
-  });
+  }], [{
+    key: 'fromGeoJson',
+    value: function fromGeoJson(geoJson) {
+      _assert2['default'](typeof geoJson === 'object');
+      var drawings = new Territory();
+
+      _assert2['default'](Array.isArray(geoJson.features));
+      geoJson.features.forEach(function (feature, i) {
+        _assert2['default'](typeof feature.properties === 'object');
+        _assert2['default'](typeof feature.geometry === 'object');
+
+        var _feature$properties = feature.properties;
+        var color = _feature$properties.color;
+        var rigid = _feature$properties.rigid;
+        var fill = _feature$properties.fill;
+        var nodePositions = _feature$properties.nodePositions;
+
+        _assert2['default'](typeof color === 'string');
+        _assert2['default'](typeof rigid === 'boolean');
+        _assert2['default'](typeof fill === 'boolean');
+        _assert2['default'](Array.isArray(nodePositions));
+
+        var drawing = new Drawing({ color: color, rigid: rigid, fill: fill });
+
+        drawings.addDrawings({
+          atIndex: -1,
+          drawing: drawing
+        });
+
+        var coordinates = undefined;
+        if (fill) {
+          coordinates = feature.geometry.coordinates[0];
+        } else {
+          coordinates = feature.geometry.coordinates;
+        }
+        _assert2['default'](Array.isArray(coordinates));
+
+        var points = coordinates.map(function (coordinate, i) {
+          var _coordinate = _slicedToArray(coordinate, 2);
+
+          var x = _coordinate[0];
+          var y = _coordinate[1];
+
+          if (nodePositions.indexOf(i) === -1) {
+            return new Point(x, y);
+          } else {
+            return new Node(x, y);
+          }
+        });
+
+        drawing.addPoints({
+          atIndex: 0,
+          points: points
+        });
+
+        return drawing;
+      });
+
+      return drawings;
+    }
+  }]);
 
   return Territory;
 })();
 
 Territory.event = {
-  DRAWING_ADDED: "Territory.drawingAdded",
-  DRAWING_REMOVED: "Territory.drawingRemoved"
+  DRAWING_ADDED: 'Territory.drawingAdded',
+  DRAWING_REMOVED: 'Territory.drawingRemoved'
 };
-
-
-
 
 exports.Point = Point;
 exports.Node = Node;
 exports.Drawing = Drawing;
 exports.Territory = Territory;
+
+},{"./assert":6,"./pubsub":14}],10:[function(require,module,exports){
+"use strict";
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-},{"./assert":6,"./pubsub":14}],10:[function(require,module,exports){
 "use strict";
 
 var PREFIX = "@@",
@@ -4183,24 +4017,30 @@ configure(EventTarget, "removeEventListener", function removeEventListener(type,
   off(this, PREFIX + type, listener);
 });
 
-module.exports = EventTarget;
+exports["default"] = EventTarget;
+module.exports = exports["default"];
 
 },{}],11:[function(require,module,exports){
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
+
+var _MapCanvas = require('./map-class');
+
+var _territoryEditorDir = require('./directives/territory-editor-dir');
+
+var _territoryEditorDir2 = _interopRequireWildcard(_territoryEditorDir);
+
+var _MapView = require('./map-view');
+
+var _MapView2 = _interopRequireWildcard(_MapView);
 
 /* global angular */
 
-angular.module("bndry", []);
-require("6to5ify/polyfill");
+angular.module('bndry', []);
+require('6to5ify/polyfill');
 
-var MapCanvas = require("./map-class").MapCanvas;
-var territoryEditorDir = _interopRequire(require("./directives/territory-editor-dir"));
-
-var MapView = _interopRequire(require("./map-view"));
-
-window.mapCanvas = new MapCanvas(document.querySelector("#map_canvas"), {
+window.mapCanvas = new _MapCanvas.MapCanvas(document.querySelector('#map_canvas'), {
   center: {
     lat: 41.123728,
     lng: -84.864721
@@ -4209,52 +4049,52 @@ window.mapCanvas = new MapCanvas(document.querySelector("#map_canvas"), {
   disableDefaultUI: true
 });
 
-window.mapView = new MapView(window.mapCanvas);
+window.mapView = new _MapView2['default'](window.mapCanvas);
 // let territorEditorCmp = new TerritoryEditorCmp( mapView );
 
 },{"./directives/territory-editor-dir":8,"./map-class":12,"./map-view":13,"6to5ify/polyfill":5}],12:[function(require,module,exports){
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
-var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
+var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } };
 
-var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+var _inherits = function (subClass, superClass) { if (typeof superClass !== 'function' && superClass !== null) { throw new TypeError('Super expression must either be null or a function, not ' + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
 
-var assert = _interopRequire(require("./assert"));
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 
-var emit = require("./pubsub").emit;
+var _assert = require('./assert');
 
+var _assert2 = _interopRequireWildcard(_assert);
 
-
-
+var _emit = require('./pubsub');
 
 var addListener = google.maps.event.addListener,
     clearListeners = google.maps.event.clearListeners;
 
-
-
-
 var MapCanvas = (function (_google$maps$Map) {
   function MapCanvas() {
     var _this2 = this;
+
     for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
       args[_key] = arguments[_key];
     }
 
     _classCallCheck(this, MapCanvas);
 
-    _get(Object.getPrototypeOf(MapCanvas.prototype), "constructor", this).apply(this, args);
+    _get(Object.getPrototypeOf(MapCanvas.prototype), 'constructor', this).apply(this, args);
 
     this._markers = [];
     this._polys = [];
 
-    addListener(this, "click", function (event) {
-      return emit(MapCanvas.event.PRESSED, {
+    addListener(this, 'click', function (event) {
+      return _emit.emit(MapCanvas.event.PRESSED, {
         event: event,
         context: _this2
       });
@@ -4263,199 +4103,176 @@ var MapCanvas = (function (_google$maps$Map) {
 
   _inherits(MapCanvas, _google$maps$Map);
 
-  _prototypeProperties(MapCanvas, null, {
-    addMarker: {
+  _createClass(MapCanvas, [{
+    key: 'addMarker',
 
+    // get center() {
+    //   return super.getCenter();
+    // }
+    // set center( latLng ) {
+    //   assert( latLng instanceof LatLng,
+    //     'Center must be a LatLng' );
+    //   super.setCenter( latLng );
+    // }
 
-      // get center() {
-      //   return super.getCenter();
-      // }
-      // set center( latLng ) {
-      //   assert( latLng instanceof LatLng,
-      //     'Center must be a LatLng' );
-      //   super.setCenter( latLng );
-      // }
+    // get zoom() {
+    //   return super.getZoom();
+    // }
+    // set zoom( value ) {
+    //   assert( typeof value === 'number',
+    //     'Zoom must be a number' );
+    //   super.setZoom( value );
+    // }
 
+    value: function addMarker(_ref) {
+      var atIndex = _ref.atIndex;
+      var marker = _ref.marker;
 
-      // get zoom() {
-      //   return super.getZoom();
-      // }
-      // set zoom( value ) {
-      //   assert( typeof value === 'number',
-      //     'Zoom must be a number' );
-      //   super.setZoom( value );
-      // }
+      _assert2['default'](Number.isInteger(atIndex));
+      _assert2['default'](atIndex >= 0 && atIndex <= this._markers.length);
+      _assert2['default'](marker instanceof Marker);
 
+      marker.setMap(this);
 
-      value: function addMarker(_ref) {
-        var atIndex = _ref.atIndex;
-        var marker = _ref.marker;
-        assert(Number.isInteger(atIndex));
-        assert(atIndex >= 0 && atIndex <= this._markers.length);
-        assert(marker instanceof Marker);
-
-        marker.setMap(this);
-
-        this._markers.splice(atIndex, 0, marker);
-      },
-      writable: true,
-      configurable: true
-    },
-    removeMarker: {
-      value: function removeMarker(marker) {
-        assert(marker instanceof Marker);
-
-        var index = this._markers.indexOf(marker);
-        assert(index > -1, "Poly not found");
-
-        return this.removePolyAtIndex(index);
-      },
-      writable: true,
-      configurable: true
-    },
-    removeMarkerAtIndex: {
-      value: function removeMarkerAtIndex(index) {
-        assert(Number.isInteger(index));
-        assert(index >= 0 && index < this._markers.length);
-
-        var marker = this._markers.splice(index, 1)[0];
-        assert(marker instanceof Marker);
-
-        marker.destroy();
-      },
-      writable: true,
-      configurable: true
-    },
-    addPoly: {
-      value: function addPoly(_ref) {
-        var atIndex = _ref.atIndex;
-        var poly = _ref.poly;
-        assert(Number.isInteger(atIndex));
-        assert(atIndex >= 0 && atIndex <= this._polys.length);
-        assert(poly instanceof Poly);
-
-        poly.setMap(this);
-
-        this._polys.splice(atIndex, 0, poly);
-      },
-      writable: true,
-      configurable: true
-    },
-    removePoly: {
-      value: function removePoly(poly) {
-        assert(poly instanceof Poly);
-
-        var index = this._polys.indexOf(poly);
-        assert(index > -1, "Poly not found");
-
-        return this.removePolyAtIndex(index);
-      },
-      writable: true,
-      configurable: true
-    },
-    removePolyAtIndex: {
-      value: function removePolyAtIndex(index) {
-        assert(Number.isInteger(index));
-        assert(index >= 0 && index < this._polys.length);
-
-        var poly = this._polys.splice(index, 1)[0];
-        assert(poly instanceof Poly);
-
-        poly.destroy();
-      },
-      writable: true,
-      configurable: true
+      this._markers.splice(atIndex, 0, marker);
     }
-  });
+  }, {
+    key: 'removeMarker',
+    value: function removeMarker(marker) {
+      _assert2['default'](marker instanceof Marker);
+
+      var index = this._markers.indexOf(marker);
+      _assert2['default'](index > -1, 'Poly not found');
+
+      return this.removePolyAtIndex(index);
+    }
+  }, {
+    key: 'removeMarkerAtIndex',
+    value: function removeMarkerAtIndex(index) {
+      _assert2['default'](Number.isInteger(index));
+      _assert2['default'](index >= 0 && index < this._markers.length);
+
+      var marker = this._markers.splice(index, 1)[0];
+      _assert2['default'](marker instanceof Marker);
+
+      marker.destroy();
+    }
+  }, {
+    key: 'addPoly',
+    value: function addPoly(_ref2) {
+      var atIndex = _ref2.atIndex;
+      var poly = _ref2.poly;
+
+      _assert2['default'](Number.isInteger(atIndex));
+      _assert2['default'](atIndex >= 0 && atIndex <= this._polys.length);
+      _assert2['default'](poly instanceof Poly);
+
+      poly.setMap(this);
+
+      this._polys.splice(atIndex, 0, poly);
+    }
+  }, {
+    key: 'removePoly',
+    value: function removePoly(poly) {
+      _assert2['default'](poly instanceof Poly);
+
+      var index = this._polys.indexOf(poly);
+      _assert2['default'](index > -1, 'Poly not found');
+
+      return this.removePolyAtIndex(index);
+    }
+  }, {
+    key: 'removePolyAtIndex',
+    value: function removePolyAtIndex(index) {
+      _assert2['default'](Number.isInteger(index));
+      _assert2['default'](index >= 0 && index < this._polys.length);
+
+      var poly = this._polys.splice(index, 1)[0];
+      _assert2['default'](poly instanceof Poly);
+
+      poly.destroy();
+    }
+  }]);
 
   return MapCanvas;
 })(google.maps.Map);
 
 MapCanvas.event = {
-  PRESSED: "MapCanvas.pressed"
+  PRESSED: 'MapCanvas.pressed'
 };
-
-
-
 
 var Marker = (function (_google$maps$Marker) {
   function Marker() {
-    var _this2 = this;
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
+    var _this3 = this;
+
+    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+      args[_key2] = arguments[_key2];
     }
 
     _classCallCheck(this, Marker);
 
-    _get(Object.getPrototypeOf(Marker.prototype), "constructor", this).apply(this, args);
+    _get(Object.getPrototypeOf(Marker.prototype), 'constructor', this).apply(this, args);
 
-    addListener(this, "click", function (event) {
-      return emit(Marker.event.PRESSED, {
+    addListener(this, 'click', function (event) {
+      return _emit.emit(Marker.event.PRESSED, {
         event: event,
-        context: _this2
+        context: _this3
       });
     });
-    addListener(this, "dragstart", function (event) {
-      return emit(Marker.event.DRAGSTARTED, {
+    addListener(this, 'dragstart', function (event) {
+      return _emit.emit(Marker.event.DRAGSTARTED, {
         event: event,
-        context: _this2
+        context: _this3
       });
     });
-    addListener(this, "drag", function (event) {
-      return emit(Marker.event.DRAGGED, {
+    addListener(this, 'drag', function (event) {
+      return _emit.emit(Marker.event.DRAGGED, {
         event: event,
-        context: _this2
+        context: _this3
       });
     });
-    addListener(this, "dragend", function (event) {
-      return emit(Marker.event.DRAGENDED, {
+    addListener(this, 'dragend', function (event) {
+      return _emit.emit(Marker.event.DRAGENDED, {
         event: event,
-        context: _this2
+        context: _this3
       });
     });
   }
 
   _inherits(Marker, _google$maps$Marker);
 
-  _prototypeProperties(Marker, null, {
-    setOptions: {
-      value: function setOptions(options) {
-        assert(typeof options === "object");
+  _createClass(Marker, [{
+    key: 'setOptions',
+    value: function setOptions(options) {
+      _assert2['default'](typeof options === 'object');
 
-        if (options.color) {}
-      },
-      writable: true,
-      configurable: true
-    },
-    destroy: {
-      value: function destroy() {
-        clearListeners(this);
-        this.setMap(null);
-      },
-      writable: true,
-      configurable: true
+      if (options.color) {}
     }
-  });
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      clearListeners(this);
+      this.setMap(null);
+    }
+  }]);
 
   return Marker;
 })(google.maps.Marker);
 
 Marker.event = {
-  PRESSED: "Marker.pressed",
-  DRAGSTARTED: "Marker.dragstarted",
-  DRAGGED: "Marker.dragged",
-  DRAGENDED: "Marker.dragended"
+  PRESSED: 'Marker.pressed',
+  DRAGSTARTED: 'Marker.dragstarted',
+  DRAGGED: 'Marker.dragged',
+  DRAGENDED: 'Marker.dragended'
 };
-
-
-
 
 var Poly = (function () {
   function Poly(options) {
-    var _this2 = this;
+    var _this4 = this;
+
     _classCallCheck(this, Poly);
 
-    assert(typeof options === "object");
+    _assert2['default'](typeof options === 'object');
 
     if (options.fillColor || options.fillOpacity !== undefined) {
       this._poly = new google.maps.Polygon(options);
@@ -4463,125 +4280,113 @@ var Poly = (function () {
       this._poly = new google.maps.Polyline(options);
     }
 
-    addListener(this._poly, "click", function (event) {
-      return emit(Poly.event.PRESSED, {
+    addListener(this._poly, 'click', function (event) {
+      return _emit.emit(Poly.event.PRESSED, {
         event: event,
-        context: _this2
+        context: _this4
       });
     });
   }
 
-  _prototypeProperties(Poly, null, {
-    length: {
-      get: function () {
-        return this._poly.getPath().getLength();
-      },
-      configurable: true
-    },
-    setMap: {
-      value: function setMap(map) {
-        this._poly.setMap(map);
-      },
-      writable: true,
-      configurable: true
-    },
-    addLatLngs: {
-      value: function addLatLngs(_ref) {
-        var atIndex = _ref.atIndex;
-        var latLngs = _ref.latLngs;
-        var path = this._poly.getPath();
-
-        assert(Number.isInteger(atIndex));
-        assert(atIndex >= 0 && atIndex <= path.getLength());
-        assert(Array.isArray(latLngs));
-
-        latLngs.forEach(function (latLng, i) {
-          path.insertAt(atIndex + i, latLng);
-        });
-      },
-      writable: true,
-      configurable: true
-    },
-    removeLatLngs: {
-      value: function removeLatLngs(_ref) {
-        var start = _ref.start;
-        var end = _ref.end;
-        var path = this._poly.getPath();
-
-        assert(Number.isInteger(start));
-        assert(Number.isInteger(end));
-        assert(start >= 0 && start <= end);
-        assert(end <= path.getLength());
-
-        var removeLength = end - start;
-
-        for (var i = end - 1; i >= start; i--) {
-          path.removeAt(i);
-        }
-      },
-      writable: true,
-      configurable: true
-    },
-    destroy: {
-      value: function destroy() {
-        clearListeners(this._poly);
-        this._poly.setMap(null);
-      },
-      writable: true,
-      configurable: true
+  _createClass(Poly, [{
+    key: 'length',
+    get: function () {
+      return this._poly.getPath().getLength();
     }
-  });
+  }, {
+    key: 'setMap',
+    value: function setMap(map) {
+      this._poly.setMap(map);
+    }
+  }, {
+    key: 'addLatLngs',
+    value: function addLatLngs(_ref3) {
+      var atIndex = _ref3.atIndex;
+      var latLngs = _ref3.latLngs;
+
+      var path = this._poly.getPath();
+
+      _assert2['default'](Number.isInteger(atIndex));
+      _assert2['default'](atIndex >= 0 && atIndex <= path.getLength());
+      _assert2['default'](Array.isArray(latLngs));
+
+      latLngs.forEach(function (latLng, i) {
+        path.insertAt(atIndex + i, latLng);
+      });
+    }
+  }, {
+    key: 'removeLatLngs',
+    value: function removeLatLngs(_ref4) {
+      var start = _ref4.start;
+      var end = _ref4.end;
+
+      var path = this._poly.getPath();
+
+      _assert2['default'](Number.isInteger(start));
+      _assert2['default'](Number.isInteger(end));
+      _assert2['default'](start >= 0 && start <= end);
+      _assert2['default'](end <= path.getLength());
+
+      var removeLength = end - start;
+
+      for (var i = end - 1; i >= start; i--) {
+        path.removeAt(i);
+      }
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      clearListeners(this._poly);
+      this._poly.setMap(null);
+    }
+  }]);
 
   return Poly;
 })();
 
 Poly.event = {
-  PRESSED: "Poly.pressed"
+  PRESSED: 'Poly.pressed'
 };
-
-
-
 
 var DirectionsService = (function (_google$maps$DirectionsService) {
   function DirectionsService() {
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
+    for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+      args[_key3] = arguments[_key3];
     }
 
     _classCallCheck(this, DirectionsService);
 
-    _get(Object.getPrototypeOf(DirectionsService.prototype), "constructor", this).apply(this, args);
+    _get(Object.getPrototypeOf(DirectionsService.prototype), 'constructor', this).apply(this, args);
   }
 
   _inherits(DirectionsService, _google$maps$DirectionsService);
 
-  _prototypeProperties(DirectionsService, null, {
-    route: {
-      value: function route(_ref) {
-        var origin = _ref.origin;
-        var destination = _ref.destination;
-        var _this = this;
-        assert(origin instanceof LatLng);
-        assert(destination instanceof LatLng);
+  _createClass(DirectionsService, [{
+    key: 'route',
+    value: function route(_ref5) {
+      var origin = _ref5.origin;
+      var destination = _ref5.destination;
 
-        return new Promise(function (resolve, reject) {
-          _get(Object.getPrototypeOf(DirectionsService.prototype), "route", _this).call(_this, {
-            origin: origin,
-            destination: destination,
-            travelMode: google.maps.TravelMode.DRIVING
-          }, function (result, status) {
-            if (status === google.maps.DirectionsStatus.OK) {
-              resolve(result.routes[0].overview_path);
-            } else {
-              reject(status);
-            }
-          });
+      var _this = this;
+
+      _assert2['default'](origin instanceof LatLng);
+      _assert2['default'](destination instanceof LatLng);
+
+      return new Promise(function (resolve, reject) {
+        _get(Object.getPrototypeOf(DirectionsService.prototype), 'route', _this).call(_this, {
+          origin: origin,
+          destination: destination,
+          travelMode: google.maps.TravelMode.DRIVING
+        }, function (result, status) {
+          if (status === google.maps.DirectionsStatus.OK) {
+            resolve(result.routes[0].overview_path);
+          } else {
+            reject(status);
+          }
         });
-      },
-      writable: true,
-      configurable: true
+      });
     }
-  });
+  }]);
 
   return DirectionsService;
 })(google.maps.DirectionsService);
@@ -4602,81 +4407,66 @@ var AutocompleteService = (function (_google$maps$places$AutocompleteService) {
 
 ;
 
-
-
-
 var LatLng = google.maps.LatLng;
-
-
 
 exports.MapCanvas = MapCanvas;
 exports.Marker = Marker;
 exports.Poly = Poly;
 exports.LatLng = LatLng;
 exports.DirectionsService = DirectionsService;
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 
 // Generate new icon
 
 },{"./assert":6,"./pubsub":14}],13:[function(require,module,exports){
-"use strict";
+'use strict';
 
-var _interopRequire = function (obj) { return obj && obj.__esModule ? obj["default"] : obj; };
+var _interopRequireWildcard = function (obj) { return obj && obj.__esModule ? obj : { 'default': obj }; };
 
-var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else { var _arr = []; for (var _iterator = arr[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) { _arr.push(_step.value); if (i && _arr.length === i) break; } return _arr; } };
+var _slicedToArray = function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i['return']) _i['return'](); } finally { if (_d) throw _e; } } return _arr; } else { throw new TypeError('Invalid attempt to destructure non-iterable instance'); } };
 
-var assert = _interopRequire(require("./assert"));
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
 
-var _pubsub = require("./pubsub");
+var _assert = require('./assert');
 
-var emit = _pubsub.emit;
-var on = _pubsub.on;
-var EventTarget = _interopRequire(require("./event-target"));
+var _assert2 = _interopRequireWildcard(_assert);
 
-var _mapClass = require("./map-class");
+var _emit$on = require('./pubsub');
 
-var MapCanvas = _mapClass.MapCanvas;
-var Marker = _mapClass.Marker;
-var Poly = _mapClass.Poly;
-var LatLng = _mapClass.LatLng;
-var _drawingClass = require("./drawing-class");
+var _EventTarget = require('./event-target');
 
-var Node = _drawingClass.Node;
-var Drawing = _drawingClass.Drawing;
-var Territory = _drawingClass.Territory;
-var MapView = exports.MapView = {
+var _EventTarget2 = _interopRequireWildcard(_EventTarget);
+
+var _MapCanvas$Marker$Poly$LatLng = require('./map-class');
+
+var _Node$Drawing$Territory = require('./drawing-class');
+
+var MapView = {
   event: {
-    MAP_PRESSED: "MapView.mapPressed",
-    POLY_PRESSED: "MapView.polyPressed",
-    MARKER_PRESSED: "MapView.markerPressed",
-    MARKER_DRAGSTARTED: "MapView.markerDragstart",
-    MARKER_DRAGGED: "MapView.markerDrag",
-    MARKER_DRAGENDED: "MapView.markerDragend"
+    MAP_PRESSED: 'MapView.mapPressed',
+    POLY_PRESSED: 'MapView.polyPressed',
+    MARKER_PRESSED: 'MapView.markerPressed',
+    MARKER_DRAGSTARTED: 'MapView.markerDragstart',
+    MARKER_DRAGGED: 'MapView.markerDrag',
+    MARKER_DRAGENDED: 'MapView.markerDragend'
   }
 };
 
+exports.MapView = MapView;
 
-
-
-exports["default"] = function () {
+exports['default'] = function () {
   var polys = new Map(),
       markers = new Map(),
       markerIndices = new Map();
 
-
   function createLatLngFromPoint(point) {
-    return new LatLng(point.y, point.x);
+    return new _MapCanvas$Marker$Poly$LatLng.LatLng(point.y, point.x);
   }
-
 
   function createLatLngsFromPoints(points) {
     return points.map(createLatLngFromPoint);
   }
-
-
-
 
   function createPolyFromDrawing(drawing) {
     var options = {
@@ -4698,17 +4488,14 @@ exports["default"] = function () {
       options.strokeWeight = 8;
     }
 
-    return new Poly(options);
+    return new _MapCanvas$Marker$Poly$LatLng.Poly(options);
   }
-
-
-
 
   function createIconFromColor(color) {
     return {
       fillColor: color,
       fillOpacity: 0,
-      path: "M-16,0 a 16,16 0 1,0 32,0a16,16 0 1,0 -32,0 M-2,0 a 2,2 0 1,0 4,0a2,2 0 1,0 -4,0",
+      path: 'M-16,0 a 16,16 0 1,0 32,0a16,16 0 1,0 -32,0 M-2,0 a 2,2 0 1,0 4,0a2,2 0 1,0 -4,0',
       scale: 1,
       strokeColor: color,
       strokeOpacity: 1,
@@ -4716,21 +4503,19 @@ exports["default"] = function () {
     };
   }
 
-
-
-
   function createMarker(_ref) {
     var point = _ref.point;
     var color = _ref.color;
+
     var latLng = {
       lat: point.y,
       lng: point.x
     };
 
-    return new Marker({
+    return new _MapCanvas$Marker$Poly$LatLng.Marker({
       clickable: true,
       crossOnDrag: false,
-      cursor: "pointer",
+      cursor: 'pointer',
       draggable: true,
       icon: createIconFromColor(color),
       opacity: 1,
@@ -4739,28 +4524,26 @@ exports["default"] = function () {
     });
   }
 
+  function findKeyByValue(_ref2) {
+    var map = _ref2.map;
+    var searchValue = _ref2.searchValue;
 
-
-
-  function findKeyByValue(_ref) {
-    var map = _ref.map;
-    var searchValue = _ref.searchValue;
     var entries = map.entries(),
         entry = undefined;
 
     while (entry = entries.next()) {
-      assert(!entry.done);
+      _assert2['default'](!entry.done);
 
       var _entry$value = _slicedToArray(entry.value, 2);
 
       var key = _entry$value[0];
       var value = _entry$value[1];
-      if (value === searchValue) return key;
+
+      if (value === searchValue) {
+        return key;
+      }
     }
   }
-
-
-
 
   function nodeForMarker(marker) {
     return findKeyByValue({
@@ -4769,9 +4552,6 @@ exports["default"] = function () {
     });
   }
 
-
-
-
   function drawingForPoly(poly) {
     return findKeyByValue({
       map: polys,
@@ -4779,12 +4559,9 @@ exports["default"] = function () {
     });
   }
 
-
-
-
   window.mapCanvas.data.setStyle(function (feature) {
-    var color = feature.getProperty("color"),
-        fill = feature.getProperty("fill");
+    var color = feature.getProperty('color'),
+        fill = feature.getProperty('fill');
 
     if (fill) {
       return {
@@ -4802,68 +4579,84 @@ exports["default"] = function () {
     }
   });
 
+  _emit$on.on(_Node$Drawing$Territory.Territory.event.DRAWING_ADDED, function (eventName, _ref3) {
+    var atIndex = _ref3.atIndex;
+    var drawing = _ref3.drawing;
+    var context = _ref3.context;
 
-
-
-  on(Territory.event.DRAWING_ADDED, function (eventName, _ref) {
-    var atIndex = _ref.atIndex;
-    var drawing = _ref.drawing;
-    var context = _ref.context;
     var poly = createPolyFromDrawing(drawing);
 
     window.mapCanvas.addPoly({ atIndex: atIndex, poly: poly });
     polys.set(drawing, poly);
   });
 
+  _emit$on.on(_Node$Drawing$Territory.Territory.event.DRAWING_REMOVED, function (eventName, _ref4) {
+    var drawing = _ref4.drawing;
 
-  on(Territory.event.DRAWING_REMOVED, function (eventName, _ref) {
-    var drawing = _ref.drawing;
     var poly = polys.get(drawing);
-    assert(poly instanceof Poly);
+    _assert2['default'](poly instanceof _MapCanvas$Marker$Poly$LatLng.Poly);
 
     window.mapCanvas.removePoly(poly);
-    polys["delete"](drawing);
+    polys['delete'](drawing);
   });
 
+  _emit$on.on(_Node$Drawing$Territory.Drawing.event.COLOR_CHANGED, function (eventName, _ref5) {
+    var color = _ref5.color;
+    var context = _ref5.context;
 
-
-
-  on(Drawing.event.COLOR_CHANGED, function (eventName, _ref) {
-    var color = _ref.color;
-    var context = _ref.context;
-    assert(polys.has(context));
+    _assert2['default'](polys.has(context));
 
     var poly = polys.get(context);
 
     poly.setOptions({ color: color });
 
     var nodes = context.nodes();
-    for (var _iterator = nodes[Symbol.iterator](), _step; !(_step = _iterator.next()).done;) {
-      var node = _step.value;
-      assert(markers.has(node));
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
 
-      var marker = markers.get(node);
-      marker.setOptions({ strokeColor: color });
+    try {
+      for (var _iterator = nodes[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var node = _step.value;
+
+        _assert2['default'](markers.has(node));
+
+        var marker = markers.get(node);
+        marker.setOptions({ strokeColor: color });
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator['return']) {
+          _iterator['return']();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
     }
   });
 
+  _emit$on.on(_Node$Drawing$Territory.Drawing.event.FILL_CHANGED, function (eventName, _ref6) {
+    var fill = _ref6.fill;
+    var context = _ref6.context;
 
-  on(Drawing.event.FILL_CHANGED, function (eventName, _ref) {
-    var fill = _ref.fill;
-    var context = _ref.context;
-    assert(polys.has(context));
+    _assert2['default'](polys.has(context));
 
     var poly = createPolyFromDrawing(context);
 
     polys.set(context, poly);
   });
 
+  _emit$on.on(_Node$Drawing$Territory.Drawing.event.POINTS_ADDED, function (eventName, _ref7) {
+    var atIndex = _ref7.atIndex;
+    var addedPoints = _ref7.addedPoints;
+    var context = _ref7.context;
 
-  on(Drawing.event.POINTS_ADDED, function (eventName, _ref) {
-    var atIndex = _ref.atIndex;
-    var addedPoints = _ref.addedPoints;
-    var context = _ref.context;
-    assert(polys.has(context));
+    _assert2['default'](polys.has(context));
 
     var poly = polys.get(context);
 
@@ -4878,7 +4671,7 @@ exports["default"] = function () {
     addedPoints.forEach(function (point, i) {
       if (skipLastPoint && i === len - 1) return;
 
-      if (point instanceof Node) {
+      if (point instanceof _Node$Drawing$Territory.Node) {
         var markerIndex = nodes.indexOf(point);
 
         var marker = createMarker({ point: point, color: color });
@@ -4900,13 +4693,13 @@ exports["default"] = function () {
     // }
   });
 
+  _emit$on.on(_Node$Drawing$Territory.Drawing.event.POINTS_REMOVED, function (eventName, _ref8) {
+    var start = _ref8.start;
+    var end = _ref8.end;
+    var removedPoints = _ref8.removedPoints;
+    var context = _ref8.context;
 
-  on(Drawing.event.POINTS_REMOVED, function (eventName, _ref) {
-    var start = _ref.start;
-    var end = _ref.end;
-    var removedPoints = _ref.removedPoints;
-    var context = _ref.context;
-    assert(polys.has(context));
+    _assert2['default'](polys.has(context));
 
     var poly = polys.get(context),
         len = removedPoints.length,
@@ -4917,27 +4710,25 @@ exports["default"] = function () {
     removedPoints.forEach(function (point, i) {
       if (skipLastPoint && i === len) return;
 
-      if (point instanceof Node) {
-        assert(markers.has(point));
+      if (point instanceof _Node$Drawing$Territory.Node) {
+        _assert2['default'](markers.has(point));
 
         var marker = markers.get(point);
 
         marker.destroy();
-        markers["delete"](point);
-        markerIndices["delete"](marker);
+        markers['delete'](point);
+        markerIndices['delete'](marker);
       }
     });
   });
 
+  _emit$on.on(_Node$Drawing$Territory.Node.event.MOVED, function (eventName, _ref9) {
+    var x = _ref9.x;
+    var y = _ref9.y;
+    var context = _ref9.context;
 
-
-
-  on(Node.event.MOVED, function (eventName, _ref) {
-    var x = _ref.x;
-    var y = _ref.y;
-    var context = _ref.context;
-    assert(context instanceof Node);
-    assert(markers.has(context));
+    _assert2['default'](context instanceof _Node$Drawing$Territory.Node);
+    _assert2['default'](markers.has(context));
 
     var marker = markers.get(context),
         index = markerIndices.get(marker);
@@ -4948,12 +4739,12 @@ exports["default"] = function () {
         entry = undefined;
 
     while (entry = entries.next()) {
-      assert(!entries.done, "Poly not found");
+      _assert2['default'](!entries.done, 'Poly not found');
 
-      var _entry$value = _slicedToArray(entry.value, 2);
+      var _entry$value2 = _slicedToArray(entry.value, 2);
 
-      var drawing = _entry$value[0];
-      var poly = _entry$value[1];
+      var drawing = _entry$value2[0];
+      var poly = _entry$value2[1];
       var _index = drawing.indexOf(context);
       if (_index > -1) {
         if (drawing.fill && _index === 0) {
@@ -4992,63 +4783,53 @@ exports["default"] = function () {
     }
   });
 
-
-
-
-  on(MapCanvas.event.PRESSED, function (eventName, _ref) {
-    var event = _ref.event;
-    return emit(MapView.event.MAP_PRESSED, event);
+  _emit$on.on(_MapCanvas$Marker$Poly$LatLng.MapCanvas.event.PRESSED, function (eventName, _ref10) {
+    var event = _ref10.event;
+    return _emit$on.emit(MapView.event.MAP_PRESSED, event);
   });
 
-
-
-
-  on(Poly.event.PRESSED, function (eventName, _ref) {
-    var event = _ref.event;
-    var context = _ref.context;
-    return emit(MapView.event.POLY_PRESSED, {
+  _emit$on.on(_MapCanvas$Marker$Poly$LatLng.Poly.event.PRESSED, function (eventName, _ref11) {
+    var event = _ref11.event;
+    var context = _ref11.context;
+    return _emit$on.emit(MapView.event.POLY_PRESSED, {
       latLng: event.latLng,
       node: drawingForPoly(context)
     });
   });
 
-
-
-
-  on(Marker.event.PRESSED, function (eventName, _ref) {
-    var event = _ref.event;
-    var context = _ref.context;
-    return emit(MapView.event.MARKER_PRESSED, {
+  _emit$on.on(_MapCanvas$Marker$Poly$LatLng.Marker.event.PRESSED, function (eventName, _ref12) {
+    var event = _ref12.event;
+    var context = _ref12.context;
+    return _emit$on.emit(MapView.event.MARKER_PRESSED, {
       latLng: event.latLng,
       node: nodeForMarker(context)
     });
   });
 
-
-  on(Marker.event.DRAGSTARTED, function (eventName, _ref) {
-    var event = _ref.event;
-    var context = _ref.context;
-    return emit(MapView.event.MARKER_DRAGSTARTED, {
+  _emit$on.on(_MapCanvas$Marker$Poly$LatLng.Marker.event.DRAGSTARTED, function (eventName, _ref13) {
+    var event = _ref13.event;
+    var context = _ref13.context;
+    return _emit$on.emit(MapView.event.MARKER_DRAGSTARTED, {
       latLng: event.latLng,
       node: nodeForMarker(context)
     });
   });
 
+  _emit$on.on(_MapCanvas$Marker$Poly$LatLng.Marker.event.DRAGGED, function (eventName, _ref14) {
+    var event = _ref14.event;
+    var context = _ref14.context;
 
-  on(Marker.event.DRAGGED, function (eventName, _ref) {
-    var event = _ref.event;
-    var context = _ref.context;
     var node = nodeForMarker(context),
         entries = polys.entries(),
         entry = undefined;
 
     while (entry = entries.next()) {
-      assert(!entries.done, "Poly not found");
+      _assert2['default'](!entries.done, 'Poly not found');
 
-      var _entry$value = _slicedToArray(entry.value, 2);
+      var _entry$value3 = _slicedToArray(entry.value, 2);
 
-      var drawing = _entry$value[0];
-      var poly = _entry$value[1];
+      var drawing = _entry$value3[0];
+      var poly = _entry$value3[1];
       var index = drawing.indexOf(node);
       if (index > -1) {
         if (drawing.fill && index === 0) {
@@ -5086,48 +4867,45 @@ exports["default"] = function () {
       }
     }
 
-    emit(MapView.event.MARKER_DRAGGED, {
+    _emit$on.emit(MapView.event.MARKER_DRAGGED, {
       latLng: event.latLng,
       node: nodeForMarker(context)
     });
   });
 
-
-  on(Marker.event.DRAGENDED, function (eventName, _ref) {
-    var event = _ref.event;
-    var context = _ref.context;
-    return emit(MapView.event.MARKER_DRAGENDED, {
+  _emit$on.on(_MapCanvas$Marker$Poly$LatLng.Marker.event.DRAGENDED, function (eventName, _ref15) {
+    var event = _ref15.event;
+    var context = _ref15.context;
+    return _emit$on.emit(MapView.event.MARKER_DRAGENDED, {
       latLng: event.latLng,
       node: nodeForMarker(context)
     });
   });
 };
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
 },{"./assert":6,"./drawing-class":9,"./event-target":10,"./map-class":12,"./pubsub":14}],14:[function(require,module,exports){
 "use strict";
 
-var _ref = [PubSub.publishSync.bind(PubSub), PubSub.subscribe.bind(PubSub), PubSub.unsubscribe.bind(PubSub)];
-
-var emit = _ref[0];
-var on = _ref[1];
-var off = _ref[2];
-exports.emit = emit;
-exports.on = on;
-exports.off = off;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+var emit = PubSub.publishSync.bind(PubSub);
+var on = PubSub.subscribe.bind(PubSub);
+var off = PubSub.unsubscribe.bind(PubSub);
+exports.emit = emit;
+exports.on = on;
+exports.off = off;
 
 },{}],15:[function(require,module,exports){
 "use strict";
 
-var _prototypeProperties = function (child, staticProps, instanceProps) { if (staticProps) Object.defineProperties(child, staticProps); if (instanceProps) Object.defineProperties(child.prototype, instanceProps); };
-
 var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var Queue = (function () {
   function Queue() {
@@ -5136,21 +4914,19 @@ var Queue = (function () {
     this._q = Promise.resolve(true);
   }
 
-  _prototypeProperties(Queue, null, {
-    add: {
-      value: function add(cb) {
-        this._q = this._q.then(cb);
+  _createClass(Queue, [{
+    key: "add",
+    value: function add(cb) {
+      this._q = this._q.then(cb);
 
-        return this;
-      },
-      writable: true,
-      configurable: true
+      return this;
     }
-  });
+  }]);
 
   return Queue;
 })();
 
-module.exports = Queue;
+exports["default"] = Queue;
+module.exports = exports["default"];
 
 },{}]},{},[11]);

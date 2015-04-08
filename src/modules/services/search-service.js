@@ -9,12 +9,9 @@ Includes results from existing territories and
 
 
 import assert from '../assert';
-import storageService from './storage-service';
-import { LatLng } from '../classes/map-class';
-import {
-  mapCanvas,
-  autocompleteService
-} from '../services/map-view';
+// import storageService from './storage-service';
+import { LatLng } from '../map-class';
+import { mapCanvas, autocompleteService } from '../map-view';
 
 
 
