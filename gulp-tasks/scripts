@@ -1,0 +1,21 @@
+const gulp = require( 'gulp' );
+
+const babel = require( 'gulp-babel' );
+const concat = require( 'gulp-concat' );
+const ngAnnotate = require( 'gulp-ng-annotate' );
+const sourcemaps = require( 'gulp-sourcemaps' );
+const uglify = require( 'gulp-uglify' );
+
+
+
+
+module.exports = function() {
+  return gulp.src( 'src/scripts/**/*.js' )
+    .pipe( sourcemaps.init() )
+      .pipe( babel() )
+      .pipe( ngAnnotate() )
+      .pipe( concat( 'script.js' ) )
+      .pipe( uglify() )
+    .pipe( sourcemaps.write( './sourcemaps' ) )
+    .pipe( gulp.dest( 'dist' ) );
+};

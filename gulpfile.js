@@ -42,7 +42,6 @@ var pkg = require( './package.json' );
 
 
 
-
 function deferScript( filepath ) {
   return '<script defer src="' + filepath + '"></script>';
 }
