@@ -1,15 +1,16 @@
-import Color from '../modules/color-class';
-
-
+//import Color from '../modules/color-class';
 
 
 describe( 'Color', () => {
-  // beforeEach(done => {
-  //   System.import( 'color-class' )
-  //     .then( $Color => Color = $Color.default )
-  //     .then( done )
-  //     .catch( err => console.error( err ) );
-  // });
+
+  let Color;
+
+  beforeEach(done => {
+    System.import( 'src/modules/color-class' )
+      .then( $Color => Color = $Color.default )
+      .then( done )
+      .catch( err => console.error( err ) );
+  });
 
 
   const DATA = [
@@ -173,7 +174,7 @@ describe( 'Color', () => {
     it( 'Converts ' + datum.name, () => {
       for ( let key in datum ) {
         if ( key === 'name' ) continue;
-        
+
         let entry = datum[ key ];
         let color = new Color( datum[ key ] );
 

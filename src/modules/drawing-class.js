@@ -1,5 +1,5 @@
-import { emit } from './pubsub';
-import assert from './assert';
+import { emit } from 'src/modules/pubsub';
+import assert from 'src/modules/assert';
 
 
 
@@ -378,7 +378,7 @@ class Drawing extends Path {
 
       // removeLength = this.length - start - 1;
       removeLength = this.length - start;
-      
+
       assert( removeLength >= 0 );
 
       removedPoints.push(
@@ -578,27 +578,27 @@ class Territory {
         let feature = {
           type: 'Feature'
         };
-        
+
         let coordinates = drawing._points.map(
           ( point ) => {
             let { x, y } = point;
             return [ x, y ];
           }
         );
-        
+
         feature.geometry = {
           type: drawing.fill ? 'Polygon' : 'LineString',
           coordinates: drawing.fill ? [ coordinates ] : coordinates
         };
-        
+
         let { color, rigid, fill } = drawing;
         feature.properties = { color, rigid, fill };
         feature.properties.nodePositions = drawing.nodePositions();
-        
+
         return feature;
       }
     );
-    
+
     return geoJson;
   }
 
@@ -620,12 +620,12 @@ class Territory {
         assert( Array.isArray( nodePositions ) );
 
         let drawing = new Drawing({ color, rigid, fill });
-        
+
         drawings.addDrawings({
           atIndex: -1,
           drawing
         });
-              
+
         let coordinates;
         if ( fill ) {
           coordinates = feature.geometry.coordinates[ 0 ];
@@ -654,7 +654,7 @@ class Territory {
         return drawing;
       }
     );
-    
+
     return drawings;
   }
 }

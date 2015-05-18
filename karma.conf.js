@@ -1,7 +1,10 @@
+/* global process */
 // Karma configuration
 // http://karma-runner.github.io/0.10/config/configuration-file.html
 
 'use strict';
+
+var path = require( 'path' );
 
 module.exports = function( config ) {
   var projectFiles = require( './project-files' );
@@ -9,10 +12,18 @@ module.exports = function( config ) {
 
 
 
+  // var configFiles = [].concat(
+  //   projectFiles.components.main,
+  //   projectFiles.build.scripts,
+  //   projectFiles.build.tests
+  // );
+
   var configFiles = [].concat(
+    'node_modules/karma-babel-preprocessor/node_modules/babel-core/browser-polyfill.js',
+    projectFiles.polyfills,
     projectFiles.components.main,
-    projectFiles.build.scripts,
-    projectFiles.build.tests
+    'src/modules/**/*.js',
+    'src/tests/**/*.js'
   );
 
 
@@ -30,8 +41,8 @@ module.exports = function( config ) {
 
     // testing framework to use (jasmine/mocha/qunit/...)
     frameworks: [
-      'jasmine',
-      'browserify'
+      'jasmine'
+      // 'phantomjs-shim'
     ],
 
     reporters: [
@@ -40,18 +51,37 @@ module.exports = function( config ) {
       'coverage'
     ],
 
-    preprocessors: {
-      // 'build/scripts/**/*.js': [ 'coverage', 'browserify' ],
-      // 'build/modules/**/*.js': [ 'coverage', 'browserify' ],
-      'build/tests/**/*': [ 'browserify' ]
+    customPreprocessors: {
+      babel_with_modules: {
+        base: 'babel',
+        options: {
+          modules: 'system',
+          moduleIds: true,
+          moduleRoot: ''
+        }
+      },
+      babel_no_modules: {
+        base: 'babel',
+        options: {
+          modules: 'ignore'
+        }
+      }
     },
 
-    // browserify: {
-    //   transform: [[ 'babelify', { optional: [ 'es7.asyncFunctions' ]} ]]
-    // },
+    preprocessors: {
+      'src/modules/**/*': [ 'babel_with_modules' ],
+      'src/tests/**/*': [ 'babel_no_modules' ]
+    },
+
+   babelPreprocessor: {
+     options: {
+       optional: [ 'es7.asyncFunctions' ],
+       sourceRoot: process.cwd()
+     }
+   },
 
     mochaReporter: {
-      output: 'minimal'
+      output: 'autowatch'
     },
 
     coverageReporter: {
@@ -72,7 +102,7 @@ module.exports = function( config ) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+    autoWatch: true,
 
 
     // Start these browsers, currently available:
@@ -84,14 +114,19 @@ module.exports = function( config ) {
     // - PhantomJS
     // - IE (only Windows)
     browsers: [
-      'Chrome'//,
-      // 'PhantomJS'
+      // 'Chrome_hidden'
+      // 'Firefox'
+      'PhantomJS2'
     ],
 
     customLaunchers: {
       Chrome_travis_ci: {
         base: 'Chrome',
         flags: [ '--no-sandbox' ]
+      },
+      Chrome_hidden: {
+        base: 'ChromeCanary',
+        flags: [ '--window-position=99999,99999', '--window-size=200,200' ]
       }
     },
 

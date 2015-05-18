@@ -3,45 +3,28 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 500;
 
 
 
-import { Point, Node, Drawing } from '../modules/drawing-class';
-import * as PubSubModule from '../modules/pubsub';
-
-
-
-
 describe( 'DrawingModule', () => {
   let emit, on, off;
+  let Point, Node, Drawing;
 
 
-  beforeEach(() => {
-    emit = spyOn( PubSubModule, 'emit' ).and.callThrough();
-    on = spyOn( PubSubModule, 'on' ).and.callThrough();
-    off = spyOn( PubSubModule, 'off' ).and.callThrough();
+  beforeEach( done => {
+    Promise.all(
+      [
+        'src/modules/pubsub',
+        'src/modules/drawing-class'
+      ].map( path => System.import( path ) )
+    )
+      .then( ([ $pubSubModule, $drawingModule ]) => {
+        emit = spyOn( $pubSubModule, 'emit' ).and.callThrough();
+        on = spyOn( $pubSubModule, 'on' ).and.callThrough();
+        off = spyOn( $pubSubModule, 'off' ).and.callThrough();
+
+        ({ Point, Node, Drawing } = $drawingModule);
+      })
+      .then( done )
+      .catch( err => console.error( err ) );
   });
-  // beforeEach(() => {
-  //   emit = spyOn
-  // } done => {
-  //   Promise.all([
-  //     System.import( 'drawing-class' ),
-  //     System.import( 'pubsub' )
-  //   ])
-  //     .then(([ DrawingModule, PubSubModule ]) => {
-  //       ({ Point, Node, Drawing } = DrawingModule );
-
-  //       emit = spyOn( PubSubModule, 'emit' ).and.callThrough();
-  //       on = spyOn( PubSubModule, 'on' ).and.callThrough();
-  //       off = spyOn( PubSubModule, 'off' ).and.callThrough();
-  //       // ({
-  //       //   emit,
-  //       //   on,
-  //       //   off
-  //       // }) = PubSubModule;
-  //     })
-  //     .then( done )
-  //     .catch( err => console.error( 'ERROR:', err ) );
-  // });
-
-
 
 
   describe("Point", function() {
@@ -105,7 +88,7 @@ describe( 'DrawingModule', () => {
 
     function generatePoints( length ) {
       let points = [];
-      
+
       for ( let i = 0; i < length; i++ ) {
         let x = Math.random() * 360 - 180,
           y = Math.random() * 360 - 180,
@@ -214,7 +197,7 @@ describe( 'DrawingModule', () => {
     it("Removes points around Node", function() {
       let morePoints = generatePoints( 7 ),
         removedPoints;
-      
+
       drawing._addPoints({
         atIndex: 5,
         points: morePoints

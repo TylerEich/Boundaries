@@ -244,79 +244,89 @@ export default class TerritoryEditorCmp {
   }
 
 
-  async fillPathAroundNode({ drawing, node }) {
+  fillPathAroundNode({ drawing, node }) {
     assert( drawing instanceof Drawing );
     assert( node instanceof Node );
 
+    let promises = [];
     let { start, end } = drawing.nodesAroundNode( node );
 
     if ( !drawing.rigid ) {
       if ( start === node && end === node ) {
         // Single node
         let latLngs;
-        try {
-          latLngs = await directionsService.route({
-            origin: latLngFromPoint( node ),
-            destination: latLngFromPoint( node )
-          });
-        } catch ( e ) {
-          alert( e );
-        }
 
-        points = latLngs.map( pointFromLatLng );
+        promises.push(
+          directionsService
+            .route({
+              origin: latLngFromPoint( node ),
+              destination: latLngFromPoint( node )
+            })
+            .then(
+              latLngs => latLngs.map( pointFromLatLng )
+            )
+        )
 
-        assert( points.length > 0 );
-
-        let { x, y } = points[ 0 ];
-        this.queue.add( node.moveTo.bind( node, x, y ) );
+        // points = latLngs.map( pointFromLatLng );
+        //
+        // assert( points.length > 0 );
+        //
+        // let { x, y } = points[ 0 ];
+        // this.queue.add( node.moveTo.bind( node, x, y ) );
       }
 
       let latLngs, points;
       if ( start !== node ) {
         // Push to previous node
-        try {
-          latLngs = await directionsService.route({
+        promises.push(
+          directionsService.route({
             origin: latLngFromPoint( start ),
             destination: latLngFromPoint( node )
-          });
-        } catch ( e ) {
-          alert( e );
-        }
+          })
+          .then(
+            latLngs => latLngs.map( pointFromLatLng )
+          )
+        );
 
-        points = latLngs.map( pointFromLatLng );
-
-        let x, y;
-        ({ x, y } = points.shift() );
-        start.moveTo( x, y );
-        ({ x, y } = points.pop() );
-        node.moveTo( x, y );
-
-        this.queue.add( drawing.removePointsBetweenNodes.bind( drawing, start, node ) );
-        this.queue.add( drawing.addPointsAfterNode.bind( drawing, start, points ) );
+        // points = latLngs.map( pointFromLatLng );
+        //
+        // let x, y;
+        // ({ x, y } = points.shift() );
+        // start.moveTo( x, y );
+        // ({ x, y } = points.pop() );
+        // node.moveTo( x, y );
+        //
+        // this.queue.add( drawing.removePointsBetweenNodes.bind( drawing, start, node ) );
+        // this.queue.add( drawing.addPointsAfterNode.bind( drawing, start, points ) );
       }
 
       if ( end !== node ) {
-        // Push to next node
-        try {
-          latLngs = await directionsService.route({
+        promises.push(
+          directionsService.route({
             origin: latLngFromPoint( node ),
             destination: latLngFromPoint( end )
-          });
-        } catch ( e ) {
-          alert( e );
-        }
+          })
+          .then(
+            latLngs => latLngs.map( pointFromLatLng )
+          )
+        );
 
-        points = latLngs.map( pointFromLatLng );
-
-        let x, y;
-        ({ x, y } = points.shift() );
-        node.moveTo( x, y );
-        ({ x, y } = points.pop() );
-        end.moveTo( x, y );
-
-        this.queue.add( drawing.removePointsBetweenNodes.bind( drawing, node, end ) );
-        this.queue.add( drawing.addPointsAfterNode.bind( drawing, node, points ) );
+        // Push to next node
+        // points = latLngs.map( pointFromLatLng );
+        //
+        // let x, y;
+        // ({ x, y } = points.shift() );
+        // node.moveTo( x, y );
+        // ({ x, y } = points.pop() );
+        // end.moveTo( x, y );
+        //
+        // this.queue.add( drawing.removePointsBetweenNodes.bind( drawing, node, end ) );
+        // this.queue.add( drawing.addPointsAfterNode.bind( drawing, node, points ) );
       }
+
+      return Promise.all( promises, paths => {
+        // TODO: decide what to do here
+      })
     }
   }
 
@@ -360,7 +370,7 @@ export default class TerritoryEditorCmp {
 
     this.queue.add(() => {
       node.moveTo( newPoint.x, newPoint.y );
-      
+
       return this.fillPathAroundNode({ drawing, node });
     });
   }
@@ -369,14 +379,14 @@ export default class TerritoryEditorCmp {
   removeNode() {
     this.queue.add(() => {
       let drawing = this.territory.atIndex( this.activeDrawingIndex );
-    
+
       let node = drawing.removeNodeAtIndex( this.activeNodeIndex );
 
       ignoreNode( node );
     });
   }
 
-  
+
   getTerritoryGeoJson() {
     return this.territory.toGeoJson();
   }
