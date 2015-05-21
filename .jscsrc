@@ -1,0 +1,15 @@
+{
+  "esnext": true,
+  "preset": "google",
+  "disallowMultipleLineBreaks": null,
+  "disallowSpacesInsideParentheses": null,
+  "disallowSpacesInsideArrayBrackets": null,
+  "disallowSpacesInsideObjectBrackets": null,
+  "requireSpacesInsideParentheses": {
+    "all": true,
+    "except": [ "{", "}", "[", "]" ]
+  },
+  "requireSpacesInsideObjectBrackets": {
+    "allExcept": [ "}", ")" ]
+  }
+}

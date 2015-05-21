@@ -37,7 +37,7 @@ export class Shape extends EventEmitter {
   addPath( path = [], index = Number.MAX_VALUE ) {
     this.path.splice( index, 0, ...path );
 
-    this.emit( 'add', path );
+    this.emit( 'add', path, this );
 
     this._sanitizePath();
   }
@@ -76,7 +76,7 @@ export class Shape extends EventEmitter {
 
     this._sanitizePath();
 
-    this.emit( 'delete', deletedPath );
+    this.emit( 'delete', deletedPath, this );
   }
 
 
@@ -141,8 +141,8 @@ export class Shape extends EventEmitter {
       shape.addPath( path );
 
       return shape;
-    } catch( e ) {
-      throw 'Feature is invalid';
+    } catch ( e ) {
+      console.warn( 'Feature is invalid' );
       return new Shape();
     }
   }
@@ -165,7 +165,7 @@ export class ShapeStore extends EventEmitter {
   addShape( shape ) {
     this._shapes.push( shape );
 
-    this.emit( 'add', shape );
+    this.emit( 'add', shape, this );
   }
 
 
@@ -174,7 +174,7 @@ export class ShapeStore extends EventEmitter {
 
     if ( shapeIndex > -1 ) {
       this._shapes.splice( shapeIndex, 1 );
-      this.emit( 'delete', shape );
+      this.emit( 'delete', shape, this );
     }
   }
 
@@ -196,15 +196,14 @@ export class ShapeStore extends EventEmitter {
 
     try {
       featureCollection.features.forEach(
-        ( feature, i ) => {
-
+        ( feature ) => {
           const shape = Shape.fromFeature( feature );
 
           shapeStore.addShape( shape );
         }
       );
-    } catch( e ) {
-      console.warn( 'geoJson is invalid', e );
+    } catch ( error ) {
+      console.warn( 'geoJson is invalid', error );
       return new ShapeStore();
     }
 

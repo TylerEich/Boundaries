@@ -6,7 +6,7 @@
     "mocha": false,
     "jasmine": false
   },
-  "_parser": "babel-eslint",
+  "parser": "babel-eslint",
   "rules": {
     "brace-style": [2, "1tbs", { "allowSingleLine": true }],
     "camelcase": [0],
@@ -35,7 +35,7 @@
       "arraysInArrays": false,
       "arraysInObjects": false
     }],
-    "space-in-parens": [2, "always", { "exceptions": ["{}"]}],
+    "space-in-parens": [2, "always", { "exceptions": ["{}", "[]"]}],
     "space-unary-ops": [2, { "words": true, "nonwords": false }],
     "spaced-line-comment": [0, "always"],
     "strict": [2, "global"],

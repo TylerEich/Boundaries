@@ -7,35 +7,37 @@ const gulp = require( 'gulp' );
 
 
 const babelMiddleware = require( 'babel-connect' );
+const injectMiddleware = require( 'connect-inject' );
 // const browserSync = require( 'browser-sync' );
 const sassMiddleware = require( 'node-sass-middleware' );
 // const reload = browserSync.reload;
 
 
+
+
 const karma = require( 'karma' );
 
 
+const inject = injectMiddleware({
 
-// const babel = babelMiddleware({
-//   options: {
-//     optional: [ 'es7.asyncFunctions' ]
-//   },
-//   src: 'src/scripts',
-//   dest: 'temp/scripts'
-// });
+});
+const babel = babelMiddleware({
+  options: {
+    modules: 'system',
+    moduleIds: true,
+    moduleRoot: '',
+    sourceRoot: process.cwd(),
+    optional: [ 'es7.asyncFunctions' ]
+  },
+  src: path.resolve( './src/modules' ),
+  dest: path.resolve( './temp/modules' )
+});
 
 const sass = sassMiddleware({
   src: path.resolve( './src/styles' ),
   dest: path.resolve( './temp/styles' ),
-  debug: true,
   outputStyle: 'compressed'
   // prefix: '/styles'
-});
-
-
-const babel = babelMiddleware({
-  src: path.resolve( './src/modules' ),
-  dest: path.resolve( './temp/modules' )
 });
 
 

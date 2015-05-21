@@ -38,123 +38,123 @@
     <main id="map_canvas">
     </main>
 
-    <main id="content"
-        ng-hide="main.showCard">
-      <section id="toolbar">
-        <section id="search-container">
-          <input id="search-input" class="paper" type="text"
-              placeholder="Search"
-              ng-focus="main.search = true"
-              ng-blur="main.search = false">
-          <ul id="search-results" class="paper"
-              ng-show="main.search">
-            <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
-            <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
-            <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
-            <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
-            <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
-          </ul>
-        </section>
-      </section>
+<!--     <main id="content"
+    ng-hide="main.showCard">
+  <section id="toolbar">
+    <section id="search-container">
+      <input id="search-input" class="paper" type="text"
+          placeholder="Search"
+          ng-focus="main.search = true"
+          ng-blur="main.search = false">
+      <ul id="search-results" class="paper"
+          ng-show="main.search">
+        <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
+        <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
+        <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
+        <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
+        <li class="result">Lorem Ipsum, Dolor, Sit Amet</li>
+      </ul>
+    </section>
+  </section>
 
-      <button id="card" class="paper"
-          ng-class="{ active: main.showCard }"
-          ng-click="main.showCard = !main.showCard">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-          <path d="M10,17 L54,17 L54,47 L10,47 L10,17 z" fill-opacity="0" />
-          <path d="M17,24 L35,24 M47,24 L41,24 M43,40 L21,40" fill-opacity="0" stroke-width="2" />
-        </svg>
-      </button>
-      <!-- <section id="card-options" class="paper"
-          ng-show="main.showCard">
-        <form>
-          <input id="locality" type="text"
-              ng-model="main.card.locality">
-          <input id="number" type="text"
-              ng-model="main.card.number">
+  <button id="card" class="paper"
+      ng-class="{ active: main.showCard }"
+      ng-click="main.showCard = !main.showCard">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+      <path d="M10,17 L54,17 L54,47 L10,47 L10,17 z" fill-opacity="0" />
+      <path d="M17,24 L35,24 M47,24 L41,24 M43,40 L21,40" fill-opacity="0" stroke-width="2" />
+    </svg>
+  </button>
+  <section id="card-options" class="paper"
+      ng-show="main.showCard">
+    <form>
+      <input id="locality" type="text"
+          ng-model="main.card.locality">
+      <input id="number" type="text"
+          ng-model="main.card.number">
 
-          <div id="colors"> 
-            <div ng-repeat="color in main.card.colors">
-              <input class="color-label" type="text"
-                  ng-model="color.label"
-                  ng-style="{color: color.value}">
-              <input class="color-desc" type="text"
-                  ng-model="color.desc">
-            </div>
-          </div>
-
-          <textarea id="notes"
-              ng-model="main.card.notes"></textarea>
-        </form>
-      </section> -->
-
-      <button id="settings" class="secondary">
-        <svg id="cog" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-          <path xmlns="http://www.w3.org/2000/svg" d="M44,24.707v-5.5l-6.574-2.738c-0.184-0.516-0.377-1.015-0.613-1.505l2.656-6.606l-3.891-3.889l-6.549,2.696   c-0.498-0.242-1.008-0.445-1.535-0.634L24.707,0h-5.5l-2.718,6.509c-0.548,0.194-1.075,0.397-1.595,0.646L8.357,4.528L4.469,8.416   l2.665,6.478c-0.259,0.532-0.467,1.074-0.667,1.633L0,19.293v5.5l6.472,2.697c0.199,0.559,0.413,1.1,0.67,1.633l-2.615,6.52   l3.888,3.889l6.494-2.676c0.522,0.248,1.054,0.447,1.601,0.635L19.293,44h5.5l2.721-6.543c0.523-0.193,1.039-0.396,1.533-0.633   l6.596,2.643l3.889-3.889l-2.709-6.562c0.232-0.494,0.418-0.994,0.602-1.504L44,24.707z M21.957,31.583   c-5.289,0-9.582-4.292-9.582-9.583s4.293-9.583,9.582-9.583c5.292,0,9.583,4.293,9.583,9.583S27.248,31.583,21.957,31.583z"/>
-        </svg>
-      </button>
-
-      <section id="undo-redo" class="paper">
-        <button class="secondary">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <path d="M10,17 L54,17 L54,47 L10,47 L10,17 z" fill-opacity="0" />
-            <path d="M17,24 L35,24 M47,24 L41,24 M43,40 L21,40" fill-opacity="0" stroke-width="2" />
-          </svg>
-          <!-- <svg id="cog" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <circle cx="32" cy="16" r="4" stroke-opacity="0" />
-            <circle cx="32" cy="32" r="4" stroke-opacity="0" />
-            <circle cx="32" cy="48" r="4" stroke-opacity="0" />
-          </svg> -->
-        </button>
-        <button class="secondary">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <path d="M32,54 C44.15,54 54,44.15 54,32 C54,19.85 44.15,10 32,10 C25.645,10 19.92,12.694 15.904,17.003" fill-opacity="0" />
-            <path d="M22,23 L10,23 L10,11 L22,23 z" />
-          </svg>
-        </button>
-        <button class="secondary">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-            <path d="M32,54 C19.85,54 10,44.15 10,32 C10,19.85 19.85,10 32,10 C38.355,10 44.08,12.694 48.096,17.003" fill-opacity="0"/>
-            <path d="M42,23 L54,23 L54,11 L42,23 z" />
-          </svg>
-        </button>
-      </section>
-
-      <territory-editor></territory-editor>
-
-    <main id="card-options" class="paper"
-        ng-show="main.showCard">
-      <button class="close"
-          ng-click="main.showCard = false">
-        <svg viewBox="0 0 64 64">
-          <path d="M10,10 L54,54 M54,10 L10,54" />
-        </svg>
-      </button>
-      <form>
-        <label for="locality">Locality</label>
-        <input id="locality" type="text"
-            ng-model="main.card.locality">
-
-        <label for="number">Number</label>
-        <input id="number" type="text"
-            ng-model="main.card.number">
-
-        <label for="colors">Colors</label>
-        <div id="colors"> 
-          <div ng-repeat="color in main.card.colors">
-            <input class="color-label" type="text"
-                ng-model="color.label"
-                ng-style="{color: color.value}">
-            <input class="color-desc" type="text"
-                ng-model="color.desc">
-          </div>
+      <div id="colors">
+        <div ng-repeat="color in main.card.colors">
+          <input class="color-label" type="text"
+              ng-model="color.label"
+              ng-style="{color: color.value}">
+          <input class="color-desc" type="text"
+              ng-model="color.desc">
         </div>
+      </div>
 
-        <label for="notes">Notes</label>
-        <textarea id="notes"
-            ng-model="main.card.notes"></textarea>
-      </form>
-    </main>
+      <textarea id="notes"
+          ng-model="main.card.notes"></textarea>
+    </form>
+  </section>
+
+  <button id="settings" class="secondary">
+    <svg id="cog" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+      <path xmlns="http://www.w3.org/2000/svg" d="M44,24.707v-5.5l-6.574-2.738c-0.184-0.516-0.377-1.015-0.613-1.505l2.656-6.606l-3.891-3.889l-6.549,2.696   c-0.498-0.242-1.008-0.445-1.535-0.634L24.707,0h-5.5l-2.718,6.509c-0.548,0.194-1.075,0.397-1.595,0.646L8.357,4.528L4.469,8.416   l2.665,6.478c-0.259,0.532-0.467,1.074-0.667,1.633L0,19.293v5.5l6.472,2.697c0.199,0.559,0.413,1.1,0.67,1.633l-2.615,6.52   l3.888,3.889l6.494-2.676c0.522,0.248,1.054,0.447,1.601,0.635L19.293,44h5.5l2.721-6.543c0.523-0.193,1.039-0.396,1.533-0.633   l6.596,2.643l3.889-3.889l-2.709-6.562c0.232-0.494,0.418-0.994,0.602-1.504L44,24.707z M21.957,31.583   c-5.289,0-9.582-4.292-9.582-9.583s4.293-9.583,9.582-9.583c5.292,0,9.583,4.293,9.583,9.583S27.248,31.583,21.957,31.583z"/>
+    </svg>
+  </button>
+
+  <section id="undo-redo" class="paper">
+    <button class="secondary">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+        <path d="M10,17 L54,17 L54,47 L10,47 L10,17 z" fill-opacity="0" />
+        <path d="M17,24 L35,24 M47,24 L41,24 M43,40 L21,40" fill-opacity="0" stroke-width="2" />
+      </svg>
+      <svg id="cog" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+        <circle cx="32" cy="16" r="4" stroke-opacity="0" />
+        <circle cx="32" cy="32" r="4" stroke-opacity="0" />
+        <circle cx="32" cy="48" r="4" stroke-opacity="0" />
+      </svg>
+    </button>
+    <button class="secondary">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+        <path d="M32,54 C44.15,54 54,44.15 54,32 C54,19.85 44.15,10 32,10 C25.645,10 19.92,12.694 15.904,17.003" fill-opacity="0" />
+        <path d="M22,23 L10,23 L10,11 L22,23 z" />
+      </svg>
+    </button>
+    <button class="secondary">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+        <path d="M32,54 C19.85,54 10,44.15 10,32 C10,19.85 19.85,10 32,10 C38.355,10 44.08,12.694 48.096,17.003" fill-opacity="0"/>
+        <path d="M42,23 L54,23 L54,11 L42,23 z" />
+      </svg>
+    </button>
+  </section>
+
+  <territory-editor></territory-editor>
+
+<main id="card-options" class="paper"
+    ng-show="main.showCard">
+  <button class="close"
+      ng-click="main.showCard = false">
+    <svg viewBox="0 0 64 64">
+      <path d="M10,10 L54,54 M54,10 L10,54" />
+    </svg>
+  </button>
+  <form>
+    <label for="locality">Locality</label>
+    <input id="locality" type="text"
+        ng-model="main.card.locality">
+
+    <label for="number">Number</label>
+    <input id="number" type="text"
+        ng-model="main.card.number">
+
+    <label for="colors">Colors</label>
+    <div id="colors">
+      <div ng-repeat="color in main.card.colors">
+        <input class="color-label" type="text"
+            ng-model="color.label"
+            ng-style="{color: color.value}">
+        <input class="color-desc" type="text"
+            ng-model="color.desc">
+      </div>
+    </div>
+
+    <label for="notes">Notes</label>
+    <textarea id="notes"
+        ng-model="main.card.notes"></textarea>
+  </form>
+</main> -->
 
     <!-- inject:css -->
     <link rel="stylesheet" href="/styles/core.css">
@@ -162,57 +162,21 @@
     <link rel="stylesheet" href="/styles/header-footer.css">
     <link rel="stylesheet" href="/styles/main.css">
     <!-- endinject -->
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.3/fastclick.min.js"></script>
-    
+
     <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry,places&sensor=false"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.js"></script>
-        
-    <!-- <script defer src="/bower_components/angular/angular.js"></script> -->
-    <script src="/bower_components/angular-animate/angular-animate.js"></script>
-    <!-- <script defer src="/bower_components/angular-mocks/angular-mocks.js"></script>
-    <script defer src="/bower_components/angular-resource/angular-resource.js"></script>
-    <script defer src="/bower_components/angular-route/angular-route.js"></script>
-    <script defer src="/bower_components/angular-sanitize/angular-sanitize.js"></script> -->
-    <!-- <script src="/bower_components/angular-touch/angular-touch.js"></script> -->
-    <!-- <script defer src="/bower_components/angular-ui-map/ui-map.js"></script>
-    <script defer src="/bower_components/angular-ui-utils/ui-utils.js"></script>
-    <script defer src="/bower_components/ngstorage/ngStorage.js"></script>
- -->
-    <script src="/bower_components/pubsub-js/src/pubsub.js"></script>
-    
+    <script src="https://rawgit.com/facebook/regenerator/master/runtime.js"></script>
+    <script src="https://rawgit.com/systemjs/systemjs/master/dist/system.js"></script>
+    <script src="https://rawgit.com/zloirock/core-js/master/client/core.min.js"></script>
+    <script src="https://rawgit.com/Wolfy87/EventEmitter/master/EventEmitter.js"></script>
+    <script src="/modules/event-emitter.js"></script>
+    <script src="/modules/shape-class.js"></script>
+    <script src="/modules/google-map.js"></script>
+    <script>
+      System.import( 'src/modules/google-map' );
+    </script>
+
     <!-- inject:js -->
     <!-- endinject -->
-    <script defer src="/build/scripts/bundle.js"></script>
-
-    <script>
-    new FastClick( document.body );
-    angular.module( 'bndry', [] );
-    
-    angular.module('app', [ 'ngAnimate' ]).controller('Main', function() {
-      this.search = false;
-      this.add = false;
-      this.showCard = false;
-      this.card = {
-        locality: 'New Haven (Maumee River)',
-        number: 'MR-1052',
-        colors: [{
-          label: 'Red',
-          value: '#ff0000',
-          desc: 'Do not work either side'
-        }, {
-          label: 'Green',
-          value: '#00c000',
-          desc: 'Work ONLY the inner side'
-        }, {
-          label: 'Blue',
-          value: '#0000ff',
-          desc: 'Work both sides'
-        }],
-        notes: 'See the attached form for Do Not Calls.\n' +
-          'Add new Do Not Calls as you find them.'
-      };
-      });</script>
 
     <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
      <!--script>
