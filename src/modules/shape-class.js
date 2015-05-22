@@ -26,10 +26,9 @@ export class Shape extends EventEmitter {
     lastNode.node = true;
 
     if ( this.fill && firstNode !== lastNode ) {
-      this.path[ this.path.length - 1 ] = firstNode;
-    } else if ( !this.fill && firstNode === lastNode ) {
-      const { x, y } = lastNode;
-      this.path[ this.path.length - 1 ] = { x, y, node: true };
+      this.path.push( firstNode );
+    } else if ( !this.fill && firstNode === lastNode && this.path.length > 1 ) {
+      this.path.pop();
     }
   }
 
@@ -71,6 +70,8 @@ export class Shape extends EventEmitter {
         break;
       }
     }
+
+    console.log( startIndex, deleteCount );
 
     const deletedPath = this.path.splice( startIndex, deleteCount );
 

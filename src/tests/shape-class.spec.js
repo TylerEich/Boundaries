@@ -109,7 +109,8 @@ describe( 'Shape & ShapeStore', () => {
 
     shape.addPath( longPath.slice( 1 ) );
 
-    expect( shape.path.length ).toEqual( 9 );
+    expect( shape.path.length ).toEqual( 10 );
+    expect( shape.path[ 0 ] ).toBe( shape.path[ shape.path.length - 1 ] );
     expect( shape.path[ 0 ].node ).toEqual( true );
   });
 
@@ -170,7 +171,11 @@ describe( 'Shape & ShapeStore', () => {
     shape.addPath( path );
     const node = shape.path[ 0 ];
 
+    console.log( shape.path );
+
     shape.deleteNode( node );
+
+    console.log( shape.path );
 
     expect( shape.path.length ).toEqual( 1 );
     expect( shape.path.indexOf( node ) ).toEqual( -1 );

@@ -48,12 +48,9 @@ System.register('src/modules/shape-class', ['src/modules/event-emitter'], functi
             lastNode.node = true;
 
             if (this.fill && firstNode !== lastNode) {
-              this.path[this.path.length - 1] = firstNode;
-            } else if (!this.fill && firstNode === lastNode) {
-              var x = lastNode.x;
-              var y = lastNode.y;
-
-              this.path[this.path.length - 1] = { x: x, y: y, node: true };
+              this.path.push(firstNode);
+            } else if (!this.fill && firstNode === lastNode && this.path.length > 1) {
+              this.path.pop();
             }
           }
         }, {
@@ -100,6 +97,8 @@ System.register('src/modules/shape-class', ['src/modules/event-emitter'], functi
                 break;
               }
             }
+
+            console.log(startIndex, deleteCount);
 
             var deletedPath = this.path.splice(startIndex, deleteCount);
 
