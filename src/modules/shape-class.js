@@ -7,10 +7,37 @@ export class Shape extends EventEmitter {
   constructor( color, fill, rigid ) {
     super();
 
-    this.color = String( color );
-    this.fill = Boolean( fill );
-    this.rigid = Boolean( rigid );
     this.path = [];
+
+    this.color = String( color );
+
+    this.fill = fill;
+    this.rigid = rigid;
+  }
+
+
+  get fill() {
+    return this._fill;
+  }
+  set fill( value ) {
+    this._fill = Boolean( value );
+    this._sanitizePath();
+  }
+
+
+  get rigid() {
+    return this._rigid;
+  }
+  set rigid( value ) {
+    this._rigid = Boolean( value );
+    this._sanitizeRigidChange();
+  }
+
+
+  _sanitizeRigidChange() {
+    if ( this.rigid ) {
+      this.path = this.path.filter( point => point.node );
+    }
   }
 
 
@@ -36,9 +63,13 @@ export class Shape extends EventEmitter {
   addPath( path = [], index = Number.MAX_VALUE ) {
     this.path.splice( index, 0, ...path );
 
-    this.emit( 'add', path, this );
-
     this._sanitizePath();
+
+    this.emit( 'add', {
+      path,
+      index,
+      target: this
+    });
   }
 
 
@@ -71,13 +102,15 @@ export class Shape extends EventEmitter {
       }
     }
 
-    console.log( startIndex, deleteCount );
-
     const deletedPath = this.path.splice( startIndex, deleteCount );
 
     this._sanitizePath();
 
-    this.emit( 'delete', deletedPath, this );
+    this.emit( 'delete', {
+      path: deletedPath,
+      index: startIndex,
+      target: this
+    });
   }
 
 
@@ -110,6 +143,32 @@ export class Shape extends EventEmitter {
         rigid,
         nodePositions
       }
+    };
+  }
+
+
+  toMultiPointFeature( { geometry, properties } = this.toFeature() ) {
+    let path;
+    if ( properties.fill ) {
+      path = geometry.coordinates[ 0 ];
+    } else {
+      path = geometry.coordinates;
+    }
+
+    let points = properties.nodePositions.map( position => path[ position ] );
+
+    if ( properties.fill ) {
+      // Last point will be duplucate of first
+      points.pop();
+    }
+
+    return {
+      type: 'Feature',
+      geometry: {
+        type: 'MultiPoint',
+        coordinates: points
+      },
+      properties
     };
   }
 
@@ -166,7 +225,10 @@ export class ShapeStore extends EventEmitter {
   addShape( shape ) {
     this._shapes.push( shape );
 
-    this.emit( 'add', shape, this );
+    this.emit( 'add', {
+      shape,
+      target: this
+    });
   }
 
 
@@ -175,7 +237,10 @@ export class ShapeStore extends EventEmitter {
 
     if ( shapeIndex > -1 ) {
       this._shapes.splice( shapeIndex, 1 );
-      this.emit( 'delete', shape, this );
+      this.emit( 'delete', {
+        shape,
+        target: this
+      });
     }
   }
 

@@ -85,7 +85,7 @@ describe( 'Shape & ShapeStore', () => {
   it( 'Shape.addPath(): emits "add" event', done => {
     shape = new Shape( color, fill, rigid );
 
-    shape.once( 'add', addedPath => {
+    shape.once( 'add', ({ path: addedPath }) => {
       expect( addedPath ).toEqual( path );
       done();
     });
@@ -95,6 +95,7 @@ describe( 'Shape & ShapeStore', () => {
 
 
   it( 'Shape.addPath(): sanitized input', () => {
+    console.log( color, fill, rigid );
     shape = new Shape( color, fill, rigid );
 
     shape.addPath( path );
@@ -118,7 +119,7 @@ describe( 'Shape & ShapeStore', () => {
   it( 'Shape.deleteNode(): emits "delete" event', done => {
     shape = new Shape( color, fill, rigid );
 
-    shape.once( 'delete', deletedPath => {
+    shape.once( 'delete', ({ path: deletedPath }) => {
       expect( deletedPath ).toEqual( longPath.slice( 1, 9 ) );
       done();
     });
@@ -221,7 +222,7 @@ describe( 'Shape & ShapeStore', () => {
 
 
   it( 'ShapeStore.addShape(): emits "add" event', done => {
-    shapeStore.once( 'add', addedShape => {
+    shapeStore.once( 'add', ({ shape: addedShape }) => {
       expect( addedShape ).toBe( shape );
       done();
     });
@@ -241,7 +242,7 @@ describe( 'Shape & ShapeStore', () => {
 
 
   it( 'ShapeStore.deleteShape(): emits "delete" event', done => {
-    shapeStore.once( 'delete', deletedShape => {
+    shapeStore.once( 'delete', ({ shape: deletedShape }) => {
       expect( deletedShape ).toBe( shape );
       done();
     });

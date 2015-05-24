@@ -34,62 +34,141 @@ let map = new google.maps.Map( document.querySelector( '#map_canvas' ), {
 });
 
 let renderedShapes = new Map();
+let renderedNodes = new Map();
 
 map.data.setStyle( ( feature ) => {
   const color = feature.getProperty( 'color' );
   const fill = feature.getProperty( 'fill' );
 
+  const options = {
+    icon: {
+      path: 'M 0 0 m -16, 0a 16,16 0 1,0 32,0 a 16,16 0 1,0 -32,0',
+      strokeWeight: 2,
+      strokeColor: color
+    }
+  };
   if ( fill ) {
-    return {
-      fillColor: color,
-      fillOpacity: 0.25,
-      strokeWeight: 0
-    };
+    options.fillColor = color;
+    options.fillOpacity = 0.25;
+    options.strokeWeight = 0;
   } else {
-    return {
-      strokeColor: color,
-      strokeOpacity: 0.5,
-      strokeWeight: 5
-    };
+    options.strokeColor = color;
+    options.strokeOpacity = 0.5;
+    options.strokeWeight = 10;
   }
+
+  return options;
 });
 
 
-function renderOnMap( path, shape ) {
-  let features = map.data.addGeoJson( shape.toFeature() );
+function removeFromMap( shape ) {
 
-  if ( renderedShapes.has( shape ) ) {
-    let oldFeatures = renderedShapes.get( shape );
-    oldFeatures.forEach( feature => map.data.remove( feature ) );
-  }
-
-  renderedShapes.set( shape, features );
 }
 
-function unrenderOnMap( shape ) {
+
+function unrenderOnMap({ target: shape }) {
   if ( renderedShapes.has( shape ) ) {
-    let oldFeatures = renderedShapes.get( shape );
-    oldFeatures.forEach( feature => map.data.remove( feature ) );
+    let poly = renderedShapes.get( shape );
+    poly.setMap( null );
+    renderedShapes.delete( shape );
   }
+  if ( renderedNodes.has( shape ) ) {
+    let markers = renderedNodes.get( shape );
+    markers.forEach( marker => marker.setMap( null ) );
+    renderedNodes.delete( shape );
+  }
+}
+
+function renderOnMap({ path = [], index = 0, target: shape }) {
+  console.time( 'render path' );
+  let poly = renderedShapes.get( shape );
+
+  let pathToAdd = path;
+  const latLngs = [];
+  const nodes = [];
+
+  // `getPaths` only exists on Polygons
+  if ( !poly || 'getPaths' in poly !== shape.fill ) {
+    pathToAdd = shape.path;
+
+    if ( shape.fill ) {
+      poly = new google.maps.Polygon({
+        map,
+        fillOpacity: 0.25,
+        strokeWeight: 0
+      });
+    } else {
+      poly = new google.maps.Polyline({
+        map,
+        strokeOpacity: 0.5,
+        strokeWeight: 7
+      });
+    }
+
+    renderedShapes.set( shape, poly );
+  }
+
+  pathToAdd.forEach( ({ x, y, node }) => {
+    let latLng = new google.maps.LatLng( y, x );
+    latLngs.push( latLng );
+    if ( node ) {
+      nodes.push( latLng );
+    }
+  });
+
+  const polyPath = poly.getPath();
+
+  latLngs.forEach(
+    ( latLng, i ) => polyPath.insertAt( index + i, latLng )
+  );
+
+  const color = shape.color;
+  poly.setOptions({
+    strokeColor: color,
+    fillColor: color
+  });
+
+  console.timeEnd( 'render path' );
+
+  console.time( 'render nodes' );
+  const markers = renderedNodes.get( shape ) || [];
+
+  let newMarkers = nodes.map( latLng => {
+    return new google.maps.Marker({
+      map,
+      position: latLng,
+      icon: {
+        path: 'M 0 0 m -16, 0a 16,16 0 1,0 32,0 a 16,16 0 1,0 -32,0',
+        strokeWeight: 2.5,
+        strokeColor: color,
+        fillColor: color,
+        fillOpacity: 0.25
+      }
+    });
+  });
+
+  renderedNodes.set( shape, markers.concat( newMarkers ) );
+  console.timeEnd( 'render nodes' );
 }
 
 let shapeStore = new ShapeStore();
 
-shapeStore.on( 'add', ( shape ) => {
-  console.log( 'Shape added' );
+shapeStore.on( 'add', ({ shape }) => {
   shape.addListeners({
     'add': renderOnMap,
-    'delete': renderOnMap
+    'delete': unrenderOnMap
   });
+
+  renderOnMap({ target: shape });
 });
 
-shapeStore.on( 'delete', ( shape ) => {
+shapeStore.on( 'delete', ({ shape }) => {
   shape.removeListeners({
     'add': renderOnMap,
-    'delete': renderOnMap
+    'delete': unrenderOnMap
   });
 
-  unrenderOnMap( shape );
+  unrenderOnMap({ target: shape });
 });
 
 
@@ -132,7 +211,6 @@ window.changeShape = function( prop, value ) {
   newShape.addPath( path );
 
   shapeStore.addShape( newShape );
-  renderOnMap( null, newShape );
 };
 
 window.toggleFill = function() {
