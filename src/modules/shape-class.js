@@ -60,34 +60,64 @@ export class Shape extends EventEmitter {
   }
 
 
-  addPath( path = [], index = Number.MAX_VALUE ) {
-    this.path.splice( index, 0, ...path );
+  addPath( path = [], index = this.path.length ) {
+    let spliceStart = index;
+    if ( this.fill && index === this.path.length && this.path.length > 1 ) {
+      spliceStart--;
+    }
+
+    let firstNode = this.path[ 0 ];
+
+    this.path.splice( spliceStart, 0, ...path );
 
     this._sanitizePath();
 
     this.emit( 'add', {
       path,
-      index,
+      index: spliceStart,
       target: this
     });
   }
 
 
   deleteNode( node ) {
+    const changes = [];
     const index = this.path.indexOf( node );
+    let removed;
+
     if ( index === -1 ) {
       throw 'node not found';
     }
     let startIndex = index;
     let deleteCount = 0;
 
-    // Look backwards for nearest node
-    for ( let i = index - 1; i >= 0; i-- ) {
-      if ( this.path[ i ].node ) {
-        // Start immediately after discovered node
-        startIndex = i + 1;
-        deleteCount += index - startIndex;
-        break;
+    if ( this.fill && index === 0 ) {
+      // firstNode === lastNode
+      // Look from end of path for nodes before firstNode
+      for ( let i = this.path.length - 2; i >= 0; i-- ) {
+        if ( this.path[ i ].node ) {
+          removed = this.path.splice( i + 1, this.path.length - i );
+
+          changes.push({
+            object: this,
+            type: 'splice',
+            index: i + 1,
+            addedCount: 0,
+            removed
+          });
+
+          break;
+        }
+      }
+    } else {
+      // Look backwards for nearest node
+      for ( let i = index - 1; i >= 0; i-- ) {
+        if ( this.path[ i ].node ) {
+          // Start immediately after this node
+          startIndex = i + 1;
+          deleteCount += index - startIndex;
+          break;
+        }
       }
     }
 
@@ -97,17 +127,27 @@ export class Shape extends EventEmitter {
     // Look ahead for nearest node
     for ( let i = index + 1; i < this.path.length; i++ ) {
       if ( this.path[ i ].node ) {
+        // End immediately before this node
         deleteCount += i - index - 1;
         break;
       }
     }
 
-    const deletedPath = this.path.splice( startIndex, deleteCount );
+    removed = this.path.splice( startIndex, deleteCount );
+
+    changes.push({
+      object: this,
+      type: 'splice',
+      index: startIndex,
+      addedCount: 0,
+      removed
+    });
 
     this._sanitizePath();
 
+    this.emit( 'change', changes );
     this.emit( 'delete', {
-      path: deletedPath,
+      path: removed,
       index: startIndex,
       target: this
     });

@@ -6,13 +6,15 @@ import { ShapeStore, Shape } from 'src/modules/shape-class';
 
 
 function randomInterpolate( pointA, pointB ) {
-  let length = Math.round( Math.random() * 10 + 5 );
+  let length = 1; // Math.round( Math.random() * 5 + 5 );
+  // return Promise.resolve([ pointB ]);
+
   const randomPath = [];
   const xInterval = ( pointB.x - pointA.x ) / length;
   const yInterval = ( pointB.y - pointA.y ) / length;
   let { x, y } = pointA;
 
-  for ( ; length > 0; length-- ) {
+  for ( ; length > 1; length-- ) {
     randomPath.push({
       x: x + xInterval * Math.random(),
       y: y + yInterval * Math.random()
@@ -21,6 +23,10 @@ function randomInterpolate( pointA, pointB ) {
     x += xInterval;
     y += yInterval;
   }
+
+  pointB.node = true;
+  
+  randomPath.push( pointB );
 
   return Promise.resolve( randomPath );
 }
@@ -66,7 +72,7 @@ function removeFromMap( shape ) {
 }
 
 
-function unrenderOnMap({ target: shape }) {
+function unrenderOnMap({ path = [], index = 0, target: shape }) {
   if ( renderedShapes.has( shape ) ) {
     let poly = renderedShapes.get( shape );
     poly.setMap( null );
@@ -81,11 +87,12 @@ function unrenderOnMap({ target: shape }) {
 
 function renderOnMap({ path = [], index = 0, target: shape }) {
   console.time( 'render path' );
+  // unrenderOnMap({ target: shape });
   let poly = renderedShapes.get( shape );
 
   let pathToAdd = path;
   const latLngs = [];
-  const nodes = [];
+  const nodes = new Map();
 
   // `getPaths` only exists on Polygons
   if ( !poly || 'getPaths' in poly !== shape.fill ) {
@@ -95,7 +102,7 @@ function renderOnMap({ path = [], index = 0, target: shape }) {
       poly = new google.maps.Polygon({
         map,
         fillOpacity: 0.25,
-        strokeWeight: 0
+        strokeWeight: 1
       });
     } else {
       poly = new google.maps.Polyline({
@@ -108,11 +115,12 @@ function renderOnMap({ path = [], index = 0, target: shape }) {
     renderedShapes.set( shape, poly );
   }
 
-  pathToAdd.forEach( ({ x, y, node }) => {
+  pathToAdd.forEach( ( point ) => {
+    let { x, y, node } = point;
     let latLng = new google.maps.LatLng( y, x );
     latLngs.push( latLng );
     if ( node ) {
-      nodes.push( latLng );
+      nodes.set( point, latLng );
     }
   });
 
@@ -131,23 +139,26 @@ function renderOnMap({ path = [], index = 0, target: shape }) {
   console.timeEnd( 'render path' );
 
   console.time( 'render nodes' );
-  const markers = renderedNodes.get( shape ) || [];
+  const markers = renderedNodes.get( shape ) || new Map();
 
-  let newMarkers = nodes.map( latLng => {
-    return new google.maps.Marker({
-      map,
-      position: latLng,
-      icon: {
-        path: 'M 0 0 m -16, 0a 16,16 0 1,0 32,0 a 16,16 0 1,0 -32,0',
-        strokeWeight: 2.5,
-        strokeColor: color,
-        fillColor: color,
-        fillOpacity: 0.25
-      }
-    });
+  nodes.forEach( ( latLng, point ) => {
+    if ( !markers.has( point ) ) {
+      let marker = new google.maps.Marker({
+        map,
+        position: latLng,
+        icon: {
+          path: 'M 0 0 m -16, 0a 16,16 0 1,0 32,0 a 16,16 0 1,0 -32,0',
+          strokeWeight: 2.5,
+          strokeColor: color,
+          fillColor: color,
+          fillOpacity: 0.25
+        }
+      });
+      markers.set( point, marker );
+    }
   });
 
-  renderedNodes.set( shape, markers.concat( newMarkers ) );
+  renderedNodes.set( shape, markers );
   console.timeEnd( 'render nodes' );
 }
 
@@ -171,19 +182,31 @@ shapeStore.on( 'delete', ({ shape }) => {
   unrenderOnMap({ target: shape });
 });
 
+window.defaults = {
+  color: '#ff0000',
+  fill: true,
+  rigid: true
+};
 
-let newShape = new Shape( '#ff0000', false, true );
+let { color, fill, rigid } = window.defaults;
+
+let newShape = new Shape( color, fill, rigid );
 
 shapeStore.addShape( newShape );
 
 
 map.addListener( 'click', async function( mouseEvent ) {
+  if ( !shapeStore.getShapes().length ) {
+    window.addShape();
+  }
+
   let [ x, y ] = [ mouseEvent.latLng.lng(), mouseEvent.latLng.lat() ];
-  let lastPoint = newShape.path[ newShape.path.length - 1 ];
 
   if ( !newShape.path.length ) {
     newShape.addPath([ { x, y } ]);
   } else {
+    let lastPoint = newShape.path[ newShape.path.length - 1 ];
+
     let randomPath = await randomInterpolate( lastPoint, { x, y } );
     newShape.addPath( randomPath );
   }
@@ -213,8 +236,24 @@ window.changeShape = function( prop, value ) {
   shapeStore.addShape( newShape );
 };
 
+window.addShape = function() {
+  let { color, fill, rigid } = window.defaults;
+
+  newShape = new Shape( color, fill, rigid );
+
+  shapeStore.addShape( newShape );
+};
+
+window.deleteShape = function() {
+  shapeStore.deleteShape( newShape );
+
+  let shapes = shapeStore.getShapes();
+
+  newShape = shapes[ shapes.length - 1 ];
+};
+
 window.toggleFill = function() {
   const fill = !newShape.fill;
 
   window.changeShape( 'fill', fill );
-}
+};

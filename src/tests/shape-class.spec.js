@@ -1,3 +1,5 @@
+/* eslint-env jasmine */
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 500;
 
 
@@ -77,7 +79,7 @@ describe( 'Shape & ShapeStore', () => {
     shapeStore = new ShapeStore();
     shape = new Shape( color, fill, rigid );
     shape.addPath( path );
-  })
+  });
 
 
 
@@ -95,7 +97,6 @@ describe( 'Shape & ShapeStore', () => {
 
 
   it( 'Shape.addPath(): sanitized input', () => {
-    console.log( color, fill, rigid );
     shape = new Shape( color, fill, rigid );
 
     shape.addPath( path );
@@ -130,80 +131,147 @@ describe( 'Shape & ShapeStore', () => {
     shape.deleteNode( node );
   });
 
+  describe( 'shape.fill = false', () => {
+    beforeEach( () => {
+      shape = new Shape( color, false, rigid );
+    });
+    it( 'Shape.deleteNode(): node 1 of 3', () => {
+      shape.addPath( longPath );
+      const node = shape.path[ 0 ];
 
-  it( 'Shape.deleteNode(): node 1 of 3', () => {
-    shape = new Shape( color, fill, rigid );
-    shape.addPath( longPath );
-    const node = shape.path[ 0 ];
+      shape.deleteNode( node );
 
-    shape.deleteNode( node );
+      expect( shape.path.length ).toEqual( 6 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
 
-    expect( shape.path.length ).toEqual( 6 );
-    expect( shape.path.indexOf( node ) ).toEqual( -1 );
+
+    it( 'Shape.deleteNode(): node 2 of 3', () => {
+      shape.addPath( longPath );
+      const node = shape.path[ 4 ];
+
+      shape.deleteNode( node );
+
+      expect( shape.path.length ).toEqual( 2 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
+
+
+    it( 'Shape.deleteNode(): node 3 of 3', () => {
+      shape.addPath( longPath );
+      const node = shape.path[ 9 ];
+
+      shape.deleteNode( node );
+
+      expect( shape.path.length ).toEqual( 5 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
+
+
+    it( 'Shape.deleteNode(): node 1 of 2', () => {
+      shape.addPath( path );
+      const node = shape.path[ 0 ];
+
+      shape.deleteNode( node );
+
+      expect( shape.path.length ).toEqual( 1 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
+
+
+    it( 'Shape.deleteNode(): node 2 of 2', () => {
+      shape.addPath( path );
+      const node = shape.path[ 4 ];
+
+      shape.deleteNode( node );
+
+      expect( shape.path.length ).toEqual( 1 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
+
+
+    it( 'Shape.deleteNode(): node 1 of 1', () => {
+      shape.addPath( path.slice( 0, 1 ) );
+      const node = shape.path[ 0 ];
+
+      shape.deleteNode( node );
+
+      expect( shape.path.length ).toEqual( 0 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
   });
 
 
-  it( 'Shape.deleteNode(): node 2 of 3', () => {
-    shape = new Shape( color, fill, rigid );
-    shape.addPath( longPath );
-    const node = shape.path[ 4 ];
-
-    shape.deleteNode( node );
-
-    expect( shape.path.length ).toEqual( 2 );
-    expect( shape.path.indexOf( node ) ).toEqual( -1 );
-  });
+  describe( 'shape.fill = true', () => {
+    beforeEach( () => {
+      shape = new Shape( color, true, rigid );
+    });
 
 
-  it( 'Shape.deleteNode(): node 3 of 3', () => {
-    shape = new Shape( color, fill, rigid );
-    shape.addPath( longPath );
-    const node = shape.path[ 9 ];
+    it( 'deleteNode(): node 1 of 3', () => {
+      shape.addPath( longPath );
+      const node = shape.path[ 0 ];
 
-    shape.deleteNode( node );
+      shape.deleteNode( node );
 
-    expect( shape.path.length ).toEqual( 5 );
-    expect( shape.path.indexOf( node ) ).toEqual( -1 );
-  });
-
-
-  it( 'Shape.deleteNode(): node 1 of 2', () => {
-    shape = new Shape( color, fill, rigid );
-    shape.addPath( path );
-    const node = shape.path[ 0 ];
-
-    console.log( shape.path );
-
-    shape.deleteNode( node );
-
-    console.log( shape.path );
-
-    expect( shape.path.length ).toEqual( 1 );
-    expect( shape.path.indexOf( node ) ).toEqual( -1 );
-  });
+      expect( shape.path.length ).toEqual( 7 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
 
 
-  it( 'Shape.deleteNode(): node 2 of 2', () => {
-    shape = new Shape( color, fill, rigid );
-    shape.addPath( path );
-    const node = shape.path[ 4 ];
+    it( 'deleteNode(): node 2 of 3', () => {
+      shape.addPath( longPath );
+      const node = shape.path[ 4 ];
 
-    shape.deleteNode( node );
+      shape.deleteNode( node );
 
-    expect( shape.path.length ).toEqual( 1 );
-    expect( shape.path.indexOf( node ) ).toEqual( -1 );
-  });
+      expect( shape.path.length ).toEqual( 3 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
 
 
-  it( 'Shape.deleteNode(): node 1 of 1', () => {
-    shape = new Shape( color, fill, rigid );
-    shape.addPath( path.slice( 0, 1 ) );
-    const node = shape.path[ 0 ];
+    it( 'deleteNode(): node 3 of 3', () => {
+      shape.addPath( longPath );
+      const node = shape.path[ 9 ];
 
-    shape.deleteNode( node );
+      shape.deleteNode( node );
 
-    expect( shape.path.length ).toEqual( 0 );
-    expect( shape.path.indexOf( node ) ).toEqual( -1 );
+      expect( shape.path.length ).toEqual( 6 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
+
+
+    it( 'deleteNode(): node 1 of 2', () => {
+      shape.addPath( path );
+      const node = shape.path[ 0 ];
+
+      shape.deleteNode( node );
+
+      expect( shape.path.length ).toEqual( 1 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
+
+
+    it( 'deleteNode(): node 2 of 2', () => {
+      shape.addPath( path );
+      const node = shape.path[ 4 ];
+
+      shape.deleteNode( node );
+
+      expect( shape.path.length ).toEqual( 2 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
+
+
+    it( 'deleteNode(): node 1 of 1', () => {
+      shape.addPath( path.slice( 0, 1 ) );
+      const node = shape.path[ 0 ];
+
+      shape.deleteNode( node );
+
+      expect( shape.path.length ).toEqual( 0 );
+      expect( shape.path.indexOf( node ) ).toEqual( -1 );
+    });
   });
 
 
