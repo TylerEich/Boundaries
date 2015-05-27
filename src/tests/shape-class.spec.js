@@ -5,9 +5,7 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 500;
 
 
 
-describe( 'Shape & ShapeStore', () => {
-  let ShapeStore;
-  let shapeStore;
+describe( 'Shape', () => {
   let Shape;
   let shape;
 
@@ -20,17 +18,16 @@ describe( 'Shape & ShapeStore', () => {
 
 
   let feature;
-  let featureCollection;
 
 
   beforeAll( done => {
     Promise.all(
       [
-        'src/modules/shape-class',
-      ].map( path => System.import( path ) )
+        'src/modules/shape-class'
+      ].map( filePath => System.import( filePath ) )
     )
-      .then( ([ $shapeModule ]) => {
-        ({ Shape, ShapeStore } = $shapeModule );
+      .then( ([ shapeModule ]) => {
+        Shape = shapeModule.default;
       })
       .then( done )
       .catch( err => console.error( err ) );
@@ -71,12 +68,7 @@ describe( 'Shape & ShapeStore', () => {
         nodePositions: [ 0, 4 ]
       }
     };
-    featureCollection = {
-      type: 'FeatureCollection',
-      features: [ feature ]
-    };
 
-    shapeStore = new ShapeStore();
     shape = new Shape( color, fill, rigid );
     shape.addPath( path );
   });
@@ -285,169 +277,4 @@ describe( 'Shape & ShapeStore', () => {
 
     expect( shape.toFeature() ).toEqual( feature );
   });
-
-
-
-
-  it( 'ShapeStore.addShape(): emits "add" event', done => {
-    shapeStore.once( 'add', ({ shape: addedShape }) => {
-      expect( addedShape ).toBe( shape );
-      done();
-    });
-
-    shapeStore.addShape( shape );
-  });
-
-
-  it( 'ShapeStore.addShape()', () => {
-    shapeStore.addShape( shape );
-
-    let shapes = shapeStore.getShapes();
-
-    expect( shapes.length ).toEqual( 1 );
-    expect( shapes[ 0 ] ).toBe( shape );
-  });
-
-
-  it( 'ShapeStore.deleteShape(): emits "delete" event', done => {
-    shapeStore.once( 'delete', ({ shape: deletedShape }) => {
-      expect( deletedShape ).toBe( shape );
-      done();
-    });
-
-    shapeStore.addShape( shape );
-
-    shapeStore.deleteShape( shape );
-  });
-
-
-  it( 'ShapeStore.deleteShape()', () => {
-    shapeStore.addShape( shape );
-
-    shapeStore.deleteShape( shape );
-
-    let shapes = shapeStore.getShapes();
-
-    expect( shapes.length ).toEqual( 0 );
-    expect( shapes.indexOf( shape ) ).toEqual( -1 );
-  });
-
-
-  it( 'ShapeStore.toFeatureCollection()', () => {
-    shapeStore.addShape( shape );
-
-    expect( shapeStore.toFeatureCollection() ).toEqual( featureCollection );
-  });
-
-
-  it( 'ShapeStore.fromFeatureCollection()', () => {
-    shapeStore = ShapeStore.fromFeatureCollection( featureCollection );
-
-    expect( shapeStore.toFeatureCollection() ).toEqual( featureCollection );
-  });
-
-
-  // describe( 'addShape', function() {
-  //   let shapes;
-  //
-  //
-  //   function generatePoints( length ) {
-  //     let points = [];
-  //
-  //     for ( let i = 0; i < length; i++ ) {
-  //       let x = Math.random() * 360 - 180,
-  //         y = Math.random() * 360 - 180,
-  //         point;
-  //
-  //       if ( i === 0 || i === length - 1 ) {
-  //         point = new Node( x, y );
-  //       } else {
-  //         point = new Point( x, y );
-  //       }
-  //
-  //       points.push( point );
-  //     }
-  //
-  //     return points;
-  //   }
-  //
-  //
-  //   beforeEach( () => {
-  //     shapes = new ShapeStore();
-  //
-  //     points = generatePoints( 10 );
-  //     color = '#ff0000';
-  //     fill = false;
-  //     rigid = false;
-  //
-  //     shapes = new ShapeStore( color, fill, rigid );
-  //
-  //     drawing._addPoints({ atIndex: 0, points });
-  //   });
-  //
-  //
-  //   it( 'addShape', () => {
-  //
-  //   });
-  //
-  //
-  //   it('Removes nodes by reference', function() {
-  //     let node = points[ 0 ],
-  //       removedPoints = drawing.removeNode( node );
-  //
-  //     expect( drawing.nodePositions() ).toEqual([ 0 ]);
-  //     expect( removedPoints.length ).toEqual( 9 );
-  //   });
-  //
-  //
-  //   it('Removes first point of polygon properly', function() {
-  //     let morePoints = generatePoints( 7 );
-  //     drawing.fill = true;
-  //
-  //     drawing._addPoints({
-  //       atIndex: drawing.length - 1,
-  //       points: morePoints.slice( 1, -1 )
-  //     });
-  //
-  //     drawing.removeNodeAtIndex( 0 );
-  //
-  //     expect( drawing.length ).toEqual( 2 );
-  //   });
-  //
-  //
-  //   it('Removes single point from polygon properly', function() {
-  //     drawing = new Drawing({
-  //       color,
-  //       rigid,
-  //       fill: true
-  //     });
-  //
-  //     let point = generatePoints( 1 )[ 0 ];
-  //     drawing._addPoints({
-  //       atIndex: 0,
-  //       points: [ point, point ]
-  //     });
-  //     drawing.removeNodeAtIndex( 0 );
-  //
-  //     expect( drawing.length ).toEqual( 0 );
-  //   });
-  //
-  //
-  //   it('Removes single point', function() {
-  //     drawing._removePoints({
-  //       start: 0,
-  //       end: 10
-  //     });
-  //
-  //     drawing._addPoints({
-  //       atIndex: 0,
-  //       points: generatePoints( 1 )
-  //     });
-  //
-  //     let removedPoints = drawing.removeNodeAtIndex( 0 );
-  //
-  //     expect( drawing.nodePositions() ).toEqual([]);
-  //     expect( removedPoints.length ).toEqual( 1 );
-  //   });
-  // });
 });

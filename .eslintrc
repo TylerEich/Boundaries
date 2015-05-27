@@ -12,7 +12,7 @@
     "camelcase": [0],
     "comma-style": [2, "last"],
     "default-case": [2],
-    "dot-notation": [2, { "allowKeywords": false }],
+    "dot-notation": [2, { "allowKeywords": true }],
     "eol-last": [2],
     "func-style": [0, "expression"],
     "quotes": [2, "single", "avoid-escape"],
@@ -31,11 +31,11 @@
     "no-unused-vars": [1, { "vars": "all", "args": "after-used" }],
     "space-after-function-name": [2, "never"],
     "space-after-keywords": [2, "always", { "checkFunctionKeyword": false }],
-    "space-in-brackets": [2, "always", {
+    "space-in-brackets": [0, "always", {
       "arraysInArrays": false,
       "arraysInObjects": false
     }],
-    "space-in-parens": [2, "always", { "exceptions": ["{}", "[]"]}],
+    "space-in-parens": [0, "always", { "exceptions": ["{}", "[]"]}],
     "space-unary-ops": [2, { "words": true, "nonwords": false }],
     "spaced-line-comment": [0, "always"],
     "strict": [2, "global"],

@@ -3,7 +3,7 @@ import EventEmitter from 'src/modules/event-emitter';
 
 
 
-export class Shape extends EventEmitter {
+export default class Shape extends EventEmitter {
   constructor( color, fill, rigid ) {
     super();
 
@@ -245,74 +245,5 @@ export class Shape extends EventEmitter {
       console.warn( 'Feature is invalid' );
       return new Shape();
     }
-  }
-}
-
-
-export class ShapeStore extends EventEmitter {
-  constructor() {
-    super();
-
-    this._shapes = [];
-  }
-
-
-  getShapes() {
-    return this._shapes;
-  }
-
-
-  addShape( shape ) {
-    this._shapes.push( shape );
-
-    this.emit( 'add', {
-      shape,
-      target: this
-    });
-  }
-
-
-  deleteShape( shape ) {
-    const shapeIndex = this._shapes.indexOf( shape );
-
-    if ( shapeIndex > -1 ) {
-      this._shapes.splice( shapeIndex, 1 );
-      this.emit( 'delete', {
-        shape,
-        target: this
-      });
-    }
-  }
-
-
-  toFeatureCollection() {
-    const features = this._shapes.map(
-      ( shape ) => shape.toFeature()
-    );
-
-    return {
-      type: 'FeatureCollection',
-      features
-    };
-  }
-
-
-  static fromFeatureCollection( featureCollection = {} ) {
-    let shapeStore = new ShapeStore();
-
-    try {
-      featureCollection.features.forEach(
-        ( feature ) => {
-          const shape = Shape.fromFeature( feature );
-
-          shapeStore.addShape( shape );
-        }
-      );
-    } catch ( error ) {
-      console.warn( 'geoJson is invalid', error );
-      return new ShapeStore();
-    }
-
-    return shapeStore;
   }
 }
