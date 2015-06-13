@@ -1,0 +1,50 @@
+<div class="shape-options">
+  <form style="min-height: 60px; padding: 16px;">
+    <md-button class="geometry-option md-icon-button">
+      <md-icon>
+        trending_up
+      </md-icon>
+    </md-button>
+    <md-button class="geometry-option md-icon-button">
+      <md-icon>
+        texture
+      </md-icon>
+    </md-button>
+
+    <!-- <div>
+      <md-switch>
+        <md-icon>
+          trending_up
+        </md-icon>
+      </md-switch>
+      <md-switch>
+        <md-icon>
+          texture
+        </md-icon>
+      </md-switch>
+    </div>
+     -->
+    <md-button class="color-option md-icon-button"
+        ng-repeat="color in shapeOptions.colors"
+        ng-style="{ color: color.value }"
+        ng-class="{ active: shapeOptions.color === color }"
+        ng-click="shapeOptions.color = color">
+    </md-button>
+  </form>
+  <!-- <form style="flex-grow: 0;">
+
+  </form> -->
+    <!-- <input type="radio" name="color"
+        ng-repeat="color in shapeOptions.colors"
+        ng-style="{ background: color.value }"
+        ng-model="shapeOptions.color"
+        ng-value="color">
+      </form>
+
+      <form>
+    <input id="rigid" type="checkbox"
+        ng-model="shapeEditor.rigid">
+    <input id="fill" type="checkbox"
+        ng-model="shapeEditor.fill"> -->
+  </form>
+</div>

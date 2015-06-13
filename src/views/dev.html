@@ -4,9 +4,16 @@
     <meta charset="utf-8">
     <title>Boundaries</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="http://cdn.rawgit.com/angular/bower-material/v0.10.0-rc2/angular-material.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic">
   </head>
   <body>
     <svg id="spritesheet" style="display: none;">
+      <symbol id="close" viewBox="0 0 64 64">
+        <path d="M10,10 L54,54 M54,10 L10,54" />
+      </symbol>
       <symbol id="flex-nofill" viewBox="0 0 64 64">
         <path d="m12,12c0,0 48,0 20,20c-20,20 20,20 20,20" fill="none" stroke-opacity="0.5" />
         <circle r="4" cx="12" cy="12" />
@@ -35,18 +42,136 @@
       <button onclick="PubSub.publish( 'Editor.add' )">Add</button>
     </div>
  -->
+    <!-- <div style="position: absolute; top: 0; left: 0; z-index: 2;">
+      <md-button class="md-icon-button">
+        <md-icon style="width: 30px; height: 30px; font-size: 30px">
+          menu
+        </md-icon>
+      </md-button>
+      <md-button class="md-icon-button">
+        <md-icon style="width: 30px; height: 30px; font-size: 30px">
+          search
+        </md-icon>
+      </md-button>
+    </div> -->
+
+    <md-card layout="row" style="position: absolute; top: 0; left: 0; width: 500px; z-index: 2;">
+      <md-button class="md-icon-button">
+        <md-icon style="width: 30px; height: 30px; font-size: 30px">
+          search
+        </md-icon>
+      </md-button>
+      <input id="search-input" ng-model="blargh" type="text" placeholder="Search" flex>
+    </md-card>
+
+    <md-toolbar ng-hide="true" class="md-toolbar-tools">
+      <md-button class="md-icon-button">
+        <md-icon>
+          menu
+        </md-icon>
+      </md-button>
+      <span flex></span>
+      <md-button class="md-icon-button">
+        <md-icon>
+          search
+        </md-icon>
+      </md-button>
+    </md-toolbar>
+
     <main id="map_canvas">
     </main>
 
-    <section style="position: absolute; bottom: 0; left: 0; height: 10rem; width: 20rem">
-      <button onclick="changeShape( 'color', '#ff0000' )">Red</button>
-      <button onclick="changeShape( 'color', '#008000' )">Green</button>
-      <button onclick="changeShape( 'color', '#0000ff' )">Blue</button>
-      <button onclick="toggleFill()">Toggle Fill</button>
-      <button onclick="addShape()">Add Shape</button>
-      <button onclick="deleteShape()">Delete Shape</button>
-    </section>
+    <md-card ng-hide="true" style="margin: 0; flex-grow: 0;">
+      <md-toolbar class="compact" layout="row">
+        <md-button style="height: 100%; margin: 0;" flex>
+          <md-icon>
+            undo
+          </md-icon>
+        </md-button>
+        <md-button ng-click="showAdd = true" style="height: 100%; margin: 0;" flex>
+          <md-icon>
+            add
+          </md-icon>
+        </md-button>
+        <md-button style="height: 100%; margin: 0;" flex>
+          <md-icon>
+            subtitles
+          </md-icon>
+        </md-button>
+      </md-toolbar>
+    </md-card>
 
+    <div ng-hide="true">
+      <md-card id="history-panel" layout="row">
+        <md-button class="md-icon-button">
+          <md-icon>
+            undo
+          </md-icon>
+        </md-button>
+        <md-button class="md-icon-button">
+          <md-icon>
+            redo
+          </md-icon>
+        </md-button>
+        <md-button class="md-icon-button">
+          <md-icon>
+            delete
+          </md-icon>
+        </md-button>
+      </md-card>
+    </div>
+
+    <md-card id="shape-add-button" layout="row" style="position: absolute; left: 0; bottom: 30px; margin-left: 0;">
+      <md-button ng-class="showAdd ? 'md-warn' : 'md-primary'" ng-click="showAdd = !showAdd" style="margin: 0; min-width: 48px; height: 80px;">
+        <md-icon ng-hide="showAdd">
+          add
+        </md-icon>
+        <md-icon ng-show="showAdd">
+          close
+        </md-icon>
+      </md-button>
+    </md-card>
+    <md-card id="shape-options-slideout" ng-show="showAdd">
+      <shape-options></shape-options>
+    </md-card>
+
+  <md-button class="md-icon-button" style="position: absolute; bottom: 6px; right: 0; z-index: 2;">
+    <md-icon style="width: 30px; height: 30px; font-size: 30px">
+      settings
+    </md-icon>
+  </md-button>
+
+    <md-card id="shape-options-slideout" ng-show="false" flex>
+      <md-toolbar class="md-warn compact">
+        <md-button ng-click="showAdd = false" style="height: 100%; margin: 0;" flex>
+          <md-icon>
+            close
+          </md-icon>
+        </md-button>
+      </md-toolbar>
+<!--       <md-button class="md-warn" style="height: 2rem;" flex>
+  <md-icon>
+    close
+  </md-icon>
+</md-button>
+ --><!--       <button style="background: #0080ff; margin: 0; border-radius: 0;">
+  <svg viewBox="0 0 64 64">
+    <path d="M10,10 L54,54 M54,10 L10,54" />
+  </svg>
+</button>
+ -->
+     <shape-options></shape-options>
+    </md-card>
+
+<!--     <section style="position: absolute; bottom: 0; left: 0; height: 10rem; width: 20rem">
+  <button onclick="changeShape( 'color', '#ff0000' )">Red</button>
+  <button onclick="changeShape( 'color', '#008000' )">Green</button>
+  <button onclick="changeShape( 'color', '#0000ff' )">Blue</button>
+  <button onclick="toggleFill()">Toggle Fill</button>
+  <button onclick="addShape()">Add Shape</button>
+  <button onclick="deleteShape()">Delete Shape</button>
+</section>
+ -->
 <!--     <main id="content"
     ng-hide="main.showCard">
   <section id="toolbar">
@@ -172,16 +297,42 @@
     <link rel="stylesheet" href="/styles/main.css">
     <!-- endinject -->
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,places&sensor=false"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-animate.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-aria.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-touch.js"></script>
+    <script src="http://cdn.rawgit.com/angular/bower-material/v0.10.0-rc2/angular-material.js"></script>
     <script src="https://rawgit.com/facebook/regenerator/master/runtime.js"></script>
     <script src="https://rawgit.com/systemjs/systemjs/master/dist/system.js"></script>
     <script src="https://rawgit.com/zloirock/core-js/master/client/core.min.js"></script>
     <script src="https://rawgit.com/Wolfy87/EventEmitter/master/EventEmitter.js"></script>
+    <script src="/modules/main.js"></script>
     <script src="/modules/event-emitter.js"></script>
     <script src="/modules/shape-class.js"></script>
+    <script src="/modules/shape-collection-class.js"></script>
     <script src="/modules/google-map.js"></script>
+    <script src="/modules/components/shape-options-cmp.js"></script>
+    <script src="/modules/directives/shape-options-dir.js"></script>
     <script>
-      System.import( 'src/modules/google-map' );
+      System.import( 'src/modules/main' )
+      .then( function() {
+        return System.import( 'src/modules/directives/shape-options-dir' );
+      })
+      .then( function() {
+        return System.import( 'src/modules/google-map' )
+      })
+      .then( function() {
+        if ( document.readyState === 'complete' ) {
+          angular.bootstrap( document, [ 'bndry' ]);
+        } else {
+          document.addEventListener( 'DOMContentLoaded', function() {
+            angular.bootstrap( document, [ 'bndry' ]);
+          });
+        }
+      })
     </script>
 
     <!-- inject:js -->

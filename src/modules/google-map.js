@@ -1,6 +1,7 @@
 /* global google */
 
-import { ShapeStore, Shape } from 'src/modules/shape-class';
+import Shape from 'src/modules/shape-class';
+import ShapeCollection from 'src/modules/shape-collection-class';
 
 
 
@@ -25,7 +26,7 @@ function randomInterpolate( pointA, pointB ) {
   }
 
   pointB.node = true;
-  
+
   randomPath.push( pointB );
 
   return Promise.resolve( randomPath );
@@ -162,9 +163,9 @@ function renderOnMap({ path = [], index = 0, target: shape }) {
   console.timeEnd( 'render nodes' );
 }
 
-let shapeStore = new ShapeStore();
+let shapeCollection = new ShapeCollection();
 
-shapeStore.on( 'add', ({ shape }) => {
+shapeCollection.on( 'add', ({ shape }) => {
   shape.addListeners({
     'add': renderOnMap,
     'delete': unrenderOnMap
@@ -173,7 +174,7 @@ shapeStore.on( 'add', ({ shape }) => {
   renderOnMap({ target: shape });
 });
 
-shapeStore.on( 'delete', ({ shape }) => {
+shapeCollection.on( 'delete', ({ shape }) => {
   shape.removeListeners({
     'add': renderOnMap,
     'delete': unrenderOnMap
@@ -192,11 +193,11 @@ let { color, fill, rigid } = window.defaults;
 
 let newShape = new Shape( color, fill, rigid );
 
-shapeStore.addShape( newShape );
+shapeCollection.addShape( newShape );
 
 
 map.addListener( 'click', async function( mouseEvent ) {
-  if ( !shapeStore.getShapes().length ) {
+  if ( !shapeCollection.getShapes().length ) {
     window.addShape();
   }
 
@@ -214,7 +215,7 @@ map.addListener( 'click', async function( mouseEvent ) {
 
 
 window.changeShape = function( prop, value ) {
-  shapeStore.deleteShape( newShape );
+  shapeCollection.deleteShape( newShape );
 
   let { color, fill, rigid, path } = newShape;
 
@@ -233,7 +234,7 @@ window.changeShape = function( prop, value ) {
   newShape = new Shape( color, fill, rigid );
   newShape.addPath( path );
 
-  shapeStore.addShape( newShape );
+  shapeCollection.addShape( newShape );
 };
 
 window.addShape = function() {
@@ -241,13 +242,13 @@ window.addShape = function() {
 
   newShape = new Shape( color, fill, rigid );
 
-  shapeStore.addShape( newShape );
+  shapeCollection.addShape( newShape );
 };
 
 window.deleteShape = function() {
-  shapeStore.deleteShape( newShape );
+  shapeCollection.deleteShape( newShape );
 
-  let shapes = shapeStore.getShapes();
+  let shapes = shapeCollection.getShapes();
 
   newShape = shapes[ shapes.length - 1 ];
 };

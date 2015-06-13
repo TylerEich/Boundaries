@@ -66,12 +66,12 @@
 }
 #status {
 	z-index: 2;
-	
+
 	position: absolute;
 	top: 0;
 	right: 0;
 	left: 0;
-	
+
 	overflow: hidden;
 	text-overflow: ellipsis;
 	padding: $navbar-padding ($navbar-padding / 2);
@@ -82,7 +82,7 @@
 		display: block !important;
 		opacity: 1;
 	}
-	
+
 	&.ng-hide {
 		opacity: 0;
 	}
@@ -106,92 +106,31 @@
 	}
 }
 
-#search {
-  z-index: 1;
-	
-//  position: absolute;
-//  top: 0;
-//  right: 0;
-//  left: 0;
-  
-	margin: 0 auto;
-
-	max-width: 25rem;
-	width: 100%;
-	
-	position: relative;
-	color: $text-color;
-	
-	display: block;
-  padding: $navbar-padding ($navbar-padding / 2);
-//  background: transparentize($navbar-color, 0.25);
-  
-//  margin-left: calc((-100% + #{$navbar-size * 2}) / 2);
-//  margin-top: $navbar-padding;
-  z-index: 1;
-  
-	button {
-		position: absolute;
-		right: 0;
-		top: 0;
-		margin: $navbar-padding ($navbar-padding / 2);
-		background: transparent;
-		border: none;
-		appearance: none;
-		width: $button-size / 2;
-		min-width: $button-size / 2;
-		height: 1.25rem;
-		min-height: 1.25rem;
-	}
-  input {
-//		position: absolute;
-//		left: 0;
-//		top: 0;
-		
-		width: calc(100% - #{2 * $button-size});
-//		margin-left: $button-size;
-		color: $text-color;
-		text-align: center;
-    font-size: inherit;
-    display: inline-block;
-		background: transparent;
-    line-height: 1.25;
-//    border-radius: $border-radius;
-//    border: $button-border;
-		border: none;
-    outline: none;
-//    padding: $button-padding;
-		padding: 0;
-    margin: 0 /*($button-padding / 2)*/;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-  }
-  
   #suggestions {
 //    margin: $button-padding ($button-padding / 2);
 //    flex-grow: 1;
 //    display: flex;
 //    flex-direction: column;
-    
+
     .suggestion {
       color: $text-color;
       cursor: pointer;
 			line-height: 1.25;
       padding: $button-padding / 2;
-      
+
       background: transparent;
 //      border: $button-border;
 			border: none;
 			border-top: 1px solid transparentize($text-color, 0.5);
 //        border-bottom: none;
 //      border-radius: $border-radius;
-      
+
       display: flex;
-      
+
       flex-grow: 1;
-      
+
       transition: $transition;
-      
+
       &.first {
 				margin-top: $button-padding;
 //        border-top-left-radius: $border-radius !important;
@@ -203,11 +142,11 @@
 //        border-bottom-left-radius: $border-radius !important;
 //          border-bottom: $button-border;
       }
-      
+
       &.ng-animate {
         transition: none;
       }
-      
+
       span {
         display: inline-block;
         width: 100%;
@@ -231,17 +170,12 @@
       }
     }
   }
-}
 
 main {
   flex: 1;
   height: 100%;
   position: relative;
-	
-	@media (orientation: landscape) and (min-width: 50rem) {
-		flex: none;
-	}
-	
+
   #map_canvas {
     height: 100%;
     width: 100%;
@@ -277,19 +211,19 @@ main {
       right: 0;
       width: 100%;
       height: 0.25rem;
-			
+
       & > div {
 				& .bar {
 					width: 100%;
 					height: 100%;
 					background: $text-color;
 	        animation: indeterminate 1.5s cubic-bezier(0.23, 1, 0.32, 1) infinite;
-				
+
 					border-bottom: 1px solid $navbar-color;
 				}
 				max-width: 25rem;
 				margin: 0 auto;
-        
+
 				transition: opacity 300ms cubic-bezier(0.23, 1, 0.32, 1);
 				transition-delay: 100ms;
 				opacity: 1;
