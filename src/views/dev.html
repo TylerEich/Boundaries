@@ -42,41 +42,93 @@
       <button onclick="PubSub.publish( 'Editor.add' )">Add</button>
     </div>
  -->
-    <!-- <div style="position: absolute; top: 0; left: 0; z-index: 2;">
-      <md-button class="md-icon-button">
-        <md-icon style="width: 30px; height: 30px; font-size: 30px">
-          menu
-        </md-icon>
-      </md-button>
-      <md-button class="md-icon-button">
-        <md-icon style="width: 30px; height: 30px; font-size: 30px">
-          search
-        </md-icon>
-      </md-button>
-    </div> -->
 
-    <md-card layout="row" style="position: absolute; top: 0; left: 0; width: 500px; z-index: 2;">
+    <!-- <md-card layout="row" style="position: absolute; top: 0; left: 0; width: 500px; z-index: 2;">
       <md-button class="md-icon-button">
         <md-icon style="width: 30px; height: 30px; font-size: 30px">
           search
         </md-icon>
       </md-button>
       <input id="search-input" ng-model="blargh" type="text" placeholder="Search" flex>
-    </md-card>
+    </md-card> -->
 
-    <md-toolbar ng-hide="true" class="md-toolbar-tools">
+    <md-toolbar ng-hide="false" class="md-toolbar-tools" style="z-index: 2;">
       <md-button class="md-icon-button">
         <md-icon>
-          menu
+          close
         </md-icon>
       </md-button>
+      <!-- <span flex></span> -->
+      <!-- <md-button class="md-icon-button">
+        <md-icon>
+          undo
+        </md-icon>
+      </md-button> -->
       <span flex></span>
+      <md-button class="md-icon-button">
+        <md-icon>
+          add
+        </md-icon>
+      </md-button>
+      <md-button class="md-icon-button">
+        <md-icon>
+          archive
+        </md-icon>
+      </md-button>
+      <md-button class="md-icon-button">
+        <md-icon>
+          expand_less
+        </md-icon>
+      </md-button>
+      <!-- <md-button class="md-icon-button">
+        <md-icon>
+          more_vert
+        </md-icon>
+      </md-button> -->
+    </md-toolbar>
+    <md-toolbar ng-hide="false" class="md-toolbar-tools md-primary md-hue-2">
       <md-button class="md-icon-button">
         <md-icon>
           search
         </md-icon>
       </md-button>
+      <span flex></span>
+      <md-button class="md-icon-button">
+        <md-icon>
+          undo
+        </md-icon>
+      </md-button>
+      <!-- <span flex></span> -->
+      <!-- <md-button class="md-icon-button">
+        <md-icon>
+          undo
+        </md-icon>
+      </md-button> -->
+      <md-button class="md-icon-button">
+        <md-icon>
+          redo
+        </md-icon>
+      </md-button>
+      <span flex></span>
+      <md-button class="md-icon-button">
+        <md-icon>
+          settings
+        </md-icon>
+      </md-button>
+      <!-- <md-button class="md-icon-button">
+        <md-icon>
+          more_vert
+        </md-icon>
+      </md-button> -->
     </md-toolbar>
+
+    <!-- <div style="position: absolute; top: 76px; left: 6px; z-index: 2;">
+      <md-button class="md-icon-button">
+        <md-icon style="width: 30px; height: 30px; font-size: 30px">
+          search
+        </md-icon>
+      </md-button>
+    </div> -->
 
     <main id="map_canvas">
     </main>
@@ -121,7 +173,7 @@
       </md-card>
     </div>
 
-    <md-card id="shape-add-button" layout="row" style="position: absolute; left: 0; bottom: 30px; margin-left: 0;">
+    <md-card ng-hide="true" id="shape-add-button" layout="row" style="position: absolute; left: 0; bottom: 30px; margin-left: 0;">
       <md-button ng-class="showAdd ? 'md-warn' : 'md-primary'" ng-click="showAdd = !showAdd" style="margin: 0; min-width: 48px; height: 80px;">
         <md-icon ng-hide="showAdd">
           add
@@ -135,11 +187,11 @@
       <shape-options></shape-options>
     </md-card>
 
-  <md-button class="md-icon-button" style="position: absolute; bottom: 6px; right: 0; z-index: 2;">
-    <md-icon style="width: 30px; height: 30px; font-size: 30px">
+  <!-- <md-button class="md-icon-button" style="position: absolute; bottom: 8px; right: -8px; z-index: 2;">
+    <md-icon style="width: 24px; height: 24px; font-size: 24px">
       settings
     </md-icon>
-  </md-button>
+  </md-button> -->
 
     <md-card id="shape-options-slideout" ng-show="false" flex>
       <md-toolbar class="md-warn compact">
@@ -299,14 +351,15 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
 
-    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,places&sensor=false"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.20&libraries=geometry,places&sensor=false"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-animate.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-aria.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-touch.js"></script>
     <script src="http://cdn.rawgit.com/angular/bower-material/v0.10.0-rc2/angular-material.js"></script>
     <script src="https://rawgit.com/facebook/regenerator/master/runtime.js"></script>
-    <script src="https://rawgit.com/systemjs/systemjs/master/dist/system.js"></script>
+    <script src="https://rawgit.com/systemjs/systemjs/0.18.1/dist/system-polyfills.src.js"></script>
+    <script src="https://rawgit.com/systemjs/systemjs/0.18.1/dist/system.src.js"></script>
     <script src="https://rawgit.com/zloirock/core-js/master/client/core.min.js"></script>
     <script src="https://rawgit.com/Wolfy87/EventEmitter/master/EventEmitter.js"></script>
     <script src="/modules/main.js"></script>

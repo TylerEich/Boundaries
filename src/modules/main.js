@@ -4,8 +4,8 @@
 angular.module( 'bndry', [ 'ngMaterial', 'ngTouch' ] )
 .config( function( $mdThemingProvider ) {
   $mdThemingProvider.theme( 'default' )
-    .primaryPalette( 'blue' )
-    .accentPalette( 'green' );
+    .primaryPalette( 'teal' )
+    .accentPalette( 'blue' );
 });
 
 

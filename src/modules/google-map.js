@@ -7,7 +7,7 @@ import ShapeCollection from 'src/modules/shape-collection-class';
 
 
 function randomInterpolate( pointA, pointB ) {
-  let length = 1; // Math.round( Math.random() * 5 + 5 );
+  let length = Math.round( Math.random() * 5 + 5 );
   // return Promise.resolve([ pointB ]);
 
   const randomPath = [];
@@ -37,7 +37,8 @@ function randomInterpolate( pointA, pointB ) {
 
 let map = new google.maps.Map( document.querySelector( '#map_canvas' ), {
   center: { lat: 43, lng: -85 },
-  zoom: 15
+  zoom: 15,
+  disableDefaultUI: true
 });
 
 let renderedShapes = new Map();
@@ -94,6 +95,8 @@ function renderOnMap({ path = [], index = 0, target: shape }) {
   let pathToAdd = path;
   const latLngs = [];
   const nodes = new Map();
+
+  console.log( poly );
 
   // `getPaths` only exists on Polygons
   if ( !poly || 'getPaths' in poly !== shape.fill ) {
@@ -185,8 +188,8 @@ shapeCollection.on( 'delete', ({ shape }) => {
 
 window.defaults = {
   color: '#ff0000',
-  fill: true,
-  rigid: true
+  fill: false,
+  rigid: false
 };
 
 let { color, fill, rigid } = window.defaults;
@@ -208,8 +211,10 @@ map.addListener( 'click', async function( mouseEvent ) {
   } else {
     let lastPoint = newShape.path[ newShape.path.length - 1 ];
 
-    let randomPath = await randomInterpolate( lastPoint, { x, y } );
-    newShape.addPath( randomPath );
+    randomInterpolate( lastPoint, { x, y } )
+      .then( ( randomPath ) => {
+        newShape.addPath( randomPath );
+      });
   }
 });
 
