@@ -6,7 +6,10 @@
   "repository": "https://github.com/TylerEich/Boundaries",
   "homepage": "https://github.com/TylerEich/Boundaries",
   "README": "A web app for creating territories quickly and easily",
-  "dependencies": {},
+  "dependencies": {
+    "gulp-sass": "^1.3.3",
+    "node-sass": "^2.1.1"
+  },
   "devDependencies": {
     "babel-connect": "^6.0.1",
     "babel-eslint": "^3.1.6",
